@@ -95,23 +95,40 @@
 
         .add-new-reminder-button {
             padding: 12px 25px;
-            background-color: #007bff; /* Blue */
+            background-image: linear-gradient(to right, #007bff, #0056b3); /* Blue gradient */
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-size: 1.1em;
             font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
             gap: 10px;
             box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
         }
-
-        .add-new-reminder-button:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
+        .add-new-reminder-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.15); /* Subtle overlay for hover */
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
+        .add-new-reminder-button:hover::before {
+            transform: translateX(0);
+        }
+        .add-new-reminder-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .add-new-reminder-button svg {
@@ -229,27 +246,31 @@
             height: 20px;
         }
 
-        /* Styling for the unordered list of reminders */
+        /* Updated Styling for the unordered list of reminders - now a grid */
         .reminder-list {
-            list-style: none; /* Removes default bullet points */
+            list-style: none;
             padding: 0;
+            display: grid; /* Changed to grid */
+            gap: 20px; /* Space between cards */
+            justify-content: center; /* Center the grid if items don't fill a row perfectly */
+            align-items: stretch; /* Ensures all cards in a row have the same height */
+            /* grid-template-columns is now dynamically set by JavaScript */
         }
 
-        /* Styling for individual reminder items */
+        /* Styling for individual reminder items (mini cards) */
         .reminder-item {
             background-color: #ecf0f1; /* Light grey */
             border: 1px solid #ddd;
             border-left: 5px solid #3498db; /* Blue accent for general reminders */
             padding: 15px;
-            margin-bottom: 10px;
             border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
+            display: flex; /* Changed to flex */
+            flex-direction: column; /* Stack content vertically */
+            justify-content: space-between; /* Space out content and action button */
+            position: relative;
             transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth hover effects */
-            position: relative; /* Needed for positioning settings button */
+            min-height: 160px; /* Minimum height for consistency */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); /* Enhanced initial shadow */
         }
 
         /* Specific styling for reminders due today */
@@ -260,12 +281,13 @@
 
         .reminder-item:hover {
             transform: translateY(-3px); /* Lifts the item slightly on hover */
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); /* Adds a shadow on hover */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); /* More prominent shadow on hover */
         }
 
         /* Details section within a reminder item */
         .reminder-details {
-            flex-grow: 1; /* Allows details to take up available space */
+            flex-grow: 1; /* Allows details to take up available space, pushing actions down */
+            margin-bottom: 10px; /* Space between details and actions */
         }
 
         .reminder-details strong {
@@ -282,25 +304,51 @@
 
         /* Actions section (e.g., Mark Reviewed button) within a reminder item */
         .reminder-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
+            width: 100%; /* Make actions section take full width of card */
+            display: flex; /* Use flex for button alignment */
+            justify-content: center; /* Center the button within the card */
+            margin-top: auto; /* Pushes the actions to the bottom of the card */
         }
 
-        .reminder-actions button {
-            padding: 8px 15px;
-            background-color: #3498db; /* Blue */
+        /* Modernized Mark Reviewed Button Style */
+        .reminder-actions button.mark-reviewed-button {
+            padding: 10px 20px; /* Adjusted padding */
+            background-image: linear-gradient(to right, #28a745, #218838); /* Green gradient */
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px; /* Consistent rounded corners */
             cursor: pointer;
-            font-size: 0.9em;
-            transition: background-color 0.3s ease;
+            font-size: 1em; /* Adjusted font size */
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3); /* Similar shadow to other modern buttons */
+            width: auto; /* Let content determine width, or set specific width if needed */
+            flex-grow: 1; /* Allow to grow within reminder-actions */
+            max-width: 180px; /* Prevent it from becoming too wide in a narrow card */
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .reminder-actions button.mark-reviewed-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.15); /* Subtle overlay for hover */
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
+        .reminder-actions button.mark-reviewed-button:hover::before {
+            transform: translateX(0);
+        }
+        .reminder-actions button.mark-reviewed-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
-        .reminder-actions button:hover {
-            background-color: #2980b9;
-        }
 
         /* Settings button specific styling */
         .settings-button {
@@ -337,6 +385,8 @@
             border-radius: 8px;
             margin-top: 15px;
             background-color: #f9f9f9;
+            /* Make empty message span full grid width */
+            grid-column: 1 / -1;
         }
 
         /* --- Modal Styles (common for all modals) --- */
@@ -364,7 +414,7 @@
             width: 90%;
             max-width: 500px;
             position: relative;
-            animation: fadeIn 0.3s ease-out;
+            animation: fadeIn 0.3s ease-out; /* Ensured fadeIn animation is present */
             box-sizing: border-box;
         }
 
@@ -423,40 +473,72 @@
         .modal-footer button {
             padding: 10px 20px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px; /* Slightly more rounded */
             cursor: pointer;
             font-weight: bold;
-            transition: background-color 0.2s ease, transform 0.1s ease;
+            transition: all 0.3s ease; /* Smooth transition for all properties */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* More prominent shadow */
+            position: relative;
+            overflow: hidden; /* For pseudo-element effects */
+            z-index: 1;
+        }
+
+        .modal-footer button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.15); /* Subtle overlay for hover */
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
+
+        .modal-footer button:hover::before {
+            transform: translateX(0);
         }
 
         .modal-footer button:active {
-            transform: translateY(1px);
+            transform: translateY(2px); /* More noticeable press effect */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Smaller shadow on press */
         }
 
+        /* Modernized Button Styles for Settings Modal */
         .modal-footer .save-button {
-            background-color: #27ae60; /* Green */
+            background-image: linear-gradient(to right, #22c55e, #16a34a); /* Tailwind green-500 to green-600 */
             color: white;
         }
-        .modal-footer .save-button:hover { background-color: #229a55; }
+        .modal-footer .save-button:hover {
+            background-image: linear-gradient(to right, #16a34a, #15803d); /* Slightly darker green */
+        }
 
         .modal-footer .cancel-button {
-            background-color: #ccc;
-            color: #333;
+            background-image: linear-gradient(to right, #6b7280, #4b5563); /* Tailwind gray-500 to gray-600 */
+            color: white;
         }
-        .modal-footer .cancel-button:hover { background-color: #bbb; }
+        .modal-footer .cancel-button:hover {
+            background-image: linear-gradient(to right, #4b5563, #374151); /* Slightly darker gray */
+        }
 
         .modal-footer .delete-button {
-            background-color: #e74c3c; /* Red */
+            background-image: linear-gradient(to right, #ef4444, #dc2626); /* Tailwind red-500 to red-600 */
             color: white;
             margin-right: auto; /* Pushes other buttons to the right */
         }
-        .modal-footer .delete-button:hover { background-color: #c0392b; }
+        .modal-footer .delete-button:hover {
+            background-image: linear-gradient(to right, #dc2626, #b91c1c); /* Slightly darker red */
+        }
 
         .modal-footer .reset-pattern-button {
-            background-color: #f39c12; /* Orange */
-            color: white;
+            background-image: linear-gradient(to right, #facc15, #eab308); /* Tailwind yellow-400 to yellow-500 */
+            color: #333; /* Darker text for better contrast on light background */
         }
-        .modal-footer .reset-pattern-button:hover { background-color: #e67e22; }
+        .modal-footer .reset-pattern-button:hover {
+            background-image: linear-gradient(to right, #eab308, #d97706); /* Slightly darker yellow/orange */
+        }
+
 
         /* Custom CSS for Circular Progress Bars from user's provided code */
         /* IMPORTANT: This section uses specific styling for the progress circles */
@@ -2192,6 +2274,44 @@
             populateSubjectSelect(filterSubjectSelect, true); // 'All' option for Filter
         }
 
+        /**
+         * Dynamically sets the grid-template-columns for a reminder list based on item count and screen size.
+         * For desktop (>= 768px), it will try to fit between 1 and 5 columns,
+         * stretching them to fill the width. For mobile (< 768px), it remains responsive
+         * with 1 or 2 columns based on screen width.
+         * @param {HTMLElement} listElement - The <ul> element (e.g., todayRemindersList).
+         * @param {number} itemCount - The number of items in that list.
+         */
+        function setResponsiveGridColumns(listElement, itemCount) {
+            const maxDesktopColumns = 5; // User's requested maximum displayed columns on desktop
+            const currentWindowWidth = window.innerWidth;
+
+            if (itemCount === 0) {
+                // If no items, the empty message will span full grid width due to its CSS (grid-column: 1 / -1;).
+                // The grid itself will simply be 1fr to ensure basic layout, not affecting the empty message's span.
+                listElement.style.gridTemplateColumns = '1fr';
+                return;
+            }
+
+            if (currentWindowWidth >= 768) { // Desktop and large tablets
+                // Determine the number of columns:
+                // - If 1 item, show 1 column.
+                // - Otherwise, show up to maxDesktopColumns, but not more than itemCount.
+                let columnsToDisplay;
+                if (itemCount === 1) {
+                    columnsToDisplay = 1;
+                } else {
+                    columnsToDisplay = Math.min(itemCount, maxDesktopColumns);
+                }
+                listElement.style.gridTemplateColumns = `repeat(${columnsToDisplay}, 1fr)`;
+            } else if (currentWindowWidth >= 640) { // Smaller tablets (640px to 767px)
+                // For tablets, default to 2 columns if there are 2 or more items, otherwise 1
+                listElement.style.gridTemplateColumns = `repeat(${itemCount >= 2 ? 2 : 1}, 1fr)`;
+            } else { // Mobile (less than 640px)
+                // Force single column on mobile for better readability
+                listElement.style.gridTemplateColumns = '1fr';
+            }
+        }
 
         /**
          * Renders all reminders based on filters (subject, incomplete mode).
@@ -2250,6 +2370,8 @@
                         incompleteRemindersList.appendChild(reminderItem);
                     });
                 }
+                setResponsiveGridColumns(incompleteRemindersList, incompleteList.length);
+
             } else {
                 todayRemindersSection.style.display = 'block';
                 upcomingRemindersSection.style.display = 'block';
@@ -2295,6 +2417,8 @@
                         todayRemindersList.appendChild(reminderItem);
                     });
                 }
+                setResponsiveGridColumns(todayRemindersList, remindersDueToday.length);
+
 
                 if (upcomingReminders.length === 0) {
                     upcomingRemindersList.innerHTML = `<li class="empty-message">No upcoming reminders for now.</li>`;
@@ -2326,6 +2450,7 @@
                         upcomingRemindersList.appendChild(reminderItem);
                     });
                 }
+                setResponsiveGridColumns(upcomingRemindersList, upcomingReminders.length);
             }
         }
 
@@ -3330,6 +3455,9 @@
                     subjectProgressData[key].percentageTextElement.textContent = `0%`;
                 }
             });
+
+            // Add event listener for window resize to re-render reminders
+            window.addEventListener('resize', renderReminders);
 
             // Login modal event listeners
             toggleAuthModeLink.addEventListener('click', (e) => {
