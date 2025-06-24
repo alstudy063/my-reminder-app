@@ -545,6 +545,9 @@
         #myProgressModal .modal-content {
             background-color: #0d1117; /* Dark background similar to the image for the progress modal */
             color: #ffffff; /* White text for readability in the modal */
+            max-width: 1100px; /* Increased max-width for even longer display */
+            width: 95%; /* Ensure it uses 95% of available width up to max */
+            padding: 15px 30px; /* Reduced vertical padding further, maintaining horizontal */
         }
 
         #myProgressModal h3 {
@@ -643,7 +646,7 @@
             .progress-circle {
                 width: 150px;
                 height: 150px;
-                margin: 1rem 0; /* Vertical margin for stacked items */
+                margin: 1rem 0; /* Vertical margin for stacked items, no horizontal margin */
             }
             .progress-circle::before {
                 width: calc(100% - 30px);
@@ -658,8 +661,9 @@
             /* Force vertical stacking on small screens */
             #myProgressModal .modal-body .progress-circles-container {
                  flex-direction: column;
-                 align-items: center;
-                 /* gap: is less relevant when individual margins are set vertically */
+                 align-items: center; /* Ensures items are centered in the column */
+                 gap: 1rem; /* Add gap between stacked circles */
+                 padding: 1rem 0; /* Add some padding if needed for the container */
             }
         }
 
@@ -1605,7 +1609,7 @@
             apiKey: "AIzaSyApLfVQ6hv0IAAN5ZkFlOQ-y5KXK-x1Q_M",
             authDomain: "reminderapp-d84e9.firebaseapp.com",
             projectId: "reminderapp-d84e9",
-            storageBucket: "reminderapp-d84e9.firebasestorage.app",
+            storageBucket: "reminderapp-d84e9.firebaseapp.com",
             messagingSenderId: "312145339940",
             appId: "1:312145339940:web:ade59de4d6de6cec221ab1"
         };
@@ -2949,7 +2953,7 @@
                     parseAndImportCSV(event.target.result);
                 };
                 reader.onerror = () => {
-                    showErrorMessage('Failed to read file. Please try again.');
+                    showErrorMessage('Failed to read file. Please tryH again.');
                 };
                 reader.readAsText(file);
             };
