@@ -218,7 +218,7 @@
             background-color: #6c757d; /* Grey */
             color: white; /* Keep color for consistency with SVG fill */
             border: none;
-            border-radius: 5px;
+            border-radius: 50%;
             cursor: pointer;
             transition: background-color 0.3s ease;
             display: inline-flex;
@@ -501,7 +501,7 @@
         }
 
         .modal-footer button:active {
-            transform: translateY(2px); /* More noticeable press effect */
+            transform: translateY(2px);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Smaller shadow on press */
         }
 
@@ -646,7 +646,7 @@
             .progress-circle {
                 width: 150px;
                 height: 150px;
-                margin: 1rem 0; /* Vertical margin for stacked items, no horizontal margin */
+                margin: 1rem auto; /* Vertical margin: 1rem, Horizontal margin: auto for centering */
             }
             .progress-circle::before {
                 width: calc(100% - 30px);
