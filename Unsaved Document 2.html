@@ -4,33 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multi-Subject Study Reminder</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS CDN (kept for general utility classes) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* General body styling for font, background, and centering */
         body {
-            font-family: 'Inter', sans-serif; /* Changed to Inter as per instructions */
+            font-family: 'Inter', sans-serif;
             background-color: #f0f2f5;
             color: #333;
             margin: 0;
-            padding: 20px;
+            padding: 0; /* Removed default padding to allow container to stretch fully */
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center; /* Center content vertically and horizontally */
+            min-height: 100vh; /* Ensure body takes full viewport height */
+            width: 100vw; /* Ensure body takes full viewport width */
+            overflow: hidden; /* Hide overflow initially, container will handle scrolling */
         }
 
         /* Container for the main application content */
         .container {
             background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px; /* Default padding for content inside */
+            border-radius: 10px; /* Default border-radius for mobile */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Default shadow for mobile */
             width: 100%;
-            max-width: 800px; /* Limits the app width on larger screens */
+            max-width: 800px; /* Default max-width for mobile */
+            height: auto; /* Default height for mobile */
             box-sizing: border-box;
-            margin-bottom: 20px;
+            margin-bottom: 20px; /* Default margin for mobile */
             position: relative; /* Added for positioning settings button */
+            display: none; /* Hidden by default until authenticated */
+            overflow-y: auto; /* Enable vertical scrolling for content within container */
+        }
+
+        /* Media query for desktop/larger screens: Make the container fill the screen */
+        @media (min-width: 768px) {
+            body {
+                overflow: hidden; /* Prevent body scrollbars on desktop */
+            }
+            .container {
+                max-width: 100vw; /* Take full viewport width */
+                width: 100vw; /* Ensure it spans full width */
+                height: 100vh; /* Take full viewport height */
+                margin: 0; /* Remove any margins */
+                border-radius: 0; /* No border radius for true full screen */
+                box-shadow: none; /* No shadow for true full screen */
+            }
+        }
+
+        /* Media query for mobile/small screens: Re-apply body padding and container styling */
+        @media (max-width: 767px) {
+            body {
+                padding: 20px; /* Reintroduce padding for mobile */
+                overflow-y: auto; /* Allow body scrolling on mobile */
+            }
+            .container {
+                margin-bottom: 20px; /* Restore margin-bottom */
+                border-radius: 10px; /* Restore border-radius */
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Restore shadow */
+            }
         }
 
         /* Styling for the main heading */
@@ -56,7 +91,6 @@
             justify-content: center; /* Align content to the center */
             margin-bottom: 30px;
             box-sizing: border-box; /* Include padding in width calculation */
-            /* Removed max-width to let it expand with parent */
         }
 
         .add-new-reminder-button {
@@ -309,7 +343,7 @@
         .modal-overlay {
             display: none; /* Hidden by default */
             position: fixed; /* Stay in place */
-            z-index: 1000; /* Sit on top */
+            z-index: 1000; /* Default z-index for most modals */
             left: 0;
             top: 0;
             width: 100%; /* Full width */
@@ -548,6 +582,9 @@
         }
 
         /* Custom alert/confirmation modal */
+        #customAlertModal {
+            z-index: 1015; /* Higher than profile and name edit modals */
+        }
         #customAlertModal .modal-content {
             max-width: 400px;
             text-align: center;
@@ -641,7 +678,7 @@
             fill: #333;
         }
 
-        /* Error message box style */
+        /* Error message box style (global) */
         .error-message-box {
             display: none; /* Hidden by default */
             position: fixed;
@@ -710,15 +747,373 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Login Modal Specific Styles */
+        #loginModal {
+            background-color: rgba(0, 0, 0, 0.7); /* Darker overlay for login */
+            z-index: 1040; /* Highest z-index to be on top of loading overlay */
+        }
+
+        .login-content {
+            background-color: #fefefe;
+            padding: 40px; /* Increased padding */
+            border-radius: 15px; /* More rounded corners */
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); /* Stronger shadow */
+            width: 90%;
+            max-width: 480px; /* Slightly adjusted max-width */
+            animation: fadeIn 0.4s ease-out; /* Slightly longer animation */
+        }
+
+        .error-message {
+            color: #ef4444; /* Tailwind red-500 */
+            font-size: 0.875rem; /* text-sm */
+            margin-top: 0.25rem; /* mt-1 */
+        }
+        .input-error {
+            border-color: #ef4444 !important; /* Ensure red border on error */
+        }
+        .input-error:focus {
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.5); /* Red ring on focus for error */
+        }
+
+        /* Custom gradient for modern button */
+        .btn-primary-modern {
+            background-image: linear-gradient(to right, #4F46E5, #6366F1); /* From indigo-600 to indigo-500 */
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary-modern:hover {
+            background-image: linear-gradient(to right, #4338CA, #4F46E5); /* Slightly darker on hover */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Profile Modal Styles */
+        #profileModal {
+            z-index: 1005; /* Lower than customAlertModal, higher than general modals */
+        }
+        #profileModal .modal-content {
+            background-color: white;
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* Stronger, softer shadow */
+            display: flex;
+            flex-direction: column;
+            max-width: 900px; /* Max width for desktop */
+            width: 100%; /* Default to full width */
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05); /* Subtle border */
+            padding: 0; /* Reset padding to be controlled by inner sections */
+            position: relative; /* For positioning close button */
+        }
+
+        @media (min-width: 768px) {
+            #profileModal .modal-content {
+                flex-direction: row; /* Side-by-side on desktop */
+                width: 90%; /* Responsive width on desktop */
+                height: auto; /* Height adapts to content */
+                max-height: 90vh; /* Max height to prevent overflow on larger profiles */
+            }
+        }
+        /* Mobile Full Screen for Profile Modal */
+        @media (max-width: 767px) {
+            #profileModal .modal-overlay {
+                padding: 0; /* Remove padding from overlay for full screen effect */
+            }
+            #profileModal .modal-content {
+                width: 100%;
+                height: 100%;
+                max-width: 100%;
+                max-height: 100%;
+                border-radius: 0; /* No rounded corners for full screen */
+                padding: 20px; /* Add some padding back for content */
+                overflow-y: auto; /* Enable scrolling if content overflows */
+            }
+            #profileModal .modal-header {
+                padding: 15px 0; /* Adjust padding for mobile full screen header */
+                margin-bottom: 10px;
+            }
+        }
+
+        /* Close button for Profile Modal */
+        #closeProfileModalButton {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #777;
+            cursor: pointer;
+            z-index: 10;
+        }
+        #closeProfileModalButton:hover {
+            color: #333;
+        }
+
+        /* Profile sections within the modal */
+        .profile-left-section {
+            flex-none;
+            width: 100%; /* Full width on mobile */
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* Border on bottom for mobile */
+            border-radius: 1.5rem 1.5rem 0 0; /* Rounded top for mobile */
+        }
+
+        .profile-right-section {
+            flex-grow: 1;
+            width: 100%; /* Full width on mobile */
+            padding: 2rem;
+            background-color: #f9fafb; /* Light grey background */
+            border-radius: 0 0 1.5rem 1.5rem; /* Rounded bottom for mobile */
+        }
+
+        @media (min-width: 768px) {
+            .profile-left-section {
+                width: 33.333333%; /* 1/3 width on desktop */
+                border-right: 1px solid rgba(0, 0, 0, 0.05); /* Border on right for desktop */
+                border-bottom: none; /* No bottom border on desktop */
+                border-radius: 1.5rem 0 0 1.5rem; /* Rounded left for desktop */
+            }
+            .profile-right-section {
+                width: 66.666667%; /* 2/3 width on desktop */
+                border-radius: 0 1.5rem 1.5rem 0; /* Rounded right for desktop */
+            }
+        }
+
+        /* Profile Card elements from user's code */
+        .profile-image {
+            width: 128px;
+            height: 128px;
+            border-radius: 9999px; /* Tailwind `rounded-full` */
+            overflow: hidden;
+            margin-bottom: 1rem; /* Tailwind `mb-4` */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Tailwind `shadow-xl` */
+            border: 4px solid white; /* Tailwind `border-4 border-white` */
+            outline: 2px solid #60a5fa; /* Tailwind `ring-2 ring-blue-400` */
+        }
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            font-size: 1.5rem; /* Tailwind `text-2xl` */
+            font-weight: 700; /* Tailwind `font-bold` */
+            color: #1f2937; /* Tailwind `text-gray-800` */
+            margin-bottom: 0.25rem; /* Tailwind `mb-1` */
+        }
+        .profile-email {
+            color: #4b5563; /* Tailwind `text-gray-600` */
+            font-size: 0.875rem; /* Tailwind `text-sm` */
+            margin-bottom: 0.25rem; /* Tailwind `mb-1` */
+        }
+        .email-verified-badge {
+            margin-left: 0.5rem; /* Tailwind `ml-2` */
+            display: inline-flex;
+            align-items: center;
+            padding-left: 0.625rem; /* Tailwind `px-2.5` */
+            padding-right: 0.625rem;
+            padding-top: 0.125rem; /* Tailwind `py-0.5` */
+            padding-bottom: 0.125rem;
+            border-radius: 9999px; /* Tailwind `rounded-full` */
+            font-size: 0.75rem; /* Tailwind `text-xs` */
+            font-weight: 500; /* Tailwind `font-medium` */
+            background-color: #d1fae5; /* Tailwind `bg-green-100` */
+            color: #065f46; /* Tailwind `text-green-800` */
+        }
+        .email-verified-badge svg {
+            margin-left: -0.125rem; /* Tailwind `-ml-0.5` */
+            margin-right: 0.375rem; /* Tailwind `mr-1.5` */
+            height: 0.5rem; /* Tailwind `h-2` */
+            width: 0.5rem; /* Tailwind `w-2` */
+            color: #34d399; /* Tailwind `text-green-400` */
+        }
+        .profile-location {
+            color: #6b7280; /* Tailwind `text-gray-500` */
+            font-size: 0.875rem; /* Tailwind `text-sm` */
+        }
+        .user-id-container {
+            color: #9ca3af; /* Tailwind `text-gray-400` */
+            font-size: 0.75rem; /* Tailwind `text-xs` */
+            margin-top: 0.5rem; /* Tailwind `mt-2` */
+            cursor: pointer;
+        }
+
+        /* Profile Info Rows */
+        .info-row {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem; /* Tailwind `p-3` */
+            border-radius: 0.5rem; /* Tailwind `rounded-lg` */
+            transition-property: background-color; /* Tailwind `transition-colors` */
+            transition-duration: 200ms; /* Tailwind `duration-200` */
+        }
+        .info-row:hover {
+            background-color: #f3f4f6; /* Tailwind `hover:bg-gray-100` */
+        }
+        .info-row.highlighted { /* For Email row */
+            background-color: #eff6ff; /* Tailwind `bg-gray-100` */
+        }
+        .info-row.highlighted:hover {
+            background-color: #e5e7eb; /* Tailwind `hover:bg-gray-200` */
+        }
+
+        .info-label {
+            width: 50%; /* Tailwind `w-1/2` */
+            color: #374151; /* Tailwind `text-gray-700` */
+            font-weight: 500; /* Tailwind `font-medium` */
+        }
+        .info-separator {
+            color: #374151; /* Tailwind `text-gray-700` */
+            margin: 0 0.5rem; /* Tailwind `mx-2` */
+        }
+        .info-value {
+            width: 50%; /* Tailwind `w-1/2` */
+            color: #1f2937; /* Tailwind `text-gray-900` */
+            font-weight: 600; /* Tailwind `font-semibold` */
+        }
+        .info-value.editable {
+            flex-grow: 1;
+            cursor: pointer;
+            text-decoration-line: underline; /* Tailwind `hover:underline` */
+            text-decoration-color: transparent; /* Initially transparent */
+            transition: text-decoration-color 0.2s ease;
+        }
+        .info-value.editable:hover {
+             text-decoration-color: currentColor; /* Underline on hover */
+        }
+        .info-value.status-active {
+            color: #16a34a; /* Tailwind `text-green-600` */
+        }
+        .info-value.status-inactive {
+            color: #dc2626; /* Tailwind `text-red-600` */
+        }
+        .info-value.email-pending {
+            color: #f97316; /* Tailwind `text-orange-500` */
+        }
+        .info-value.email-verified {
+            color: #16a34a; /* Tailwind `text-green-600` */
+        }
+
+        /* Sign Out Button animation and glow */
+        #signOutProfileButton { /* Renamed for clarity within profile modal */
+            opacity: 0;
+            transform: translateY(10px); /* Starts 10px down for a more subtle 'up' animation */
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out; /* Add box-shadow and border-color to transition */
+            pointer-events: none; /* Prevents interaction when hidden */
+            box-shadow: 0 0 0 rgba(0,0,0,0); /* Initial no shadow */
+        }
+        #signOutProfileButton.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto; /* Allows interaction when visible */
+        }
+        /* New hover/focus styles for glow */
+        #signOutProfileButton:hover, #signOutProfileButton:focus {
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); /* Red glow effect */
+            border-color: rgba(239, 68, 68, 0.7); /* Slightly stronger border on hover/focus */
+        }
+
+        /* Profile Info Container animation */
+        #profile-info-container-left { /* Renamed for clarity */
+            position: relative; /* Needed for transform */
+            transition: transform 0.3s ease-out; /* Smooth transition for shifting up */
+        }
+        #profile-info-container-left.shift-up {
+            transform: translateY(-10px); /* Shift up by 10px when sign out button is shown */
+        }
+
+        /* Name Edit Modal (within Profile Modal's JS) */
+        #name-edit-modal-overlay { /* Using same overlay class but specific ID for clarity */
+            z-index: 1010; /* Above profile modal, below customAlertModal */
+        }
+        #name-edit-modal-content {
+            padding: 30px;
+            border-radius: 1rem;
+            max-width: 400px;
+            width: 90%;
+        }
+        #modal-edit-name-input {
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #d1d5db;
+            color: #1f2937;
+            transition: border-color 0.2s ease;
+        }
+        #modal-edit-name-input:focus {
+            border-color: #3b82f6; /* blue-500 */
+        }
+        #modal-save-name-btn {
+            background-image: linear-gradient(to right, #3b82f6, #2563eb); /* blue-500 to blue-600 */
+            transition: all 0.2s ease;
+        }
+        #modal-save-name-btn:hover {
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
     </style>
 </head>
 <body>
+    <!-- Login Modal Structure (hidden by default) -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-content login-content">
+            <p class="text-gray-500 text-base mb-1 font-medium" id="loginHeaderSubtitle">Please enter your details</p>
+            <h2 class="text-4xl font-extrabold text-gray-900 mb-8" id="loginHeaderTitle">Welcome back</h2>
+
+            <div class="mb-5">
+                <input type="email" id="emailInputLogin" placeholder="Email address" class="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 ease-in-out">
+                <p id="emailErrorLogin" class="error-message hidden"></p>
+            </div>
+            <div class="mb-5">
+                <input type="password" id="passwordInputLogin" placeholder="Password" class="w-full px-5 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 ease-in-out">
+                <p id="passwordErrorLogin" class="error-message hidden"></p>
+            </div>
+
+            <div class="flex items-center justify-between mb-8">
+                <label class="flex items-center text-sm text-gray-700 cursor-pointer">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500">
+                    <span class="ml-2">Remember for 30 days</span>
+                </label>
+                <a href="#" class="text-sm text-indigo-600 hover:underline font-medium" id="forgotPasswordLink">Forgot password?</a>
+            </div>
+
+            <button id="authActionButton" class="w-full text-white py-3 rounded-xl font-semibold btn-primary-modern mb-4">
+                Sign In
+            </button>
+
+            <div class="relative flex items-center justify-center text-sm font-medium text-gray-600 my-6">
+                <span class="absolute left-0 w-full border-t border-gray-300"></span>
+                <span class="relative z-10 bg-white px-3">OR</span>
+            </div>
+
+            <button id="googleSignInButton" class="w-full flex items-center justify-center border border-gray-300 py-3 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 transition duration-200 ease-in-out shadow-sm">
+                <img src="https://www.google.com/favicon.ico" alt="Google icon" class="w-5 h-5 mr-3">
+                Sign in with Google
+            </button>
+
+            <p class="text-center text-sm text-gray-700 mt-8">
+                Don't have an account?
+                <a href="#" class="text-indigo-600 hover:underline font-semibold" id="toggleAuthMode">Sign up</a>
+            </p>
+            <div id="authLoadingIndicator" class="hidden text-center mt-4 text-blue-500">
+                <div class="spinner mx-auto"></div>
+                Authenticating...
+            </div>
+            <p id="authErrorMessage" class="error-message text-center mt-4 hidden"></p>
+        </div>
+    </div>
+
     <div id="loadingOverlay">
         <div class="spinner"></div>
         Loading Reminders...
     </div>
 
-    <div class="container">
+    <div class="container" id="mainAppContainer">
         <h1>Multi-Subject Study Reminder</h1>
         <p id="userIdDisplay" class="text-sm text-gray-500 text-center mb-4"></p>
 
@@ -727,7 +1122,7 @@
             <button id="settingsDropdownButton" class="settings-dropdown-button">
                 <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M0 0h24v24H0V0z" fill="none"/>
-                    <path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.09-.76-1.71-1.05l-.34-2.51c-.05-.24-.24-.41-.48-.41h-4c-.24 0-.43.17-.48.41l-.34 2.51c-.62.29-1.19.65-1.71 1.05l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.12.22-.07.49.12.64l2.11 1.65c-.04.32-.07.64-.07.98 0 .34.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.09.76 1.71 1.05l.34 2.51c.05.24.24.41.48.41h4c.24 0 .43-.17.48-.41l-.34 2.51c.62-.29 1.19-.65 1.71-1.05l2.49 1c.22.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zm-1.93-1.78c.05.18.08.36.08.54s-.03.36-.08.54l-.24 1.78 1.45 1.13-.88 1.52-1.77-.71-.47.24c-.25.13-.48.29-.7.46l-1.09.84-.71 1.77-1.52.88-1.13-1.45-.24.47c-.25-.13-.48-.29-.46-.7l-.84-1.09-1.77.71-1.52.88-1.13 1.45.88 1.52 1.77-.71.47.24c.25.13.48.29.7.46l1.09.84.71 1.77 1.52.88 1.13-1.45.24-.47c.13-.25.29-.48.46-.7l.84-1.09.71-1.77 1.52-.88 1.13 1.45.88-1.52-1.77.71-.47-.24c-.25-.13-.48-.29-.7-.46l-1.09-.84zM12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                    <path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.09-.76-1.71-1.05l-.34-2.51c-.05-.24-.24-.41-.48-.41h-4c-.24 0-.43.17-.48.41l-.34 2.51c-.62.29-1.19.65-1.71 1.05l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.12.22-.07.49.12.64l2.11 1.65c-.04.32-.07.64-.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.09.76 1.71 1.05l.34 2.51c.05.24.24.41.48.41h4c.24 0 .43-.17.48-.41l-.34 2.51c.62-.29 1.19-.65 1.71-1.05l2.49 1c.22.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zm-1.93-1.78c.05.18.08.36.08.54s-.03.36-.08.54l-.24 1.78 1.45 1.13-.88 1.52-1.77-.71-.47.24c-.25.13-.48.29-.7.46l-1.09.84-.71 1.77-1.52.88-1.13-1.45-.24.47c-.25-.13-.48-.29-.46-.7l-.84-1.09-1.77.71-1.52.88-1.13 1.45.88 1.52 1.77-.71-.47-.24c-.25-.13-.48-.29-.7-.46l-1.09-.84zM12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
                 </svg>
             </button>
             <div id="settingsMenu" class="settings-menu">
@@ -775,6 +1170,15 @@
                                 <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                             </svg>
                             Migrate Local Data
+                        </button>
+                    </li>
+                    <li>
+                        <button id="myProfileButton"> <!-- Replaced Logout with My Profile -->
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M0 0h24v24H0V0z" fill="none"/>
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                            My Profile
                         </button>
                     </li>
                 </ul>
@@ -1010,11 +1414,108 @@
         </div>
     </div>
 
+    <!-- MY PROFILE MODAL STRUCTURE -->
+    <div id="profileModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-button" id="closeProfileModalButton">&times;</button>
+            <!-- Left Section: Profile Picture and Basic Info -->
+            <div id="profile-info-container-left" class="profile-left-section">
+                <!-- Profile Image -->
+                <div class="profile-image">
+                    <img id="profile-image" src="https://placehold.co/128x128/D1D5DB/4B5563?text=User" alt="Profile Picture">
+                </div>
+                <!-- Name -->
+                <h2 id="display-name" class="profile-name">Loading...</h2>
+                <!-- Email -->
+                <p id="display-email" class="profile-email">Loading...
+                    <!-- Verified Badge for Email (optional) -->
+                    <span id="email-verified-badge" class="email-verified-badge hidden">
+                        <!-- Checkmark SVG icon -->
+                        <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                        Verified
+                    </span>
+                </p>
+                <!-- Location -->
+                <p id="display-location" class="profile-location">United States</p>
+                <!-- User ID Display (for multi-user app context) -->
+                <p class="user-id-container" id="user-id-container">User ID: <span id="display-user-id">Not Available</span></p>
+                <!-- Sign Out Button -->
+                <button id="signOutProfileButton" class="mt-4 px-4 py-2 bg-transparent text-red-500 border border-red-500 font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2 transition duration-200 ease-in-out text-sm">Sign Out</button>
+            </div>
+
+            <!-- Right Section: Detailed Information -->
+            <div class="profile-right-section">
+                <div class="space-y-4">
+                    <!-- Name Row (Editable on Tap) -->
+                    <div class="info-row">
+                        <div class="info-label">Name</div>
+                        <div class="info-separator">:</div>
+                        <div class="info-value flex items-center">
+                            <span id="display-name-editable" class="info-value editable">Loading...</span>
+                        </div>
+                    </div>
+
+                    <!-- Role Row -->
+                    <div class="info-row">
+                        <div class="info-label">Role</div>
+                        <div class="info-separator">:</div>
+                        <div id="display-role" class="info-value">User</div>
+                    </div>
+
+                    <!-- Email Row -->
+                    <div class="info-row highlighted">
+                        <div class="info-label">Email</div>
+                        <div class="info-separator">:</div>
+                        <div id="display-email-detailed" class="info-value">Loading...</div>
+                    </div>
+
+                    <!-- Email Verification Row -->
+                    <div class="info-row">
+                        <div class="info-label">Email Verification</div>
+                        <div class="info-separator">:</div>
+                        <div id="display-email-verification" class="info-value email-pending">Loading...</div>
+                    </div>
+
+                    <!-- Status Row -->
+                    <div class="info-row">
+                        <div class="info-label">Status</div>
+                        <div class="info-separator">:</div>
+                        <div id="display-status" class="info-value status-active">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Name Edit Modal -->
+    <div id="name-edit-modal-overlay" class="modal-overlay">
+        <div id="name-edit-modal-content" class="modal-content">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Edit Name</h3>
+            <!-- Modernized Edit Name Input -->
+            <input type="text" id="modal-edit-name-input" class="w-full p-3 mb-4 bg-transparent border-b-2 border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-0 transition-colors duration-200" placeholder="Enter new name">
+            <div class="flex justify-end space-x-3">
+                <button id="modal-cancel-btn" class="px-5 py-2 bg-gray-300 text-gray-800 font-semibold rounded-lg shadow-md hover:bg-gray-400 transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2">Cancel</button>
+                <button id="modal-save-name-btn" class="px-5 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Save</button>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
         // Import the functions you need from the Firebase SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            signInWithCustomToken, 
+            onAuthStateChanged,
+            createUserWithEmailAndPassword, /* Added for email/password sign-up */
+            signInWithEmailAndPassword,     /* Added for email/password sign-in */
+            GoogleAuthProvider,             /* Added for Google sign-in */
+            signInWithPopup,                /* Added for Google sign-in */
+            signOut                         /* Added for logout */
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDoc, setDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Your web app's Firebase configuration (provided by user)
@@ -1040,6 +1541,9 @@
         let isFirebaseReady = false; // Flag to indicate Firebase is initialized and user is authenticated
 
         // Get references to HTML elements
+        // Main App Container
+        const mainAppContainer = document.getElementById('mainAppContainer'); // The entire main app content
+
         // Add Reminder Modal elements
         const openAddReminderModalButton = document.getElementById('openAddReminderModalButton');
         const addReminderModal = document.getElementById('addReminderModal');
@@ -1114,9 +1618,53 @@
         const importDataButton = document.getElementById('importDataButton');
         const openChangeSubjectsModalButton = document.getElementById('openChangeSubjectsModalButton'); // NEW
         const migrateLocalStorageButton = document.getElementById('migrateLocalStorageButton'); // NEW: For migrating local storage
+        const myProfileButton = document.getElementById('myProfileButton'); // NEW: My Profile button
+
         const errorMessage = document.getElementById('errorMessage');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const userIdDisplay = document.getElementById('userIdDisplay'); // To display userId
+
+        // Login Modal elements
+        const loginModal = document.getElementById('loginModal');
+        const emailInputLogin = document.getElementById('emailInputLogin');
+        const passwordInputLogin = document.getElementById('passwordInputLogin');
+        const emailErrorLogin = document.getElementById('emailErrorLogin');
+        const passwordErrorLogin = document.getElementById('passwordErrorLogin');
+        const authActionButton = document.getElementById('authActionButton'); // Sign In / Sign Up button
+        const googleSignInButton = document.getElementById('googleSignInButton');
+        const toggleAuthModeLink = document.getElementById('toggleAuthMode');
+        const loginHeaderTitle = document.getElementById('loginHeaderTitle');
+        const loginHeaderSubtitle = document.getElementById('loginHeaderSubtitle');
+        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        const authLoadingIndicator = document.getElementById('authLoadingIndicator');
+        const authErrorMessage = document.getElementById('authErrorMessage');
+
+        let isSignInMode = true; // State for login modal: true for Sign In, false for Sign Up
+
+        // Profile Modal elements
+        const profileModal = document.getElementById('profileModal');
+        const closeProfileModalButton = document.getElementById('closeProfileModalButton');
+        const profileImage = document.getElementById('profile-image');
+        const displayName = document.getElementById('display-name');
+        const displayEmail = document.getElementById('display-email');
+        const emailVerifiedBadge = document.getElementById('email-verified-badge');
+        const displayLocation = document.getElementById('display-location');
+        const displayUserId = document.getElementById('display-user-id');
+        const signOutProfileButton = document.getElementById('signOutProfileButton'); // Logout button inside profile modal
+        const displayNameEditable = document.getElementById('display-name-editable');
+        const displayRole = document.getElementById('display-role');
+        const displayEmailDetailed = document.getElementById('display-email-detailed');
+        const displayEmailVerification = document.getElementById('display-email-verification');
+        const displayStatus = document.getElementById('display-status');
+        const userIdContainer = document.getElementById('user-id-container');
+        const profileInfoContainerLeft = document.getElementById('profile-info-container-left'); // Left section container
+
+        // Name Edit Modal elements (within profile modal)
+        const nameEditModalOverlay = document.getElementById('name-edit-modal-overlay');
+        const modalEditNameInput = document.getElementById('modal-edit-name-input');
+        const modalSaveNameButton = document.getElementById('modal-save-name-btn');
+        const modalCancelButton = document.getElementById('modal-cancel-btn');
+
 
         // Global variable to store all reminders across all subjects
         let allReminders = [];
@@ -1212,7 +1760,10 @@
             return new Promise((resolve) => {
                 customAlertTitle.textContent = title;
                 customAlertMessage.textContent = message;
-                customAlertModal.style.display = 'flex';
+                customAlertModal.style.display = 'flex'; // Use flex to center
+
+                // Bring custom alert to front
+                customAlertModal.style.zIndex = '1015'; // Ensure it's on top of all other modals
 
                 customAlertOkButton.style.display = 'inline-block';
                 customAlertCancelButton.style.display = isConfirm ? 'inline-block' : 'none';
@@ -1306,7 +1857,10 @@
          * Connects to Firestore and starts real-time data listeners once authenticated.
          */
         async function initializeFirebaseAndAuth() {
-            loadingOverlay.style.display = 'flex'; // Show loading overlay
+            loadingOverlay.style.display = 'flex'; // Show global loading overlay
+            mainAppContainer.style.display = 'none'; // Ensure main app is hidden initially
+            loginModal.style.display = 'none'; // Ensure login modal is hidden initially
+
             try {
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
@@ -1319,28 +1873,47 @@
                         userIdDisplay.textContent = `User ID: ${userId}`; // Display userId on UI
                         console.log("Firebase user authenticated:", userId);
                         isFirebaseReady = true;
+                        loginModal.style.display = 'none'; // Hide login modal
+                        mainAppContainer.style.display = 'block'; // Show main app container
                         // Now that user is authenticated, set up real-time listeners for reminders and settings
                         setupRealtimeListeners();
-                        loadingOverlay.style.display = 'none'; // Hide loading overlay once data starts loading
+                        loadingOverlay.style.display = 'none'; // Hide global loading overlay
                     } else {
-                        // Sign in anonymously if no user is found, or use custom token if available
-                        try {
-                            if (initialAuthToken) {
+                        // User is signed out or not authenticated
+                        userId = null; // Clear userId
+                        userIdDisplay.textContent = `User ID: Not Logged In`;
+                        isFirebaseReady = false; // Firebase not ready for user-specific data
+                        allReminders = []; // Clear reminders
+                        renderReminders(); // Clear UI
+                        loadingOverlay.style.display = 'none'; // Hide global loading overlay
+                        mainAppContainer.style.display = 'none'; // Hide main app container
+                        showLoginModal(); // Show login modal
+                        
+                        // Try anonymous sign-in or custom token if not explicitly signed out by user
+                        if (initialAuthToken) {
+                            try {
                                 await signInWithCustomToken(auth, initialAuthToken);
-                            } else {
-                                await signInAnonymously(auth);
+                            } catch (error) {
+                                console.error("Error during custom token sign-in:", error);
+                                authErrorMessage.textContent = "Failed to auto-authenticate. Please log in.";
+                                authErrorMessage.classList.remove('hidden');
                             }
-                        } catch (error) {
-                            console.error("Error during anonymous sign-in or custom token sign-in:", error);
-                            showErrorMessage("Failed to authenticate with Firebase. Some features may not work. Check console.");
-                            loadingOverlay.style.display = 'none'; // Hide loading overlay even on auth error
+                        } else {
+                            // If no initial token, allow anonymous sign-in if needed or just wait for user login
+                            try {
+                                // signInAnonymously(auth); // Commented out to force explicit login
+                            } catch (error) {
+                                console.error("Error during anonymous sign-in:", error);
+                            }
                         }
                     }
                 });
             } catch (e) {
                 console.error("Error initializing Firebase:", e);
                 showErrorMessage("Failed to initialize Firebase. Check console for details.");
-                loadingOverlay.style.display = 'none'; // Hide loading overlay on init error
+                loadingOverlay.style.display = 'none'; // Hide global loading overlay on init error
+                mainAppContainer.style.display = 'none';
+                showLoginModal(); // Still show login modal if Firebase init fails
             }
         }
 
@@ -1349,7 +1922,7 @@
          */
         function setupRealtimeListeners() {
             if (!isFirebaseReady || !userId) {
-                console.warn("Firebase not ready or userId not available for setting up listeners.");
+                console.warn("Firebase not ready or userId not available for setting up listeners. Skipping real-time listeners.");
                 return;
             }
 
@@ -2370,6 +2943,361 @@
         }
 
 
+        // --- Login Modal Functions ---
+
+        /**
+         * Shows the login modal and hides the main app content.
+         */
+        function showLoginModal() {
+            loginModal.style.display = 'flex';
+            mainAppContainer.style.display = 'none';
+            loadingOverlay.style.display = 'none';
+            // Reset input fields and errors when showing
+            emailInputLogin.value = '';
+            passwordInputLogin.value = '';
+            emailErrorLogin.classList.add('hidden');
+            passwordErrorLogin.classList.add('hidden');
+            authErrorMessage.classList.add('hidden');
+            setAuthMode(true); // Default to sign-in mode
+        }
+
+        /**
+         * Hides the login modal and shows the main app content.
+         */
+        function hideLoginModal() {
+            loginModal.style.display = 'none';
+            mainAppContainer.style.display = 'block';
+            authLoadingIndicator.classList.add('hidden'); // Hide loading indicator
+            authErrorMessage.classList.add('hidden'); // Hide any auth error messages
+        }
+
+        /**
+         * Toggles between Sign In and Sign Up modes for the login form.
+         * @param {boolean} signInMode - True for Sign In, false for Sign Up.
+         */
+        function setAuthMode(signInMode) {
+            isSignInMode = signInMode;
+            if (isSignInMode) {
+                loginHeaderTitle.textContent = "Welcome back";
+                loginHeaderSubtitle.textContent = "Please enter your details";
+                authActionButton.textContent = "Sign In";
+                toggleAuthModeLink.textContent = "Sign up";
+                forgotPasswordLink.style.display = 'block';
+            } else {
+                loginHeaderTitle.textContent = "Create an account";
+                loginHeaderSubtitle.textContent = "Join us to start managing your studies!";
+                authActionButton.textContent = "Sign Up";
+                toggleAuthModeLink.textContent = "Sign In";
+                forgotPasswordLink.style.display = 'none'; // Hide for sign up
+            }
+            // Clear any previous input errors
+            emailErrorLogin.classList.add('hidden');
+            passwordErrorLogin.classList.add('hidden');
+            emailInputLogin.classList.remove('input-error');
+            passwordInputLogin.classList.remove('input-error');
+            authErrorMessage.classList.add('hidden');
+        }
+
+        /**
+         * Handles email/password authentication (Sign In or Sign Up).
+         */
+        async function handleEmailAuth() {
+            const email = emailInputLogin.value.trim();
+            const password = passwordInputLogin.value.trim();
+
+            // Reset errors
+            emailErrorLogin.classList.add('hidden');
+            passwordErrorLogin.classList.add('hidden');
+            emailInputLogin.classList.remove('input-error');
+            passwordInputLogin.classList.remove('input-error');
+            authErrorMessage.classList.add('hidden');
+
+            let hasError = false;
+
+            if (!email) {
+                emailErrorLogin.textContent = "Email is required.";
+                emailErrorLogin.classList.remove('hidden');
+                emailInputLogin.classList.add('input-error');
+                hasError = true;
+            } else if (!email.includes('@')) {
+                emailErrorLogin.textContent = "Please enter a valid email address.";
+                emailErrorLogin.classList.remove('hidden');
+                emailInputLogin.classList.add('input-error');
+                hasError = true;
+            }
+
+            if (!password) {
+                passwordErrorLogin.textContent = "Password is required.";
+                passwordErrorLogin.classList.remove('hidden');
+                passwordInputLogin.classList.add('input-error');
+                hasError = true;
+            } else if (password.length < 6) {
+                passwordErrorLogin.textContent = "Password must be at least 6 characters long.";
+                passwordErrorLogin.classList.remove('hidden');
+                passwordInputLogin.classList.add('input-error');
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            authLoadingIndicator.classList.remove('hidden');
+
+            try {
+                if (isSignInMode) {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    console.log("User signed in with email.");
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    console.log("User signed up with email.");
+                    customAlert('Account created successfully! You are now logged in.', 'Success');
+                }
+                // onAuthStateChanged listener will handle hiding modal and showing app
+            } catch (error) {
+                console.error("Authentication error:", error.code, error.message);
+                let displayMessage = "An unknown error occurred.";
+
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        displayMessage = "Invalid email format.";
+                        emailInputLogin.classList.add('input-error');
+                        break;
+                    case 'auth/user-disabled':
+                        displayMessage = "Your account has been disabled.";
+                        break;
+                    case 'auth/user-not-found':
+                        displayMessage = "No user found with this email. Please sign up.";
+                        emailInputLogin.classList.add('input-error');
+                        break;
+                    case 'auth/wrong-password':
+                        displayMessage = "Incorrect password.";
+                        passwordInputLogin.classList.add('input-error');
+                        break;
+                    case 'auth/email-already-in-use':
+                        displayMessage = "This email is already in use. Try signing in.";
+                        emailInputLogin.classList.add('input-error');
+                        break;
+                    case 'auth/weak-password':
+                        displayMessage = "Password is too weak. Please choose a stronger password.";
+                        passwordInputLogin.classList.add('input-error');
+                        break;
+                    case 'auth/operation-not-allowed':
+                        displayMessage = "Email/password login is not enabled. Contact support.";
+                        break;
+                    default:
+                        displayMessage = error.message;
+                        break;
+                }
+                authErrorMessage.textContent = displayMessage;
+                authErrorMessage.classList.remove('hidden');
+            } finally {
+                authLoadingIndicator.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Handles Google Sign-In using a popup.
+         */
+        async function handleGoogleAuth() {
+            authLoadingIndicator.classList.remove('hidden');
+            authErrorMessage.classList.add('hidden'); // Hide previous errors
+            try {
+                const provider = new GoogleAuthProvider();
+                await signInWithPopup(auth, provider);
+                console.log("User signed in with Google.");
+                // onAuthStateChanged listener will handle hiding modal and showing app
+            } catch (error) {
+                console.error("Google Sign-In error:", error.code, error.message);
+                let displayMessage = "Failed to sign in with Google.";
+
+                if (error.code === 'auth/popup-closed-by-user') {
+                    displayMessage = "Google Sign-In popup was closed.";
+                } else if (error.code === 'auth/cancelled-popup-request') {
+                    displayMessage = "Another sign-in popup was already open.";
+                } else if (error.code === 'auth/auth-domain-config-required') {
+                    displayMessage = "Authentication domain configuration is missing.";
+                } else if (error.code === 'auth/popup-blocked') { // Specific handling for popup-blocked
+                    displayMessage = "Pop-up blocked by your browser. Please allow pop-ups for this site and try again.";
+                } else {
+                    displayMessage += ` (${error.message})`;
+                }
+                authErrorMessage.textContent = displayMessage;
+                authErrorMessage.classList.remove('hidden');
+            } finally {
+                authLoadingIndicator.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Handles user logout.
+         */
+        async function handleSignOut() {
+            const confirmed = await customAlert('Are you sure you want to log out?', 'Confirm Logout', true);
+            if (confirmed) {
+                try {
+                    await signOut(auth);
+                    console.log("User signed out.");
+                    // onAuthStateChanged listener will handle showing login modal
+                    settingsMenu.classList.remove('show'); // Close main settings dropdown
+                    profileModal.style.display = 'none'; // Close profile modal if open
+                    customAlert('You have been successfully logged out.', 'Logged Out');
+                } catch (error) {
+                    console.error("Error signing out:", error);
+                    showErrorMessage("Failed to log out: " + error.message);
+                }
+            }
+        }
+
+        // --- Profile Modal Functions ---
+
+        /**
+         * Shows the My Profile modal.
+         */
+        async function openProfileModal() {
+            profileModal.style.display = 'flex';
+            settingsMenu.classList.remove('show'); // Close settings dropdown
+
+            const user = auth.currentUser;
+            if (user && db && userId) {
+                const profileDocRef = doc(db, `artifacts/${appId}/users/${userId}/profile`, 'details');
+                
+                // Fetch current user data from Firebase Auth
+                const userData = {
+                    name: user.displayName,
+                    email: user.email,
+                    emailVerified: user.emailVerified,
+                    photoURL: user.photoURL,
+                    role: 'User', // Default role
+                    status: 'Active' // Default status
+                };
+
+                // Listen for real-time updates from Firestore profile data
+                onSnapshot(profileDocRef, (docSnap) => {
+                    let firestoreData = {};
+                    if (docSnap.exists()) {
+                        firestoreData = docSnap.data();
+                        console.log("Profile data fetched from Firestore:", firestoreData);
+                    } else {
+                        console.log("No custom profile data in Firestore. Using Firebase Auth defaults.");
+                        // Create initial profile data in Firestore if it doesn't exist
+                        setDoc(profileDocRef, userData, { merge: true })
+                            .then(() => console.log("Initial profile document created in Firestore."))
+                            .catch(error => console.error("Error creating initial profile document:", error));
+                    }
+                    
+                    // Merge Firebase Auth data with Firestore data (Firestore overrides Auth)
+                    const mergedData = { ...userData, ...firestoreData };
+                    updateProfileUI(mergedData);
+                }, (error) => {
+                    console.error("Error listening to profile data:", error);
+                    showErrorMessage("Error loading profile details: " + error.message);
+                    // Fallback to only Firebase Auth data if Firestore listener fails
+                    updateProfileUI(userData);
+                });
+
+            } else {
+                // Handle case where no user is logged in (should be caught by onAuthStateChanged, but as fallback)
+                updateProfileUI({
+                    name: 'Guest User',
+                    email: 'guest@example.com',
+                    role: 'Guest',
+                    emailVerified: false,
+                    status: 'Inactive',
+                    photoURL: 'https://placehold.co/128x128/D1D5DB/4B5563?text=User'
+                });
+            }
+        }
+
+        /**
+         * Hides the My Profile modal.
+         */
+        function closeProfileModal() {
+            profileModal.style.display = 'none';
+        }
+
+        /**
+         * Updates the UI with user profile data.
+         * @param {Object} userData - Object containing user data.
+         */
+        function updateProfileUI(userData) {
+            profileImage.src = userData.photoURL || 'https://placehold.co/128x128/D1D5DB/4B5563?text=User';
+            displayName.textContent = userData.name || 'N/A';
+            displayNameEditable.textContent = userData.name || 'N/A'; // For tap to open modal
+            modalEditNameInput.value = userData.name || ''; // Set modal input value
+
+            displayEmail.textContent = userData.email || 'N/A';
+            displayEmailDetailed.textContent = userData.email || 'N/A';
+            displayRole.textContent = userData.role || 'User';
+            displayLocation.textContent = userData.location || 'United States'; // Assuming a default location
+
+            // Update Email Verification display and badge
+            displayEmailVerification.textContent = userData.emailVerified ? 'Verified' : 'Pending';
+            displayEmailVerification.classList.toggle('email-verified', userData.emailVerified);
+            displayEmailVerification.classList.toggle('email-pending', !userData.emailVerified);
+
+            if (emailVerifiedBadge) {
+                emailVerifiedBadge.classList.toggle('hidden', !userData.emailVerified);
+            }
+
+            displayStatus.textContent = userData.status || 'Active';
+            displayStatus.classList.toggle('status-active', userData.status === 'Active');
+            displayStatus.classList.toggle('status-inactive', userData.status !== 'Active');
+            
+            // Display full User ID
+            displayUserId.textContent = userId;
+
+            // Show/hide sign out button based on if a user is authenticated (not anonymous)
+            if (auth.currentUser && !auth.currentUser.isAnonymous) {
+                signOutProfileButton.classList.add('show');
+                profileInfoContainerLeft.classList.add('shift-up');
+            } else {
+                signOutProfileButton.classList.remove('show');
+                profileInfoContainerLeft.classList.remove('shift-up');
+            }
+        }
+
+        /**
+         * Updates the user's name in Firestore.
+         * @param {string} newName - The new name to set.
+         */
+        async function updateUserName(newName) {
+            if (!db || !userId || !auth.currentUser) {
+                showErrorMessage("You must be logged in to update your profile.", true);
+                return;
+            }
+
+            const profileDocRef = doc(db, `artifacts/${appId}/users/${userId}/profile`, 'details');
+            try {
+                await setDoc(profileDocRef, { name: newName }, { merge: true });
+                // Also update Firebase Auth profile if the user is not anonymous and has a providable name
+                if (!auth.currentUser.isAnonymous && auth.currentUser.providerData.length > 0) {
+                     // Check if a provider (like Google) is linked, then update display name
+                    await auth.currentUser.updateProfile({ displayName: newName });
+                }
+                customAlert("Name updated successfully!");
+                closeNameEditModal();
+            } catch (error) {
+                console.error("Error updating name:", error);
+                showErrorMessage("Failed to update name: " + error.message, true);
+            }
+        }
+
+        /**
+         * Opens the name edit modal.
+         */
+        function openNameEditModal() {
+            nameEditModalOverlay.style.display = 'flex'; // Use flex to center
+            modalEditNameInput.value = displayNameEditable.textContent; // Pre-fill with current name
+            modalEditNameInput.focus();
+            modalEditNameInput.select();
+        }
+
+        /**
+         * Closes the name edit modal.
+         */
+        function closeNameEditModal() {
+            nameEditModalOverlay.style.display = 'none';
+        }
+
         // --- Initial Load ---
         document.addEventListener('DOMContentLoaded', () => {
             initializeFirebaseAndAuth(); // Start Firebase initialization and auth
@@ -2402,8 +3330,67 @@
                     subjectProgressData[key].percentageTextElement.textContent = `0%`;
                 }
             });
+
+            // Login modal event listeners
+            toggleAuthModeLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                setAuthMode(!isSignInMode); // Toggle the mode
+            });
+
+            authActionButton.addEventListener('click', handleEmailAuth);
+            googleSignInButton.addEventListener('click', handleGoogleAuth);
+            
+            // Replaced logoutButton with myProfileButton
+            myProfileButton.addEventListener('click', openProfileModal);
+
+            // Profile Modal Event Listeners
+            closeProfileModalButton.addEventListener('click', closeProfileModal);
+            profileModal.addEventListener('click', (e) => {
+                if (e.target === profileModal) {
+                    closeProfileModal();
+                }
+            });
+            signOutProfileButton.addEventListener('click', handleSignOut); // Logout now tied to button inside profile modal
+
+            // Name Edit Modal Listeners (within Profile Modal's context)
+            displayNameEditable.addEventListener('click', openNameEditModal); // Tap to edit name
+            modalSaveNameButton.addEventListener('click', () => {
+                const newName = modalEditNameInput.value.trim();
+                if (newName) {
+                    updateUserName(newName);
+                } else {
+                    showErrorMessage("Name cannot be empty.", true);
+                }
+            });
+            modalCancelButton.addEventListener('click', closeNameEditModal);
+            nameEditModalOverlay.addEventListener('click', (event) => {
+                if (event.target === nameEditModalOverlay) {
+                    closeNameEditModal();
+                }
+            });
+            modalEditNameInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    modalSaveNameButton.click();
+                }
+            });
+
+            // Clear login errors on input
+            emailInputLogin.addEventListener('input', () => {
+                emailErrorLogin.classList.add('hidden');
+                emailInputLogin.classList.remove('input-error');
+                authErrorMessage.classList.add('hidden');
+            });
+            passwordInputLogin.addEventListener('input', () => {
+                passwordErrorLogin.classList.add('hidden');
+                passwordInputLogin.classList.remove('input-error');
+                authErrorMessage.classList.add('hidden');
+            });
+
+            // Prevent default form submission if login modal was a form
+            if (loginModal.querySelector('form')) {
+                loginModal.querySelector('form').addEventListener('submit', (e) => e.preventDefault());
+            }
         });
     </script>
 </body>
 </html>
-
