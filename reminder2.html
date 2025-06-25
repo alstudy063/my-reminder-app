@@ -254,7 +254,7 @@
             transition: background-color 0.3s ease;
             display: inline-flex;
             align-items: center;
-            justify-content: center; /* Center icon within button */
+            justify-content: center;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             width: 40px; /* Fixed width for icon-only button */
             height: 40px; /* Fixed height for icon-only button */
@@ -1185,7 +1185,7 @@
             box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
         }
 
-        /* Chatbot specific styles */
+        /* Chatbot specific styles from chatbot.html */
         .hide-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
@@ -2128,14 +2128,15 @@
             signInWithEmailAndPassword,     /* Added for email/password sign-in */
             GoogleAuthProvider,             /* Added for Google sign-in */
             signInWithPopup,                /* Added for Google sign-in */
-            signOut                         /* Added for logout */
+            signOut,                        /* Added for logout */
+            updateProfile                   /* Added for updating user profile (display name) */
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDoc, setDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // Your web app's Firebase configuration (provided by user)
         const userFirebaseConfig = {
-            apiKey: "AIzaSyApLfVQ6hv0IAAN5ZkFlOQ-y5KXK-x1Q_M", // Updated API Key
+            apiKey: "AIzaSyAzhi07ChzXgVbhiJ23xZldmTsOResycBw", // Updated API Key
             authDomain: "reminderapp-d84e9.firebaseapp.com",
             projectId: "reminderapp-d84e9",
             storageBucket: "reminderapp-d84e9.firebaseapp.com",
@@ -2455,7 +2456,7 @@
 
 
         /**
-         * Formats a Date object into a thereunder-MM-DD string.
+         * Formats a Date object into a BCE-MM-DD string.
          * Useful for input[type="date"] and storing dates consistently.
          * @param {Date} date - The date object to format.
          * @returns {string} The formatted date string.
@@ -2468,7 +2469,7 @@
         }
 
         /**
-         * Parses a thereunder-MM-DD date string into a Date object, set to the start of the day.
+         * Parses a BCE-MM-DD date string into a Date object, set to the start of the day.
          * @param {string | Date} dateValue - The date string or Firestore Timestamp to parse.
          * @returns {Date} The parsed Date object.
          */
@@ -2480,7 +2481,7 @@
             if (typeof dateValue === 'object' && dateValue !== null && typeof dateValue.toDate === 'function') {
                 return dateValue.toDate();
             }
-            // Assume it's a thereunder-MM-DD string
+            // Assume it's a BCE-MM-DD string
             const [year, month, day] = String(dateValue).split('-').map(Number);
             return new Date(year, month - 1, day);
         }
@@ -2745,7 +2746,7 @@
          * Adds a new topic to Firestore.
          * @param {string} name - The name of the study topic.
          * @param {string} subject - The subject of the topic (e.g., 'Biology', 'Physics').
-         * @param {string} startDateString - The start date string in thereunder-MM-DD format.
+         * @param {string} startDateString - The start date string in BCE-MM-DD format.
          */
         async function addTopic(name, subject, startDateString) {
             if (!isFirebaseReady) {
@@ -3168,7 +3169,7 @@
                 if (reminder) {
                     const initialInterval = calculateNextInterval({ reviewCount: 0, customIntervalsArray: [] });
                     const newNextReviewDate = new Date(reminder.startDate); // Reset to start date
-                    newNextReviewDate.setDate(reminder.startDate.getDate() + initialInterval);
+                    newNextReviewDate.setDate(newNextReviewDate.getDate() + initialInterval); // Correctly apply initial interval from startDate
                     
                     await updateDoc(reminderRef, {
                         customIntervalsArray: [],
@@ -3219,7 +3220,7 @@
                 'Chemistry': changeDisplayNameChemistryInput.value.trim() || 'Chemistry'
             };
             // The 'Other' subject display name is not editable via this modal
-            newDisplayNames['Other'] = subjectDisplayNames['Other'] || 'Other';
+            newDisplayNames['Other'] = subjectDisplayNames['Other'] || 'Other'; // Ensure 'Other' is preserved
 
             subjectDisplayNames = newDisplayNames; // Update local state immediately
             await saveCustomSubjectDisplayNames(); // Save to Firestore
@@ -4042,14 +4043,13 @@
                 const values = headers.map(header => {
                     let value = reminder[header];
                     if (value instanceof Date) {
-                        value = formatDate(value); // Format Date objects to thereunder-MM-DD
+                        value = formatDate(value); // Format Date objects to BCE-MM-DD
                     } else if (Array.isArray(value)) {
                         value = value.join(';'); // Join array elements with semicolon
                     }
                     if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
                         value = `"${value.replace(/"/g, '""')}"`; // Handle commas and quotes in strings
                     }
-                    return value;
                     return value;
                 });
                 csvRows.push(values.join(','));
@@ -4089,7 +4089,7 @@
                     parseAndImportCSV(event.target.result);
                 };
                 reader.onerror = () => {
-                    showErrorMessage('Failed to read file. Please tryH again.');
+                    showErrorMessage('Failed to read file. Please try again.');
                 };
                 reader.readAsText(file);
             };
@@ -4537,7 +4537,7 @@
                 // Also update Firebase Auth profile if the user is not anonymous and has a providable name
                 if (!auth.currentUser.isAnonymous && auth.currentUser.providerData.length > 0) {
                      // Check if a provider (like Google) is linked, then update display name
-                    await auth.currentUser.updateProfile({ displayName: newName });
+                    await updateProfile(auth.currentUser, { displayName: newName });
                 }
                 customAlert("Name updated successfully!");
                 closeNameEditModal();
@@ -4866,4 +4866,3 @@
     </script>
 </body>
 </html>
-
