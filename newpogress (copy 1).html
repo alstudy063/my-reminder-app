@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paper Marks Progress Chart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <style>
+        /* Custom font for better aesthetics */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+        }
+        /* Hide scrollbar for the all papers list */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        /* Style for the editable mark input */
+        .mark-input {
+            width: 80px; /* Adjust width as needed */
+            text-align: right;
+            padding: 4px 8px;
+            border: 1px solid #D1D5DB; /* gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            font-weight: 500; /* font-medium */
+            color: #111827; /* gray-900 */
+            background-color: #F9FAFB; /* gray-50 */
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .mark-input:focus {
+            outline: none;
+            border-color: #3B82F6; /* blue-500 */
+            box-shadow: 0 0 0 1px #3B82F6;
+        }
+        .mark-display {
+            cursor: pointer; /* Indicate it's clickable */
+            padding: 4px 8px; /* Match input padding for consistent size */
+            /* Use transform for smooth linear animation */
+            transition: transform 0.4s linear;
+            transform: translateX(0); /* Initial position */
+        }
+        .mark-display.shifted {
+            transform: translateX(-30px); /* Shift left by the width of the delete button */
+        }
+        /* Style for the paper item container to enable absolute positioning of children */
+        .paper-item {
+            position: relative; /* Crucial for positioning the delete button */
+            overflow: visible; /* Allow delete button to slide out of bounds */
+        }
+        /* Wrapper for mark display and delete button, now without padding-right */
+        .mark-and-delete-wrapper {
+            position: relative; /* For absolute positioning of delete button */
+            display: flex;
+            align-items: center;
+        }
+        .delete-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            position: absolute; /* Float it */
+            right: -30px; /* Start position: hidden outside the wrapper */
+            top: 50%; /* Center vertically */
+            transform: translateY(-50%); /* Adjust for perfect vertical centering */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px; /* Size of the SVG */
+            height: 24px; /* Size of the SVG */
+            opacity: 0; /* Hidden by default */
+            transition: right 0.4s linear, opacity 0.4s linear; /* Slower linear animation for both */
+            pointer-events: none; /* Do not block clicks when hidden */
+        }
+        .delete-btn.visible {
+            opacity: 1; /* Visible when active */
+            right: 0px; /* End position: visible at the right edge */
+            pointer-events: auto; /* Enable clicks when visible */
+        }
+        .delete-btn svg {
+            width: 18px; /* Adjust SVG size */
+            height: 18px; /* Adjust SVG size */
+        }
+        .delete-btn svg path {
+            stroke: #EF4444; /* Red color for delete icon */
+        }
+
+        /* Root variables for animation duration */
+        :root {
+            --popup-animation-duration: 0.3s; /* Matched from the provided example */
+        }
+
+        /* Styles for the warning modal - REPLACED WITH EXAMPLE ANIMATION */
+        .warning-modal-overlay, .password-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            
+            /* Initial state for overlay */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--popup-animation-duration) ease-in-out, visibility 0ms linear var(--popup-animation-duration);
+        }
+        .warning-modal-overlay.visible, .password-modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity var(--popup-animation-duration) ease-in-out, visibility 0ms;
+        }
+        .warning-modal-content, .password-modal-content {
+            background-color: white;
+            padding: 24px;
+            border-radius: 16px; /* Increased border-radius */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            max-width: 380px;
+            width: 90%;
+            
+            /* Ensure it's absolutely positioned within the overlay and centered */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Initial centering */
+
+            /* Initial state for hide animation (will be overridden by show-popup) */
+            animation: hide-popup var(--popup-animation-duration) forwards;
+        }
+        .warning-modal-overlay.visible .warning-modal-content,
+        .password-modal-overlay.visible .password-modal-content {
+            /* Show animation */
+            animation: show-popup var(--popup-animation-duration) forwards;
+        }
+        .warning-icon svg, .modal-icon svg {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+        }
+        .warning-icon svg path {
+            fill: #F59E0B; /* Amber color for warning icon */
+        }
+        .warning-icon svg path[stroke] {
+            stroke: #DF1463; /* Red stroke for warning icon details */
+        }
+
+        /* Keyframes from the provided example for popup animation */
+        @keyframes show-popup {
+            0% {
+                transform: translate(-50%, -50%) scale(.7);
+                opacity: 0;
+            }
+            45% {
+                transform: translate(-50%, -50%) scale(1.05);
+                opacity: 1;
+            }
+            80% {
+                transform: translate(-50%, -50%) scale(.95);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        @keyframes hide-popup {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(.5);
+                opacity: 0;
+            }
+        }
+
+        /* Styles for the paper suggestions menu */
+        .paper-suggestions-menu {
+            position: absolute;
+            top: 100%; /* Position below the input field */
+            left: 0;
+            right: 0;
+            background-color: white;
+            border: 1px solid #D1D5DB;
+            border-radius: 0.375rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 50; /* Ensure it's above other content */
+            max-height: 150px; /* Max height when visible */
+            overflow-y: auto; /* Changed from hidden to auto for scrolling */
+            opacity: 0; /* Initial state for animation */
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+        }
+
+        .paper-suggestions-menu.visible {
+            max-height: 150px; /* Max height when visible */
+            opacity: 1;
+        }
+
+        .paper-suggestions-menu .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.875rem; /* sm:text-sm */
+            color: #4B5563; /* gray-700 */
+        }
+
+        .paper-suggestions-menu .menu-item:hover {
+            background-color: #F3F4F6; /* gray-100 */
+        }
+
+        .paper-suggestions-menu .menu-item-name {
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .paper-suggestions-menu .menu-item-actions {
+            display: flex;
+            gap: 8px; /* Space between icons */
+        }
+
+        .paper-suggestions-menu .menu-icon {
+            width: 16px; /* Smaller icon size for menu */
+            height: 16px;
+            cursor: pointer;
+            color: #6B7280; /* Gray color for icons */
+        }
+
+        .paper-suggestions-menu .menu-icon:hover {
+            color: #3B82F6; /* Blue on hover */
+        }
+
+        .paper-suggestions-menu .menu-icon.delete:hover {
+            color: #EF4444; /* Red on hover for delete */
+        }
+
+        .paper-suggestions-menu .rename-input {
+            width: calc(100% - 60px); /* Adjust width to fit icons */
+            padding: 4px 8px;
+            border: 1px solid #3B82F6;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            margin-right: 8px;
+        }
+
+        /* Custom styles for the collapsible message button */
+        .message-button {
+            width: 48px; /* Initial width for icon only */
+            transition: width 0.5s ease-in-out, padding 0.5s ease-in-out; /* Smooth transition for width and padding */
+            overflow: hidden; /* Hide overflowing content */
+            white-space: nowrap; /* Prevent text from wrapping */
+            padding: 12px; /* Initial padding for the icon */
+        }
+
+        .message-button:hover {
+            width: 150px; /* Expanded width to show text comfortably */
+            padding-left: 16px; /* Adjust padding for expanded state */
+            padding-right: 16px; /* Adjust padding for expanded state */
+        }
+
+        .message-button svg {
+            flex-shrink: 0; /* Prevent SVG from shrinking */
+        }
+
+        .message-button span {
+            opacity: 0; /* Initially hidden text */
+            max-width: 0; /* Collapse width */
+            margin-left: 0; /* Remove initial margin */
+            /* Transition for disappearing: opacity first, then width/margin */
+            /* Adjusted opacity transition to include a delay for hiding */
+            transition: opacity 0.2s ease-out 0.3s, max-width 0.5s ease-out 0.1s, margin-left 0.5s ease-out 0.1s;
+        }
+
+        .message-button:hover span {
+            opacity: 1; /* Show text on hover */
+            max-width: max-content; /* Allow text to expand to its natural width */
+            margin-left: 8px; /* Add margin back on hover */
+            /* Transition for appearing: opacity with delay, width/margin immediately */
+            transition: opacity 0.3s ease-in 0.2s, max-width 0.5s ease-in, margin-left 0.5s ease-in;
+        }
+
+        /* Styles for the new member input and button */
+        #member-name-input {
+            width: 0;
+            opacity: 0;
+            transition: width 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            margin-right: 0; /* No margin when hidden */
+        }
+
+        #member-name-input.visible {
+            width: 150px; /* Expanded width */
+            opacity: 1;
+            margin-right: 8px; /* Space between input and button/icon */
+        }
+
+        #add-member-btn {
+            width: 0;
+            opacity: 0;
+            padding: 0; /* Remove padding when hidden */
+            transition: width 0.3s ease-in-out, opacity 0.3s ease-in-out, padding 0.3s ease-in-out;
+        }
+
+        #add-member-btn.visible {
+            width: auto; /* Allow button to take its natural width */
+            opacity: 1;
+            padding: 8px 12px; /* Restore padding when visible */
+        }
+        /* Style for the new icon below the add member button */
+        #new-member-icon-container {
+            position: relative; /* To position the menu relative to this container */
+            display: flex;
+            flex-direction: column; /* Stack the icon and menu vertically */
+            align-items: flex-end; /* Align icon and menu to the right */
+        }
+
+        #new-member-icon {
+            margin-top: 8px; /* Space between button and icon */
+            width: 24px; /* Adjust size as needed */
+            height: 24px;
+            color: #030D45; /* Set color based on fill in SVG */
+        }
+
+        /* Styles for the member suggestions menu */
+        #member-suggestions-menu {
+            position: absolute;
+            top: calc(100% + 8px); /* Position below the icon with some spacing */
+            right: 0; /* Align to the right of its parent container */
+            background-color: white;
+            border: 1px solid #D1D5DB;
+            border-radius: 0.375rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 50; /* Ensure it's above other content */
+            max-height: 0; /* Initial state for animation - collapsed */
+            overflow-y: hidden; /* Hide overflow initially */
+            opacity: 0; /* Initial state for animation */
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            min-width: 150px; /* Ensure it has a minimum width */
+        }
+
+        #member-suggestions-menu.visible {
+            max-height: 200px; /* Max height when visible (adjust as needed) */
+            overflow-y: auto; /* Allow scrolling when visible */
+            opacity: 1;
+        }
+
+        #member-suggestions-menu .menu-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.875rem; /* sm:text-sm */
+            color: #4B5563; /* gray-700 */
+        }
+
+        #member-suggestions-menu .menu-item:hover {
+            background-color: #F3F4F6; /* gray-100 */
+        }
+
+        /* Style for the error message */
+        .error-message {
+            color: #EF4444; /* Red-600 */
+            font-size: 0.75rem; /* text-xs */
+            margin-top: 4px;
+            height: 0; /* Initially hidden */
+            overflow: hidden;
+            opacity: 0;
+            transition: height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+
+        .error-message.visible {
+            height: auto; /* Show height */
+            opacity: 1;
+        }
+        /* Style for password error message within the modal */
+        #password-error-message {
+            color: #EF4444; /* Red-600 */
+            font-size: 0.75rem; /* text-xs */
+            margin-top: 8px;
+            height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+
+        #password-error-message.visible {
+            height: auto;
+            opacity: 1;
+        }
+    </style>
+    <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyApLfVQ6hv0IAAN5ZkFlOQ-y5KXK-x1Q_M",
+    authDomain: "reminderapp-d84e9.firebaseapp.com",
+    databaseURL: "https://reminderapp-d84e9-default-rtdb.firebaseio.com",
+    projectId: "reminderapp-d84e9",
+    storageBucket: "reminderapp-d84e9.appspot.com",
+    messagingSenderId: "312145339940",
+    appId: "1:312145339940:web:ade59de4d6de6cec221ab1"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
+  const chartRef = ref(database, 'charts/Udara');
+
+  // Example save function
+  function saveChartToFirebase(chartData) {
+    set(chartRef, chartData)
+      .then(() => console.log("✅ Saved to Firebase"))
+      .catch(err => console.error("❌ Save failed", err));
+  }
+
+  // Example load
+  onValue(chartRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      console.log("Loaded from Firebase:", data);
+      // Update your chart here
+    }
+  });
+</script>
+
+
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="flex flex-col lg:flex-row bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-6xl flex-grow relative">
+        <div class="w-full lg:w-2/3 p-6 md:p-8 flex flex-col relative"> <div class="mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800">Udara's Paper Marks</h2>
+                <div class="flex items-baseline mt-2">
+                    <span id="overall-percentage" class="text-4xl font-bold text-gray-900">64.72%</span>
+                    <span id="percentage-change" class="ml-3 text-lg font-semibold text-green-600 flex items-center">
+                        17.67% <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                </div>
+            </div>
+            <div class="absolute top-4 right-4 z-10 flex items-start space-x-0">
+                <div class="relative flex flex-col items-end space-y-1"> <div class="flex items-center space-x-2">
+                        <input type="text" id="member-name-input" placeholder="Enter Member ID"
+                               class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <button id="add-member-btn"
+                                class="flex-shrink-0 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-sm">
+                            Add
+                        </button>
+                        <svg id="add-member-icon" tabindex="0" role="button" aria-label="Add Member" viewBox="-2 -2 24 24" xmlns="http://www.w3.org/2000/svg" fill="#000000" class="w-6 h-6 cursor-pointer">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <path id="secondary" fill="#2ca9bc" d="M7,19.5a9,9,0,0,0,9.94,0A5,5,0,0,0,7,19.5Z"></path>
+                                <path id="primary" d="M8.54,13A4,4,0,1,0,12,7a3.66,3.66,0,0,0-1,.13" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                                <path id="primary-2" data-name="primary" d="M7,19.5a9,9,0,0,0,9.94,0A5,5,0,0,0,7,19.5ZM3,9H7M5,11V7" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                                <path id="primary-3" data-name="primary" d="M8,3.94A9,9,0,1,1,5.64,18.36,8.86,8.86,0,0,1,3.52,15" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                            </g>
+                        </svg>
+                    </div>
+                    <div id="member-id-error-message" class="error-message"></div>
+                </div>
+
+                <div id="new-member-icon-container" class="relative flex flex-col items-end space-y-2 -ml-4">
+                    <svg id="new-member-icon" tabindex="0" role="button" aria-label="View All Members" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 cursor-pointer">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.36264 3.53846C7.60261 3.53846 6.17582 4.96525 6.17582 6.72528C6.17582 8.4853 7.60261 9.91209 9.36264 9.91209C11.1227 9.91209 12.5494 8.4853 12.5494 6.72528C12.5494 4.96525 11.1227 3.53846 9.36264 3.53846ZM4.63736 6.72528C4.63736 4.11558 6.75294 2 9.36264 2C11.9723 2 14.0879 4.11558 14.0879 6.72528C14.0879 9.33497 11.9723 11.4506 9.36264 11.4506C6.75294 11.4506 4.63736 9.33497 4.63736 6.72528Z" fill="#030D45"></path>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M7.41153 15.4066C5.27249 15.4066 3.53846 17.1406 3.53846 19.2797C3.53846 19.3861 3.55682 19.4596 3.57526 19.5013C3.59011 19.5348 3.60106 19.5412 3.60591 19.544C4.13353 19.8541 5.65133 20.4615 9.36264 20.4615C13.0739 20.4615 14.5913 19.8543 15.1189 19.5443C15.1238 19.5414 15.1352 19.5348 15.15 19.5013C15.1685 19.4596 15.1868 19.3861 15.1868 19.2797C15.1868 17.1406 13.4528 15.4066 11.3137 15.4066H7.41153ZM2 19.2797C2 16.291 4.42282 13.8681 7.41153 13.8681H11.3137C14.3024 13.8681 16.7253 16.291 16.7253 19.2797C16.7253 19.7944 16.5513 20.4869 15.8984 20.8706C15.0381 21.3763 13.2089 22 9.36264 22C5.51639 22 3.68722 21.3763 2.82683 20.8706C2.17398 20.4869 2 19.7944 2 19.2797Z" fill="#030D45"></path>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M15.5431 3.88721C15.654 3.47709 16.0763 3.23448 16.4864 3.34532C18.1832 3.80392 19.3626 5.47949 19.3626 7.38461C19.3626 9.39763 17.9829 11.2126 16.0478 11.4451C15.626 11.4957 15.243 11.1949 15.1923 10.7731C15.1416 10.3513 15.4425 9.96824 15.8643 9.91758C16.8962 9.79362 17.8242 8.75741 17.8242 7.38461C17.8242 6.08213 17.0256 5.0847 16.085 4.8305C15.6749 4.71966 15.4323 4.29733 15.5431 3.88721Z" fill="#030D45"></path>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M17.8384 14.4901C17.9197 14.0731 18.3237 13.801 18.7407 13.8824C20.6337 14.2516 22 15.91 22 17.8388V18.3735C22 18.8469 21.858 19.5212 21.2404 19.9159C20.8246 20.1817 20.1798 20.4649 19.1855 20.666C18.7691 20.7503 18.3633 20.481 18.279 20.0646C18.1948 19.6482 18.464 19.2424 18.8804 19.1581C19.7287 18.9865 20.1871 18.7633 20.4118 18.6197L20.4136 18.6179C20.4153 18.6158 20.4213 18.6077 20.4287 18.5896C20.4451 18.5498 20.4615 18.4784 20.4615 18.3735V17.8388C20.4615 16.6462 19.6167 15.6207 18.4462 15.3924C18.0292 15.311 17.7571 14.9071 17.8384 14.4901Z" fill="#030D45"></path>
+                        </g>
+                    </svg>
+                    <button id="leave-member-btn"
+                            class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-sm">
+                        Leave
+                    </button>
+                    <div id="member-suggestions-menu" class="hidden">
+                        </div>
+                </div>
+            </div>
+
+            <div class="relative flex-grow">
+                <canvas id="marksChart"></canvas>
+            </div>
+        </div>
+
+        <div class="w-full lg:w-1/3 bg-gray-50 p-6 md:p-8 border-t lg:border-t-0 lg:border-l border-gray-200 relative">
+            <h3 class="text-xl font-semibold text-gray-800 mb-6">Paper Marks Entry</h3>
+            <form id="add-paper-form" class="space-y-4">
+                <div>
+                    <label for="paper-name" class="block text-sm font-medium text-gray-700">Paper Name</label>
+                    <div class="flex items-center mt-1 relative" id="paper-name-input-container">
+                        <input type="text" id="paper-name" placeholder="e.g., Midterm Exam"
+                               class="block w-full px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm pr-10" required autocomplete="off">
+                        <svg id="paper-name-icon" tabindex="0" role="button" aria-label="Toggle Paper Suggestions" class="absolute right-16 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 cursor-pointer" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <path d="M22 42H6V26" stroke="#000000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+                                <path d="M26 6H42V22" stroke="#000000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </g>
+                        </svg>
+                        <button type="button" id="add-paper-name-only-btn"
+                                class="flex-shrink-0 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded-r-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out text-sm">
+                            Add
+                        </button>
+                        <div id="paper-suggestions-menu" class="paper-suggestions-menu hidden">
+                            </div>
+                    </div>
+                </div>
+                <div>
+                    <label for="mark-percentage" id="mark-percentage-label" class="block text-sm font-medium text-gray-700">Add Marks</label>
+                    <div class="flex items-center mt-1">
+                        <input type="number" id="mark-percentage" placeholder="e.g., 85" min="0" max="100"
+                               class="block w-full px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" autocomplete="off">
+                        <button type="button" id="add-mark-to-latest-btn"
+                                class="flex-shrink-0 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded-r-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out text-sm">
+                            Add
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="mt-8">
+                <h4 class="text-lg font-medium text-gray-800 mb-4">All Papers</h4>
+                <div id="all-papers-list" class="space-y-3 max-h-64 overflow-y-auto no-scrollbar">
+                </div>
+            </div>
+        </div>
+
+        <button class="absolute bottom-4 right-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center justify-center message-button" tabindex="0" role="button" aria-label="Messages">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6">
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                <g id="SVGRepo_iconCarrier">
+                    <path d="M13.19 6H6.79C6.53 6 6.28 6.01 6.04 6.04C3.35 6.27 2 7.86 2 10.79V14.79C2 18.79 3.6 19.58 6.79 19.58H7.19C7.41 19.58 7.7 19.73 7.83 19.9L9.03 21.5C9.56 22.21 10.42 22.21 10.95 21.5L12.15 19.9C12.3 19.7 12.54 19.58 12.79 19.58H13.19C16.12 19.58 17.71 18.24 17.94 15.54C17.97 15.3 17.98 15.05 17.98 14.79V10.79C17.98 7.6 16.38 6 13.19 6ZM6.5 14C5.94 14 5.5 13.55 5.5 13C5.5 12.45 5.95 12 6.5 12C7.05 12 7.5 12.45 7.5 13C7.5 13.55 7.05 14 6.5 14ZM9.99 14C9.43 14 8.99 13.55 8.99 13C8.99 12.45 9.44 12 9.99 12C10.54 12 10.99 12.45 10.99 13C10.99 13.55 10.55 14 9.99 14ZM13.49 14C12.93 14 12.49 13.55 12.49 13C12.49 12.45 12.94 12 13.49 12C14.04 12 14.49 12.45 14.49 13C14.49 13.55 14.04 14 13.49 14Z" fill="#ffffff"></path>
+                    <path d="M21.9802 6.79V10.79C21.9802 12.79 21.3602 14.15 20.1202 14.9C19.8202 15.08 19.4702 14.84 19.4702 14.49L19.4802 10.79C19.4802 6.79 17.1902 4.5 13.1902 4.5L7.10025 4.51C6.75025 4.51 6.51025 4.16 6.69025 3.86C7.44025 2.62 8.80025 2 10.7902 2H17.1902C20.3802 2 21.9802 3.6 21.9802 6.79Z" fill="#ffffff"></path>
+                </g>
+            </svg>
+            <span>Messages</span>
+        </button>
+    </div>
+
+    <div id="warning-modal-overlay" class="warning-modal-overlay">
+        <div id="warning-modal-content" class="warning-modal-content">
+            <div class="warning-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M13.0619 4.4295C12.6213 3.54786 11.3636 3.54786 10.9229 4.4295L3.89008 18.5006C3.49256 19.2959 4.07069 20.2317 4.95957 20.2317H19.0253C19.9142 20.2317 20.4923 19.2959 20.0948 18.5006L13.0619 4.4295ZM9.34196 3.6387C10.434 1.45376 13.5508 1.45377 14.6429 3.63871L21.6758 17.7098C22.6609 19.6809 21.2282 22 19.0253 22H4.95957C2.75669 22 1.32395 19.6809 2.3091 17.7098L9.34196 3.6387Z" fill="#1C1C1C"></path>
+                    <path d="M12 8V13" stroke="#DF1463" stroke-width="1.7" stroke-linecap="round"></path>
+                    <path d="M12 16L12 16.5" stroke="#DF1463" stroke-width="1.7" stroke-linecap="round"></path>
+                </svg>
+            </div>
+            <p class="text-lg font-semibold text-gray-800 mb-4">Are you sure?</p>
+            <p class="text-sm text-gray-600 mb-6">This action cannot be undone. The paper and its marks will be permanently deleted.</p>
+            <div class="flex justify-center space-x-4">
+                <button id="cancel-delete-btn" class="px-5 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition duration-150 ease-in-out">
+                    Cancel
+                </button>
+                <button id="confirm-delete-btn" class="px-5 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-150 ease-in-out">
+                    Confirm Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="password-modal-overlay" class="password-modal-overlay">
+        <div id="password-modal-content" class="password-modal-content">
+            <div class="modal-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_iconCarrier">
+                        <path d="M12 11V15" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M12 18H12.01" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </g>
+                </svg>
+            </div>
+            <p class="text-lg font-semibold text-gray-800 mb-4">Enter Password to Leave Member</p>
+            <input type="password" id="password-input" placeholder="Enter password"
+                   class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm mb-4" autocomplete="off">
+            <div id="password-error-message" class="error-message"></div>
+            <div class="flex justify-center space-x-4">
+                <button id="cancel-password-btn" class="px-5 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition duration-150 ease-in-out">
+                    Cancel
+                </button>
+                <button id="confirm-password-btn" class="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-150 ease-in-out">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initial data for the chart
+        let chartData = {
+            labels: ['Paper 1', 'Paper 2', 'Paper 3', 'Paper 4'],
+            datasets: [
+                {
+                    label: 'Udara',
+                    data: [50, 80, 15, 38],
+                    borderColor: '#3B82F6', // Blue
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    tension: 0.4,
+                    fill: false,
+                    pointBackgroundColor: '#3B82F6',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                },
+                {
+                    label: 'Member 2',
+                    data: [40, 60, null, null], // Member 2 has no mark for Paper 3 and 4 initially
+                    borderColor: '#EF4444', // Red
+                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                    tension: 0.4,
+                    fill: false,
+                    pointBackgroundColor: '#EF4444',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                },
+                {
+                    label: 'Member 3',
+                    data: [30, 50, null, null], // Member 3 has no mark for Paper 3 and 4 initially
+                    borderColor: '#22C55E', // Green
+                    backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                    tension: 0.4,
+                    fill: false,
+                    pointBackgroundColor: '#22C55E',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                }
+            ]
+        };
+
+        // Define a list of valid member IDs for validation purposes
+        // These are the IDs that are initially recognized as valid accounts.
+        const validMemberIds = ["Udara", "Member 2", "Member 3"];
+        const ADMIN_PASSWORD = "801176"; // The password for leaving members
+
+        // Chart configuration
+        const config = {
+            type: 'line',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // Allow chart to fill container height
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: {
+                                family: 'Inter',
+                                size: 14,
+                                weight: '500'
+                            },
+                            boxWidth: 20,
+                            boxHeight: 10,
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y + '%';
+                                } else {
+                                    label += 'N/A'; // Show N/A for null values in tooltip
+                                }
+                                return label;
+                            }
+                        },
+                        titleFont: { family: 'Inter' },
+                        bodyFont: { family: 'Inter' },
+                        padding: 10,
+                        boxPadding: 5,
+                        displayColors: true,
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(0, 0, 0, 0.1)',
+                        borderWidth: 1,
+                        cornerRadius: 6
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                family: 'Inter'
+                            },
+                            color: '#6B7280',
+                            callback: function(value, index, ticks) {
+                                // Apply "Paper " prefix if the label is a number
+                                const originalLabel = chartData.labels[index];
+                                return isNaN(originalLabel) ? originalLabel : `Paper ${originalLabel}`;
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Paper',
+                            font: {
+                                family: 'Inter',
+                                size: 14,
+                                weight: '600'
+                            },
+                            color: '#4B5563'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            color: '#E5E7EB'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            },
+                            font: {
+                                family: 'Inter'
+                            },
+                            color: '#6B7280'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Mark (%)',
+                            font: {
+                                family: 'Inter',
+                                size: 14,
+                                weight: '600'
+                            },
+                            color: '#4B5563'
+                        }
+                    }
+                }
+            }
+        };
+
+        // Initialize the chart
+        let marksChart;
+        window.onload = function() {
+            const ctx = document.getElementById('marksChart').getContext('2d');
+            marksChart = new Chart(ctx, config);
+            updateOverallPercentage();
+            renderAllPapers();
+            updateMarkPercentageLabel(); // Initial update for the label
+            checkAndToggleAddPaperButton(); // Initial check for button state
+        };
+
+        // Function to update the overall percentage and percentage change
+        function updateOverallPercentage() {
+            const udaraMarks = chartData.datasets[0].data;
+            // Filter out null values for calculation of average
+            const validUdaraMarks = udaraMarks.filter(mark => mark !== null && mark !== undefined);
+
+            if (validUdaraMarks.length === 0) {
+                document.getElementById('overall-percentage').textContent = '0.00%';
+                document.getElementById('percentage-change').innerHTML = '0.00% <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>';
+                document.getElementById('percentage-change').classList.remove('text-green-600', 'text-red-600');
+                document.getElementById('percentage-change').classList.add('text-gray-500');
+                return;
+            }
+
+            const currentAvg = validUdaraMarks.reduce((sum, mark) => sum + mark, 0) / validUdaraMarks.length;
+            document.getElementById('overall-percentage').textContent = currentAvg.toFixed(2) + '%';
+
+            let change = 0;
+            if (validUdaraMarks.length >= 2) {
+                const lastMark = validUdaraMarks[validUdaraMarks.length - 1];
+                const secondLastMark = validUdaraMarks[validUdaraMarks.length - 2];
+                change = lastMark - secondLastMark;
+            } else if (validUdaraMarks.length === 1) {
+                change = validUdaraMarks[0];
+            }
+
+            const changeElement = document.getElementById('percentage-change');
+            changeElement.textContent = Math.abs(change).toFixed(2) + '%';
+            changeElement.classList.remove('text-green-600', 'text-red-600', 'text-gray-500');
+
+            if (change > 0) {
+                changeElement.classList.add('text-green-600');
+                changeElement.innerHTML += ' <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1 inline" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>';
+            } else if (change < 0) {
+                changeElement.classList.add('text-red-600');
+                changeElement.innerHTML += ' <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1 inline" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>';
+            } else {
+                changeElement.classList.add('text-gray-500');
+                changeElement.innerHTML += ' <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1 inline" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>';
+            }
+        }
+
+        // Function to update Udara's mark for a specific paper
+        function updateUdaraMark(index, newMark) {
+            if (index >= 0 && index < chartData.datasets[0].data.length) {
+                chartData.datasets[0].data[index] = newMark;
+                marksChart.update(); // Update the chart
+                updateOverallPercentage(); // Update the overall percentage
+                checkAndToggleAddPaperButton(); // Check button state after mark update
+            }
+        }
+
+        // Function to delete a paper (now removes the entire entry)
+        function deletePaperConfirmed(index) {
+            if (index >= 0 && index < chartData.labels.length) {
+                chartData.labels.splice(index, 1); // Remove label
+                chartData.datasets.forEach(dataset => {
+                    dataset.data.splice(index, 1); // Remove corresponding data from all datasets
+                });
+
+                marksChart.update(); // Update the chart
+                updateOverallPercentage(); // Update the overall percentage
+                renderAllPapers(); // Re-render the list to reflect the changes
+                updateMarkPercentageLabel(); // Update the label as the latest paper might have changed
+                checkAndToggleAddPaperButton(); // Check button state after deletion
+            }
+        }
+
+        let activePaperItem = null; // To keep track of the currently active paper item
+        let paperIndexToDelete = -1; // To store the index of the paper to be deleted
+        let memberIndexToLeave = -1; // To store the index of the member to be left
+
+        // Get modal elements
+        const warningModalOverlay = document.getElementById('warning-modal-overlay');
+        const warningModalContent = document.getElementById('warning-modal-content'); // Get the content div
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+
+        // Get password modal elements
+        const passwordModalOverlay = document.getElementById('password-modal-overlay');
+        const passwordModalContent = document.getElementById('password-modal-content');
+        const passwordInput = document.getElementById('password-input');
+        const passwordErrorMessage = document.getElementById('password-error-message');
+        const confirmPasswordBtn = document.getElementById('confirm-password-btn');
+        const cancelPasswordBtn = document.getElementById('cancel-password-btn');
+
+
+        // Show warning modal
+        function showWarningModal(index) {
+            paperIndexToDelete = index;
+            warningModalOverlay.classList.add('visible');
+            confirmDeleteBtn.focus(); // Focus on a button for keyboard navigation
+        }
+
+        // Hide warning modal
+        function hideWarningModal() {
+            warningModalOverlay.classList.remove('visible');
+            paperIndexToDelete = -1;
+        }
+
+        // Confirm delete action
+        confirmDeleteBtn.addEventListener('click', () => {
+            if (paperIndexToDelete !== -1) {
+                deletePaperConfirmed(paperIndexToDelete);
+            }
+            hideWarningModal();
+        });
+
+        // Cancel delete action
+        cancelDeleteBtn.addEventListener('click', () => {
+            hideWarningModal();
+        });
+
+        // Show password modal
+        function showPasswordModal(index) {
+            memberIndexToLeave = index;
+            passwordInput.value = ''; // Clear input field
+            hidePasswordErrorMessage(); // Hide any previous error messages
+            passwordModalOverlay.classList.add('visible');
+            passwordInput.focus(); // Focus the input field
+        }
+
+        // Hide password modal
+        function hidePasswordModal() {
+            passwordModalOverlay.classList.remove('visible');
+            memberIndexToLeave = -1;
+            hidePasswordErrorMessage();
+        }
+
+        // Show password error message
+        function showPasswordErrorMessage(message) {
+            passwordErrorMessage.textContent = message;
+            passwordErrorMessage.classList.add('visible');
+        }
+
+        // Hide password error message
+        function hidePasswordErrorMessage() {
+            passwordErrorMessage.classList.remove('visible');
+            passwordErrorMessage.textContent = '';
+        }
+
+        // Confirm password action
+        confirmPasswordBtn.addEventListener('click', () => {
+            const enteredPassword = passwordInput.value;
+            if (enteredPassword === ADMIN_PASSWORD) {
+                if (memberIndexToLeave !== -1) {
+                    removeMemberConfirmed(memberIndexToLeave);
+                }
+                hidePasswordModal();
+            } else {
+                showPasswordErrorMessage("Incorrect password. Please try again.");
+            }
+        });
+
+        // Allow password confirmation on Enter key press in the password input field
+        passwordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                confirmPasswordBtn.click(); // Simulate a click on the confirm button
+            } else {
+                hidePasswordErrorMessage(); // Hide error message as user types
+            }
+        });
+
+        // Cancel password action
+        cancelPasswordBtn.addEventListener('click', () => {
+            hidePasswordModal();
+        });
+
+
+        // Get elements for the new mini-menu functionality
+        const paperNameInput = document.getElementById('paper-name');
+        const paperNameIcon = document.getElementById('paper-name-icon');
+        const paperSuggestionsMenu = document.getElementById('paper-suggestions-menu');
+        const paperNameInputContainer = document.getElementById('paper-name-input-container'); // The relative container
+
+        // Function to toggle the visibility of the paper suggestions menu
+        function togglePaperSuggestionsMenu() {
+            if (paperSuggestionsMenu.classList.contains('hidden')) {
+                // Show the menu
+                paperSuggestionsMenu.classList.remove('hidden');
+                paperSuggestionsMenu.classList.add('visible'); // Add visible class for animation
+                populatePaperSuggestionsMenu();
+            } else {
+                // Hide the menu
+                paperSuggestionsMenu.classList.remove('visible'); // Remove visible class for animation
+                // Use a timeout to hide 'hidden' class after transition completes
+                setTimeout(() => {
+                    paperSuggestionsMenu.classList.add('hidden');
+                }, 300); // Match this to the CSS transition duration
+            }
+        }
+
+        // Function to populate the paper suggestions menu
+        function populatePaperSuggestionsMenu() {
+            paperSuggestionsMenu.innerHTML = ''; // Clear existing items
+            if (chartData.labels.length === 0) {
+                const noPapersMessage = document.createElement('div');
+                noPapersMessage.textContent = 'No papers to suggest.';
+                noPapersMessage.classList.add('text-gray-500', 'italic', 'text-center', 'py-2');
+                paperSuggestionsMenu.appendChild(noPapersMessage);
+                return;
+            }
+
+            chartData.labels.forEach((label, index) => {
+                const item = document.createElement('div');
+                item.className = 'menu-item';
+                item.setAttribute('tabindex', '0'); // Make menu item focusable
+                item.setAttribute('role', 'menuitem');
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'menu-item-name';
+                nameSpan.textContent = isNaN(label) ? label : `Paper ${label}`;
+                item.appendChild(nameSpan);
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'menu-item-actions';
+
+                // Edit/Rename Icon
+                const editIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                editIcon.setAttribute('viewBox', '0 0 24 24');
+                editIcon.setAttribute('fill', 'none');
+                editIcon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                editIcon.classList.add('menu-icon');
+                editIcon.innerHTML = `<g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12.75 3.25L18.75 9.25L7 21L3 21L3 17L12.75 3.25Z" stroke="#4B5563" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> </g>`;
+                editIcon.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent item click
+                    startRename(nameSpan, index, label);
+                });
+                editIcon.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === 'Space') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        startRename(nameSpan, index, label);
+                    }
+                });
+                actionsDiv.appendChild(editIcon);
+
+                // Delete Icon
+                const deleteIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                deleteIcon.setAttribute('viewBox', '0 0 24 24');
+                deleteIcon.setAttribute('fill', 'none');
+                deleteIcon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                deleteIcon.classList.add('menu-icon', 'delete');
+                deleteIcon.innerHTML = `<g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M10 12V17" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> <path d="M14 12V17" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> <path d="M4 7H20" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> <path d="M6 10V18C6 19.6569 7.34315 21 9 21H15C16.6569 21 18 19.6569 18 18V10" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> </g>`;
+                deleteIcon.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent item click
+                    showWarningModal(index);
+                });
+                deleteIcon.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === 'Space') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        showWarningModal(index);
+                    }
+                });
+                actionsDiv.appendChild(deleteIcon);
+
+                item.appendChild(actionsDiv);
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent global click from closing menu
+                    paperNameInput.value = isNaN(label) ? label : `Paper ${label}`;
+                    togglePaperSuggestionsMenu(); // Close menu after selection
+                });
+                item.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === 'Space') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        paperNameInput.value = isNaN(label) ? label : `Paper ${label}`;
+                        togglePaperSuggestionsMenu();
+                    }
+                });
+                paperSuggestionsMenu.appendChild(item);
+            });
+        }
+
+        function startRename(nameSpanElement, index, originalName) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'rename-input';
+            input.value = originalName; // Use original name for editing
+            input.setAttribute('autocomplete', 'off'); // Add autocomplete="off"
+            
+            // Replace the span with the input
+            nameSpanElement.parentNode.replaceChild(input, nameSpanElement);
+            input.focus();
+
+            const saveRename = () => {
+                let newName = input.value.trim();
+                if (newName && newName !== originalName) {
+                    chartData.labels[index] = newName; // Update only the label
+                    marksChart.update();
+                    updateOverallPercentage();
+                    renderAllPapers(); // Re-render the main list
+                    updateMarkPercentageLabel(); // Update the label for the latest paper
+                    checkAndToggleAddPaperButton(); // Check button state after rename
+                }
+                // Replace input back with span, only showing the name
+                nameSpanElement.textContent = isNaN(newName) ? newName : `Paper ${newName}`;
+                input.parentNode.replaceChild(nameSpanElement, input);
+            };
+
+            input.addEventListener('blur', saveRename);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    saveRename(); // Save on Enter key
+                } else if (e.key === 'Escape') {
+                    input.value = originalName; // Revert to original name
+                    saveRename(); // Save (which just replaces with original name)
+                }
+            });
+        }
+
+
+        // Event listener for the SVG icon to toggle the menu
+        paperNameIcon.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent the global click listener from immediately closing it
+            togglePaperSuggestionsMenu();
+        });
+
+        paperNameIcon.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === 'Space') {
+                event.preventDefault(); // Prevent default scroll for space
+                event.stopPropagation();
+                togglePaperSuggestionsMenu();
+            } else if (event.key === 'Escape') {
+                togglePaperSuggestionsMenu();
+            }
+        });
+
+        // Global click and keydown listener to hide menus and modals when clicking outside or pressing Escape
+        document.body.addEventListener('click', (event) => {
+            // Hide warning modal
+            if (warningModalOverlay.classList.contains('visible') && !warningModalContent.contains(event.target)) {
+                hideWarningModal();
+            }
+
+            // Hide password modal
+            if (passwordModalOverlay.classList.contains('visible') && !passwordModalContent.contains(event.target)) {
+                hidePasswordModal();
+            }
+
+            // Hide paper suggestions menu
+            if (!paperNameInputContainer.contains(event.target) && paperSuggestionsMenu.classList.contains('visible')) {
+                paperSuggestionsMenu.classList.remove('visible');
+                setTimeout(() => {
+                    paperSuggestionsMenu.classList.add('hidden');
+                }, 300); // Match this to the CSS transition duration
+            }
+
+            // Then handle hiding the paper item's delete button/shift
+            if (activePaperItem) {
+                // Check if the click was *inside* the active paper item but *not* on the mark-display or delete-btn
+                const clickedInsideMarkOrDelete = event.target.closest('.mark-display') || event.target.closest('.delete-btn');
+                if (!activePaperItem.contains(event.target) || (activePaperItem.contains(event.target) && !clickedInsideMarkOrDelete)) {
+                    const deleteButton = activePaperItem.querySelector('.delete-btn');
+                    const markDisplaySpan = activePaperItem.querySelector('.mark-display');
+
+                    if (deleteButton) {
+                        deleteButton.classList.remove('visible');
+                    }
+                    if (markDisplaySpan) {
+                        markDisplaySpan.classList.remove('shifted');
+                    }
+                    activePaperItem = null;
+                }
+            }
+            // Hide member input and button if clicking outside
+            const addMemberGroup = document.querySelector('.absolute.top-4.right-4 > .relative.flex.flex-col');
+            if (addMemberGroup && !addMemberGroup.contains(event.target) && memberNameInput.classList.contains('visible')) {
+                toggleMemberInput();
+            }
+
+            // Hide member suggestions menu if clicking outside
+            const memberSuggestionsMenuElement = document.getElementById('member-suggestions-menu');
+            const newMemberIconContainer = document.getElementById('new-member-icon-container'); // Get the parent container
+            const leaveMemberBtn = document.getElementById('leave-member-btn'); // Get the leave button
+            if (memberSuggestionsMenuElement.classList.contains('visible') && !newMemberIconContainer.contains(event.target) && !memberSuggestionsMenuElement.contains(event.target) && !leaveMemberBtn.contains(event.target)) {
+                toggleMemberSuggestionsMenu();
+            }
+        });
+
+        document.body.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                if (warningModalOverlay.classList.contains('visible')) {
+                    hideWarningModal();
+                }
+                if (passwordModalOverlay.classList.contains('visible')) {
+                    hidePasswordModal();
+                }
+                if (paperSuggestionsMenu.classList.contains('visible')) {
+                    togglePaperSuggestionsMenu();
+                }
+                if (memberSuggestionsMenu.classList.contains('visible')) {
+                    toggleMemberSuggestionsMenu();
+                }
+                // If member input is visible, hide it.
+                if (memberNameInput.classList.contains('visible')) {
+                    toggleMemberInput();
+                }
+            }
+        });
+
+
+        // Function to render all papers in the list
+        function renderAllPapers() {
+            const allPapersList = document.getElementById('all-papers-list');
+            allPapersList.innerHTML = ''; // Clear existing list
+            activePaperItem = null; // Reset active item on re-render
+
+            chartData.labels.forEach((paperName, index) => {
+                const udaraMark = chartData.datasets[0].data[index];
+                
+                // Only render the paper in the list if Udara has a mark
+                // If you want to show papers with N/A marks in the list, this condition should be removed.
+                if (udaraMark === null || udaraMark === undefined) {
+                    return; // Skip this paper, do not render it in the list
+                }
+
+                const displayMark = udaraMark.toFixed(2) + '%'; // No need for N/A here, as we only show papers with marks
+
+                const paperItem = document.createElement('div');
+                paperItem.className = 'paper-item flex items-center justify-between py-2 px-3 bg-white rounded-md shadow-sm text-gray-700 text-sm';
+                paperItem.dataset.index = index; // Store the index of the paper
+                paperItem.setAttribute('tabindex', '0'); // Make paper item focusable
+                paperItem.setAttribute('role', 'listitem'); // Semantic role
+
+                const paperNameContainer = document.createElement('div');
+                paperNameContainer.className = 'flex items-center'; // Flex container for name and icon
+
+                const paperNameSpan = document.createElement('span');
+                // Check if paperName is a number, if so, prepend "Paper "
+                paperNameSpan.textContent = isNaN(paperName) ? paperName : `Paper ${paperName}`;
+                paperNameContainer.appendChild(paperNameSpan);
+                
+                const markAndDelWrapper = document.createElement('div');
+                markAndDelWrapper.className = 'mark-and-delete-wrapper';
+
+                const markDisplaySpan = document.createElement('span');
+                markDisplaySpan.className = 'font-medium text-gray-900 mark-display';
+                markDisplaySpan.textContent = displayMark;
+                markDisplaySpan.dataset.index = index; // Store the index of the paper
+                markDisplaySpan.setAttribute('tabindex', '0'); // Make mark display focusable
+                markDisplaySpan.setAttribute('role', 'button'); // Treat as a button for activation
+
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'delete-btn';
+                deleteButton.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 12V17" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14 12V17" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M4 7H20" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M6 10V18C6 19.6569 7.34315 21 9 21H15C16.6569 21 18 19.6569 18 18V10" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    `;
+                deleteButton.dataset.index = index; // Store the index for deletion
+                deleteButton.setAttribute('tabindex', '-1'); // Not focusable initially, becomes focusable when visible
+                deleteButton.setAttribute('aria-label', `Delete ${paperName}`);
+
+                // Event listener for the entire paper item (for delete button visibility)
+                paperItem.addEventListener('click', (event) => {
+                    // If clicking on the delete button or mark display, let their specific handlers take over
+                    if (event.target.closest('.delete-btn') || event.target.closest('.mark-display')) {
+                        return;
+                    }
+                    togglePaperItemActiveState(paperItem, deleteButton, markDisplaySpan);
+                });
+
+                paperItem.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === 'Space') {
+                        event.preventDefault(); // Prevent default scroll for space
+                        togglePaperItemActiveState(paperItem, deleteButton, markDisplaySpan);
+                    } else if (event.key === 'Escape' && activePaperItem === paperItem) {
+                        // If this item is active and escape is pressed, deactivate it
+                        event.preventDefault();
+                        togglePaperItemActiveState(paperItem, deleteButton, markDisplaySpan);
+                    }
+                });
+
+                function togglePaperItemActiveState(item, delBtn, markSpan) {
+                    // Hide previous active delete button if any
+                    if (activePaperItem && activePaperItem !== item) {
+                        const prevDeleteBtn = activePaperItem.querySelector('.delete-btn');
+                        const prevMarkDisplaySpan = activePaperItem.querySelector('.mark-display');
+                        if (prevDeleteBtn) {
+                            prevDeleteBtn.classList.remove('visible');
+                            prevDeleteBtn.setAttribute('tabindex', '-1');
+                        }
+                        if (prevMarkDisplaySpan) {
+                            prevMarkDisplaySpan.classList.remove('shifted');
+                        }
+                    }
+
+                    // Toggle visibility of the current delete button
+                    delBtn.classList.toggle('visible');
+                    markSpan.classList.toggle('shifted'); // Toggle shifted class for percentage text
+
+                    if (delBtn.classList.contains('visible')) {
+                        delBtn.setAttribute('tabindex', '0'); // Make delete button focusable
+                        activePaperItem = item;
+                    } else {
+                        delBtn.setAttribute('tabindex', '-1');
+                        activePaperItem = null;
+                    }
+                }
+
+                // Event listener for the mark display span (for editing marks)
+                markDisplaySpan.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Prevent paperItem's click listener from firing
+                    startMarkEdit(markDisplaySpan);
+                });
+
+                markDisplaySpan.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === 'Space') {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        startMarkEdit(markDisplaySpan);
+                    }
+                });
+
+                function startMarkEdit(currentSpan) {
+                    const paperIndex = parseInt(currentSpan.dataset.index);
+                    const currentMark = chartData.datasets[0].data[paperIndex];
+
+                    const markInput = document.createElement('input');
+                    markInput.type = 'number';
+                    markInput.className = 'mark-input';
+                    // If currentMark is null, set input value to empty string for better UX
+                    markInput.value = (currentMark !== null && currentMark !== undefined) ? currentMark.toFixed(2) : '';
+                    markInput.min = '0';
+                    markInput.max = '100';
+                    markInput.dataset.index = paperIndex;
+                    markInput.setAttribute('autocomplete', 'off'); // Add autocomplete="off"
+                    
+                    // Replace the span with the input
+                    currentSpan.parentNode.replaceChild(markInput, currentSpan);
+                    markInput.focus(); // Focus the input for immediate editing
+
+                    // Event listener to save changes and revert to span
+                    const saveChanges = () => {
+                        let newMark = parseFloat(markInput.value);
+                        // If input is empty or invalid, set to null
+                        if (isNaN(newMark) || newMark < 0 || newMark > 100) {
+                            newMark = null;
+                            console.error("Invalid mark entered. Mark set to N/A.");
+                        }
+
+                        updateUdaraMark(paperIndex, newMark);
+                        currentSpan.textContent = (newMark !== null && newMark !== undefined) ? newMark.toFixed(2) + '%' : 'N/A'; // Update span text
+                        
+                        // Replace the input with the span
+                        markInput.parentNode.replaceChild(currentSpan, markInput);
+                        checkAndToggleAddPaperButton(); // Check button state after editing a mark
+                    };
+
+                    markInput.addEventListener('blur', saveChanges); // Save on blur
+                    markInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            saveChanges(); // Save on Enter key
+                        } else if (e.key === 'Escape') {
+                            // On escape, revert to original value and save (which replaces input with span)
+                            markInput.value = (currentMark !== null && currentMark !== undefined) ? currentMark.toFixed(2) : '';
+                            saveChanges();
+                            event.stopPropagation(); // Stop propagation of Escape to not close modal/menu
+                        }
+                    });
+                }
+
+                // The delete button is always added if we reach this point (because udaraMark is not null)
+                deleteButton.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Prevent paperItem's click listener from firing
+                    const paperIndex = parseInt(event.currentTarget.dataset.index);
+                    showWarningModal(paperIndex); // Show warning modal instead of direct delete
+                });
+
+                deleteButton.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === 'Space') {
+                        event.preventDefault(); // Prevent default scroll for space
+                        event.stopPropagation();
+                        const paperIndex = parseInt(event.currentTarget.dataset.index);
+                        showWarningModal(paperIndex);
+                    }
+                });
+
+
+                markAndDelWrapper.appendChild(deleteButton); // Always append if Udara has a mark
+                
+                markAndDelWrapper.appendChild(markDisplaySpan);
+                paperItem.appendChild(paperNameContainer); // Append the container with name and icon
+                paperItem.appendChild(markAndDelWrapper); // Append the new wrapper
+                allPapersList.appendChild(paperItem);
+            });
+        }
+
+        // Function to update the "Add Marks For Latest Paper" label
+        function updateMarkPercentageLabel() {
+            const labelElement = document.getElementById('mark-percentage-label');
+            if (chartData.labels.length > 0) {
+                const latestPaperName = chartData.labels[chartData.labels.length - 1];
+                labelElement.textContent = `Add Marks For "${isNaN(latestPaperName) ? latestPaperName : `Paper ${latestPaperName}`}"`;
+            } else {
+                labelElement.textContent = 'Add Marks';
+            }
+        }
+
+        // Function to check if at least one person has added marks for the latest paper
+        // and toggle the "Add Paper" button accordingly.
+        function checkAndToggleAddPaperButton() {
+            const addPaperNameOnlyBtn = document.getElementById('add-paper-name-only-btn');
+            const latestPaperIndex = chartData.labels.length - 1;
+            let shouldEnable = false; // Assume disabled by default
+
+            // If there are no papers, enable the button to allow adding the first one
+            if (latestPaperIndex < 0) {
+                shouldEnable = true;
+            } else {
+                // Check if at least one member has a mark for the latest paper
+                for (let j = 0; j < chartData.datasets.length; j++) {
+                    const mark = chartData.datasets[j].data[latestPaperIndex];
+                    if (mark !== null && mark !== undefined) {
+                        shouldEnable = true; // Found at least one mark for the latest paper
+                        break; // No need to check other datasets for this paper
+                    }
+                }
+            }
+
+            if (shouldEnable) {
+                addPaperNameOnlyBtn.disabled = false;
+                addPaperNameOnlyBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                addPaperNameOnlyBtn.classList.add('hover:bg-blue-600');
+            } else {
+                addPaperNameOnlyBtn.disabled = true;
+                addPaperNameOnlyBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                addPaperNameOnlyBtn.classList.remove('hover:bg-blue-600');
+            }
+        }
+
+        // Handle form submission for the main form. This will now be triggered by pressing Enter in input fields.
+        document.getElementById('add-paper-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            // Form submission will be handled by individual button clicks on Enter.
+            // This prevents unexpected full form submission.
+        });
+
+        // Event listener for the 'Add' button next to Paper Name
+        document.getElementById('add-paper-name-only-btn').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default button action
+
+            const paperNameInput = document.getElementById('paper-name');
+            const markPercentageInput = document.getElementById('mark-percentage'); // Get mark input as well
+            
+            const paperName = paperNameInput.value.trim();
+            let markPercentage = parseFloat(markPercentageInput.value);
+
+            // If mark input is empty, set mark to null
+            if (markPercentageInput.value.trim() === '') {
+                markPercentage = null;
+            } else if (isNaN(markPercentage) || markPercentage < 0 || markPercentage > 100) {
+                // If a value was entered but it's invalid, show error and stop
+                console.error("Please enter a valid mark (0-100) or leave it empty.");
+                return;
+            }
+
+            if (paperName) {
+                // Add new paper to labels, applying "Paper " prefix if it's a number
+                chartData.labels.push(isNaN(paperName) ? paperName : `Paper ${paperName}`);
+
+                // Add mark for Udara (main user), which can be null
+                chartData.datasets[0].data.push(markPercentage);
+
+                // For other members, push null to indicate no mark yet for this paper
+                chartData.datasets[1].data.push(null);
+                chartData.datasets[2].data.push(null);
+
+                // Update the chart
+                marksChart.update();
+
+                // Update overall percentage and papers list
+                updateOverallPercentage();
+                renderAllPapers(); // Re-render the list to include the new editable paper
+                updateMarkPercentageLabel(); // Update the label after adding a paper
+                checkAndToggleAddPaperButton(); // Check button state after adding a paper
+                populatePaperSuggestionsMenu(); // Refresh the mini-menu
+                // Clear form fields
+                paperNameInput.value = '';
+                markPercentageInput.value = ''; // Clear mark field as well
+            } else {
+                console.error("Please enter a paper name.");
+            }
+        });
+
+        // Event listener for Enter key on paperNameInput
+        paperNameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Prevent default form submission
+                document.getElementById('add-paper-name-only-btn').click();
+            } else if (e.key === 'Escape' && paperSuggestionsMenu.classList.contains('visible')) {
+                e.preventDefault();
+                togglePaperSuggestionsMenu(); // Close suggestions menu if open
+            }
+        });
+
+        // Event listener for the new 'Add' button next to Mark Percentage
+        document.getElementById('add-mark-to-latest-btn').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default button action
+
+            const markPercentageInput = document.getElementById('mark-percentage');
+            const markPercentage = parseFloat(markPercentageInput.value);
+
+            if (chartData.labels.length === 0) {
+                console.error("No papers added yet to add marks to.");
+                return;
+            }
+
+            if (!isNaN(markPercentage) && markPercentage >= 0 && markPercentage <= 100) {
+                const latestPaperIndex = chartData.labels.length - 1;
+                updateUdaraMark(latestPaperIndex, markPercentage); // Update the mark for the latest paper
+                markPercentageInput.value = ''; // Clear the mark input field
+                renderAllPapers(); // Re-render to show updated mark in the list
+                checkAndToggleAddPaperButton(); // Check button state after adding a mark
+                populatePaperSuggestionsMenu(); // Refresh the mini-menu
+            } else {
+                console.error("Please enter a valid mark (0-100).");
+            }
+        });
+
+        // Event listener for Enter key on markPercentageInput
+        document.getElementById('mark-percentage').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Prevent default form submission
+                document.getElementById('add-mark-to-latest-btn').click();
+            }
+        });
+
+        // Get elements for the new member input
+        const addMemberIcon = document.getElementById('add-member-icon');
+        const memberNameInput = document.getElementById('member-name-input');
+        const addMemberBtn = document.getElementById('add-member-btn');
+        const newMemberIcon = document.getElementById('new-member-icon'); // The new icon for member list
+        const memberSuggestionsMenu = document.getElementById('member-suggestions-menu'); // The new member suggestions menu
+        const memberIdErrorMessage = document.getElementById('member-id-error-message'); // New error message element
+        const leaveMemberBtn = document.getElementById('leave-member-btn'); // The new leave button
+
+        // Function to show error message
+        function showErrorMessage(message) {
+            memberIdErrorMessage.textContent = message;
+            memberIdErrorMessage.classList.add('visible');
+        }
+
+        // Function to hide error message
+        function hideErrorMessage() {
+            memberIdErrorMessage.classList.remove('visible');
+            memberIdErrorMessage.textContent = '';
+        }
+
+        // Function to toggle the visibility of the member input and button
+        function toggleMemberInput() {
+            // If the input is currently visible AND there's an error message,
+            // just hide the error and keep the input visible for correction.
+            if (memberNameInput.classList.contains('visible') && memberIdErrorMessage.classList.contains('visible')) {
+                hideErrorMessage();
+                memberNameInput.focus(); // Keep focus for correction
+            } else {
+                // Otherwise, proceed with normal toggle behavior
+                memberNameInput.classList.toggle('visible');
+                addMemberBtn.classList.toggle('visible');
+                if (memberNameInput.classList.contains('visible')) {
+                    memberNameInput.focus();
+                } else {
+                    hideErrorMessage(); // Hide error message when input is hidden
+                }
+            }
+        }
+
+        // Function to toggle the visibility of the member suggestions menu
+        function toggleMemberSuggestionsMenu() {
+            if (memberSuggestionsMenu.classList.contains('hidden')) {
+                // Show the menu
+                memberSuggestionsMenu.classList.remove('hidden');
+                memberSuggestionsMenu.classList.add('visible'); // Add visible class for animation
+                populateMemberSuggestionsMenu(); // Populate when showing
+            } else {
+                // Hide the menu
+                memberSuggestionsMenu.classList.remove('visible'); // Remove visible class for animation
+                // Use a timeout to hide 'hidden' class after transition completes
+                setTimeout(() => {
+                    memberSuggestionsMenu.classList.add('hidden');
+                }, 300); // Match this to the CSS transition duration
+            }
+        }
+
+        // Function to populate the member suggestions menu
+        function populateMemberSuggestionsMenu() {
+            memberSuggestionsMenu.innerHTML = ''; // Clear existing items
+            // Start from index 1 to exclude "Udara" from the leave list
+            if (chartData.datasets.length <= 1) {
+                const noMembersMessage = document.createElement('div');
+                noMembersMessage.textContent = 'No other members to leave.';
+                noMembersMessage.classList.add('text-gray-500', 'italic', 'text-center', 'py-2');
+                memberSuggestionsMenu.appendChild(noMembersMessage);
+                return;
+            }
+
+            for (let i = 1; i < chartData.datasets.length; i++) {
+                const dataset = chartData.datasets[i];
+                const item = document.createElement('div');
+                item.className = 'menu-item';
+                item.setAttribute('tabindex', '0'); // Make menu item focusable
+                item.setAttribute('role', 'menuitem');
+                item.textContent = dataset.label;
+                item.dataset.index = i; // Store the index for removal
+
+                item.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Prevent the click from bubbling up to document.body
+                    const memberIndex = parseInt(event.currentTarget.dataset.index);
+                    if (memberIndex > 0) { // Ensure "Udara" (index 0) cannot be removed
+                        showPasswordModal(memberIndex); // Show password modal before removing
+                        // The member suggestions menu will be hidden by the global click listener
+                        // when the password modal is clicked outside its content.
+                    }
+                });
+                item.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === 'Space') {
+                        event.preventDefault(); // Prevent default scroll for space
+                        event.stopPropagation();
+                        const memberIndex = parseInt(event.currentTarget.dataset.index);
+                        if (memberIndex > 0) {
+                            showPasswordModal(memberIndex);
+                        }
+                    }
+                });
+                memberSuggestionsMenu.appendChild(item);
+            }
+        }
+
+        // Function to remove a member from the chart (actual removal logic)
+        function removeMemberConfirmed(index) {
+            if (index > 0 && index < chartData.datasets.length) { // Ensure "Udara" (index 0) cannot be removed
+                const memberName = chartData.datasets[index].label;
+                chartData.datasets.splice(index, 1); // Remove the dataset
+                
+                // Also remove the member from validMemberIds if they were there
+                const validIndex = validMemberIds.indexOf(memberName);
+                if (validIndex > -1) {
+                    validMemberIds.splice(validIndex, 1);
+                }
+
+                marksChart.update(); // Update the chart
+                populateMemberSuggestionsMenu(); // Refresh the member list menu
+            }
+        }
+
+
+        // Event listener for the add member icon (for input/button)
+        addMemberIcon.addEventListener('click', toggleMemberInput);
+        addMemberIcon.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === 'Space') {
+                event.preventDefault(); // Prevent default scroll for space
+                toggleMemberInput();
+            } else if (event.key === 'Escape' && memberNameInput.classList.contains('visible')) {
+                event.preventDefault();
+                toggleMemberInput();
+            }
+        });
+
+        // Event listener for the new member list icon
+        newMemberIcon.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent global click from immediately closing it
+            toggleMemberSuggestionsMenu();
+        });
+        newMemberIcon.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === 'Space') {
+                event.preventDefault(); // Prevent default scroll for space
+                event.stopPropagation();
+                toggleMemberSuggestionsMenu();
+            } else if (event.key === 'Escape' && memberSuggestionsMenu.classList.contains('visible')) {
+                event.preventDefault();
+                toggleMemberSuggestionsMenu();
+            }
+        });
+
+        // Event listener for the Leave Member button
+        leaveMemberBtn.addEventListener('click', () => {
+            // When the "Leave" button is clicked, open the member suggestions menu
+            // for the user to select which member to remove.
+            toggleMemberSuggestionsMenu();
+        });
+
+        // Event listener for the Add Member button
+        addMemberBtn.addEventListener('click', () => {
+            const newMemberName = memberNameInput.value.trim();
+            hideErrorMessage(); // Always clear previous error on new attempt
+
+            if (newMemberName) {
+                // 1. Check if the member is already in the chartData datasets (actual existing members)
+                const isDuplicate = chartData.datasets.some(dataset => dataset.label === newMemberName);
+                if (isDuplicate) {
+                    showErrorMessage("Member ID already exists in chart.");
+                    return; // Stop execution if it's a duplicate
+                }
+
+                // 2. If not a duplicate, check if the entered member ID is in our predefined list of valid IDs
+                if (validMemberIds.includes(newMemberName)) {
+                    // Add new dataset for the new member
+                    chartData.datasets.push({
+                        label: newMemberName,
+                        data: new Array(chartData.labels.length).fill(null), // Initialize with nulls for existing papers
+                        borderColor: getRandomColor(), // Function to get a random color
+                        backgroundColor: getRandomColor(0.2),
+                        tension: 0.4,
+                        fill: false,
+                        pointBackgroundColor: getRandomColor(),
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                    });
+                    marksChart.update();
+                    memberNameInput.value = ''; // Clear input
+                    toggleMemberInput(); // Hide input and button
+                    populateMemberSuggestionsMenu(); // Refresh the member list menu
+                } else {
+                    // If the ID is not found in the validMemberIds list
+                    showErrorMessage("Account ID not found.");
+                }
+            } else {
+                // If input is empty, just clear and hide without an error message
+                memberNameInput.value = '';
+                toggleMemberInput();
+            }
+        });
+
+        // Allow adding member on Enter key press in the input field
+        memberNameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                addMemberBtn.click(); // Simulate a click on the add button
+            } else {
+                hideErrorMessage(); // Hide error message as user types
+            }
+        });
+
+        // Event listener for the Messages button (for demo purposes)
+        document.querySelector('.message-button').addEventListener('click', () => {
+            alert('Messages button clicked!');
+        });
+        document.querySelector('.message-button').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === 'Space') {
+                e.preventDefault();
+                alert('Messages button activated with keyboard!');
+            }
+        });
+
+        // Function to generate a random color for new datasets
+        function getRandomColor(alpha = 1) {
+            const r = Math.floor(Math.random() * 255);
+            const g = Math.floor(Math.random() * 255);
+            const b = Math.floor(Math.random() * 255);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+    </script>
+<!-- ✅ Paste this near the bottom of your HTML file, before </body> -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+  // ✅ Step 2: Your Firebase configuration (paste here)
+  const firebaseConfig = {
+    apiKey: "AIzaSyApLfVQ6hv0IAAN5ZkFlOQ-y5KXK-x1Q_M",
+    authDomain: "reminderapp-d84e9.firebaseapp.com",
+    databaseURL: "https://reminderapp-d84e9-default-rtdb.firebaseio.com",
+    projectId: "reminderapp-d84e9",
+    storageBucket: "reminderapp-d84e9.appspot.com",
+    messagingSenderId: "312145339940",
+    appId: "1:312145339940:web:ade59de4d6de6cec221ab1"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
+
+  const chartRef = ref(database, 'charts/Udara'); // use member ID dynamically if needed
+
+  function saveChartToFirebase() {
+  const chartDataToSave = {
+    labels: chartData.labels,
+    data: chartData.datasets[0].data
+  };
+  set(chartRef, chartDataToSave)
+    .then(() => console.log("✅ Chart saved to Firebase"))
+    .catch((err) => console.error("❌ Save failed", err));
+}
+
+
+  onValue(chartRef, (snapshot) => {
+  const firebaseData = snapshot.val();
+  if (firebaseData) {
+    chartData.labels = firebaseData.labels;
+    chartData.datasets[0].data = firebaseData.data;
+    marksChart.update();
+    updateOverallPercentage();
+    renderAllPapers();
+    updateMarkPercentageLabel();
+  }
+});
+
+</script>
+
+</body>
+
+</html>
+
