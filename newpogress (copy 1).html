@@ -6,6 +6,97 @@
     <title>Paper Marks Progress Chart</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        // Your Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyApLfVQ6hv0IAAN5ZkFlOQ-y5KXK-x1Q_M",
+            authDomain: "reminderapp-d84e9.firebaseapp.com",
+            databaseURL: "https://reminderapp-d84e9-default-rtdb.firebaseio.com",
+            projectId: "reminderapp-d84e9",
+            storageBucket: "reminderapp-d84e9.appspot.com",
+            messagingSenderId: "312145339940",
+            appId: "1:312145339940:web:ade59de4d6de6cec221ab1"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Reference for saving paper marks - using "Udara" as the userId as provided
+        const userId = "Udara"; // This can be made dynamic with authentication later
+        const chartRef = ref(database, 'charts/' + userId);
+
+        // Make Firebase variables globally accessible within the script
+        window.firebaseDatabase = database;
+        window.chartRef = chartRef;
+        window.saveChartToFirebase = function() {
+            const chartDataToSave = {
+                labels: window.chartData.labels,
+                datasets: window.chartData.datasets.map(dataset => ({
+                    label: dataset.label,
+                    data: dataset.data,
+                    borderColor: dataset.borderColor,
+                    backgroundColor: dataset.backgroundColor,
+                    tension: dataset.tension,
+                    fill: dataset.fill,
+                    pointBackgroundColor: dataset.pointBackgroundColor,
+                    pointBorderColor: dataset.pointBorderColor,
+                    pointBorderWidth: dataset.pointBorderWidth,
+                    pointRadius: dataset.pointRadius,
+                    pointHoverRadius: dataset.pointHoverRadius,
+                }))
+            };
+            set(window.chartRef, chartDataToSave)
+                .then(() => console.log("Data saved to Firebase"))
+                .catch((error) => console.error("Error saving to Firebase:", error));
+        };
+
+        // Load data from Firebase on page load
+        onValue(window.chartRef, (snapshot) => {
+            const firebaseData = snapshot.val();
+            if (firebaseData) {
+                // Update chartData with data from Firebase
+                window.chartData.labels = firebaseData.labels || [];
+                // Ensure datasets are properly loaded, handling potential undefined properties
+                window.chartData.datasets = firebaseData.datasets.map(fbDataset => {
+                    // Try to find an existing dataset to merge properties, or create a new one
+                    const existingDataset = window.chartData.datasets.find(ds => ds.label === fbDataset.label);
+                    return {
+                        ...existingDataset, // Keep existing chart-specific properties if any
+                        label: fbDataset.label,
+                        data: fbDataset.data,
+                        borderColor: fbDataset.borderColor || (existingDataset ? existingDataset.borderColor : undefined),
+                        backgroundColor: fbDataset.backgroundColor || (existingDataset ? existingDataset.backgroundColor : undefined),
+                        tension: fbDataset.tension !== undefined ? fbDataset.tension : (existingDataset ? existingDataset.tension : undefined),
+                        fill: fbDataset.fill !== undefined ? fbDataset.fill : (existingDataset ? existingDataset.fill : undefined),
+                        pointBackgroundColor: fbDataset.pointBackgroundColor || (existingDataset ? existingDataset.pointBackgroundColor : undefined),
+                        pointBorderColor: fbDataset.pointBorderColor || (existingDataset ? existingDataset.pointBorderColor : undefined),
+                        pointBorderWidth: fbDataset.pointBorderWidth !== undefined ? fbDataset.pointBorderWidth : (existingDataset ? existingDataset.pointBorderWidth : undefined),
+                        pointRadius: fbDataset.pointRadius !== undefined ? fbDataset.pointRadius : (existingDataset ? existingDataset.pointRadius : undefined),
+                        pointHoverRadius: fbDataset.pointHoverRadius !== undefined ? fbDataset.pointHoverRadius : (existingDataset ? existingDataset.pointHoverRadius : undefined),
+                    };
+                });
+
+                // Update the chart and UI elements after loading data
+                if (window.marksChart) { // Ensure chart is initialized before updating
+                    window.marksChart.update();
+                    window.updateOverallPercentage();
+                    window.renderAllPapers();
+                    window.updateMarkPercentageLabel();
+                    window.checkAndToggleAddPaperButton();
+                    window.populatePaperSuggestionsMenu();
+                    window.populateMemberSuggestionsMenu();
+                } else {
+                    // If chart not yet initialized, set a flag or call a deferred update
+                    console.log("Chart not yet initialized, data will be applied on init.");
+                }
+            }
+        });
+    </script>
     <style>
         /* Custom font for better aesthetics */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -343,7 +434,7 @@
             z-index: 50; /* Ensure it's above other content */
             max-height: 0; /* Initial state for animation - collapsed */
             overflow-y: hidden; /* Hide overflow initially */
-            opacity: 0; /* Initial state for animation */
+            opacity: 0;
             transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
             min-width: 150px; /* Ensure it has a minimum width */
         }
@@ -396,42 +487,6 @@
             opacity: 1;
         }
     </style>
-    <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyApLfVQ6hv0IAAN5ZkFlOQ-y5KXK-x1Q_M",
-    authDomain: "reminderapp-d84e9.firebaseapp.com",
-    databaseURL: "https://reminderapp-d84e9-default-rtdb.firebaseio.com",
-    projectId: "reminderapp-d84e9",
-    storageBucket: "reminderapp-d84e9.appspot.com",
-    messagingSenderId: "312145339940",
-    appId: "1:312145339940:web:ade59de4d6de6cec221ab1"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const database = getDatabase(app);
-  const chartRef = ref(database, 'charts/Udara');
-
-  // Example save function
-  function saveChartToFirebase(chartData) {
-    set(chartRef, chartData)
-      .then(() => console.log("✅ Saved to Firebase"))
-      .catch(err => console.error("❌ Save failed", err));
-  }
-
-  // Example load
-  onValue(chartRef, (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-      console.log("Loaded from Firebase:", data);
-      // Update your chart here
-    }
-  });
-</script>
-
-
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
     <div class="flex flex-col lg:flex-row bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-6xl flex-grow relative">
@@ -602,7 +657,8 @@
 
     <script>
         // Initial data for the chart
-        let chartData = {
+        // Make chartData global for Firebase access
+        window.chartData = {
             labels: ['Paper 1', 'Paper 2', 'Paper 3', 'Paper 4'],
             datasets: [
                 {
@@ -655,7 +711,7 @@
         // Chart configuration
         const config = {
             type: 'line',
-            data: chartData,
+            data: window.chartData, // Use global chartData
             options: {
                 responsive: true,
                 maintainAspectRatio: false, // Allow chart to fill container height
@@ -715,7 +771,7 @@
                             color: '#6B7280',
                             callback: function(value, index, ticks) {
                                 // Apply "Paper " prefix if the label is a number
-                                const originalLabel = chartData.labels[index];
+                                const originalLabel = window.chartData.labels[index];
                                 return isNaN(originalLabel) ? originalLabel : `Paper ${originalLabel}`;
                             }
                         },
@@ -765,15 +821,20 @@
         window.onload = function() {
             const ctx = document.getElementById('marksChart').getContext('2d');
             marksChart = new Chart(ctx, config);
+            window.marksChart = marksChart; // Make marksChart globally accessible
+
+            // Initial UI updates (these will be overridden by Firebase data if available)
             updateOverallPercentage();
             renderAllPapers();
             updateMarkPercentageLabel(); // Initial update for the label
             checkAndToggleAddPaperButton(); // Initial check for button state
+            populatePaperSuggestionsMenu(); // Initial population of paper suggestions
+            populateMemberSuggestionsMenu(); // Initial population of member suggestions
         };
 
         // Function to update the overall percentage and percentage change
-        function updateOverallPercentage() {
-            const udaraMarks = chartData.datasets[0].data;
+        window.updateOverallPercentage = function() {
+            const udaraMarks = window.chartData.datasets[0].data;
             // Filter out null values for calculation of average
             const validUdaraMarks = udaraMarks.filter(mark => mark !== null && mark !== undefined);
 
@@ -814,28 +875,30 @@
         }
 
         // Function to update Udara's mark for a specific paper
-        function updateUdaraMark(index, newMark) {
-            if (index >= 0 && index < chartData.datasets[0].data.length) {
-                chartData.datasets[0].data[index] = newMark;
-                marksChart.update(); // Update the chart
+        window.updateUdaraMark = function(index, newMark) {
+            if (index >= 0 && index < window.chartData.datasets[0].data.length) {
+                window.chartData.datasets[0].data[index] = newMark;
+                window.marksChart.update(); // Update the chart
                 updateOverallPercentage(); // Update the overall percentage
                 checkAndToggleAddPaperButton(); // Check button state after mark update
+                saveChartToFirebase(); // Save changes to Firebase
             }
         }
 
         // Function to delete a paper (now removes the entire entry)
-        function deletePaperConfirmed(index) {
-            if (index >= 0 && index < chartData.labels.length) {
-                chartData.labels.splice(index, 1); // Remove label
-                chartData.datasets.forEach(dataset => {
+        window.deletePaperConfirmed = function(index) {
+            if (index >= 0 && index < window.chartData.labels.length) {
+                window.chartData.labels.splice(index, 1); // Remove label
+                window.chartData.datasets.forEach(dataset => {
                     dataset.data.splice(index, 1); // Remove corresponding data from all datasets
                 });
 
-                marksChart.update(); // Update the chart
+                window.marksChart.update(); // Update the chart
                 updateOverallPercentage(); // Update the overall percentage
                 renderAllPapers(); // Re-render the list to reflect the changes
                 updateMarkPercentageLabel(); // Update the label as the latest paper might have changed
                 checkAndToggleAddPaperButton(); // Check button state after deletion
+                saveChartToFirebase(); // Save changes to Firebase
             }
         }
 
@@ -964,9 +1027,9 @@
         }
 
         // Function to populate the paper suggestions menu
-        function populatePaperSuggestionsMenu() {
+        window.populatePaperSuggestionsMenu = function() { // Make global for Firebase load
             paperSuggestionsMenu.innerHTML = ''; // Clear existing items
-            if (chartData.labels.length === 0) {
+            if (window.chartData.labels.length === 0) {
                 const noPapersMessage = document.createElement('div');
                 noPapersMessage.textContent = 'No papers to suggest.';
                 noPapersMessage.classList.add('text-gray-500', 'italic', 'text-center', 'py-2');
@@ -974,7 +1037,7 @@
                 return;
             }
 
-            chartData.labels.forEach((label, index) => {
+            window.chartData.labels.forEach((label, index) => {
                 const item = document.createElement('div');
                 item.className = 'menu-item';
                 item.setAttribute('tabindex', '0'); // Make menu item focusable
@@ -1060,12 +1123,13 @@
             const saveRename = () => {
                 let newName = input.value.trim();
                 if (newName && newName !== originalName) {
-                    chartData.labels[index] = newName; // Update only the label
-                    marksChart.update();
+                    window.chartData.labels[index] = newName; // Update only the label
+                    window.marksChart.update();
                     updateOverallPercentage();
                     renderAllPapers(); // Re-render the main list
                     updateMarkPercentageLabel(); // Update the label for the latest paper
                     checkAndToggleAddPaperButton(); // Check button state after rename
+                    saveChartToFirebase(); // Save changes to Firebase
                 }
                 // Replace input back with span, only showing the name
                 nameSpanElement.textContent = isNaN(newName) ? newName : `Paper ${newName}`;
@@ -1175,13 +1239,13 @@
 
 
         // Function to render all papers in the list
-        function renderAllPapers() {
+        window.renderAllPapers = function() { // Make global for Firebase load
             const allPapersList = document.getElementById('all-papers-list');
             allPapersList.innerHTML = ''; // Clear existing list
             activePaperItem = null; // Reset active item on re-render
 
-            chartData.labels.forEach((paperName, index) => {
-                const udaraMark = chartData.datasets[0].data[index];
+            window.chartData.labels.forEach((paperName, index) => {
+                const udaraMark = window.chartData.datasets[0].data[index];
                 
                 // Only render the paper in the list if Udara has a mark
                 // If you want to show papers with N/A marks in the list, this condition should be removed.
@@ -1293,7 +1357,7 @@
 
                 function startMarkEdit(currentSpan) {
                     const paperIndex = parseInt(currentSpan.dataset.index);
-                    const currentMark = chartData.datasets[0].data[paperIndex];
+                    const currentMark = window.chartData.datasets[0].data[paperIndex];
 
                     const markInput = document.createElement('input');
                     markInput.type = 'number';
@@ -1366,10 +1430,10 @@
         }
 
         // Function to update the "Add Marks For Latest Paper" label
-        function updateMarkPercentageLabel() {
+        window.updateMarkPercentageLabel = function() { // Make global for Firebase load
             const labelElement = document.getElementById('mark-percentage-label');
-            if (chartData.labels.length > 0) {
-                const latestPaperName = chartData.labels[chartData.labels.length - 1];
+            if (window.chartData.labels.length > 0) {
+                const latestPaperName = window.chartData.labels[window.chartData.labels.length - 1];
                 labelElement.textContent = `Add Marks For "${isNaN(latestPaperName) ? latestPaperName : `Paper ${latestPaperName}`}"`;
             } else {
                 labelElement.textContent = 'Add Marks';
@@ -1378,9 +1442,9 @@
 
         // Function to check if at least one person has added marks for the latest paper
         // and toggle the "Add Paper" button accordingly.
-        function checkAndToggleAddPaperButton() {
+        window.checkAndToggleAddPaperButton = function() { // Make global for Firebase load
             const addPaperNameOnlyBtn = document.getElementById('add-paper-name-only-btn');
-            const latestPaperIndex = chartData.labels.length - 1;
+            const latestPaperIndex = window.chartData.labels.length - 1;
             let shouldEnable = false; // Assume disabled by default
 
             // If there are no papers, enable the button to allow adding the first one
@@ -1388,8 +1452,8 @@
                 shouldEnable = true;
             } else {
                 // Check if at least one member has a mark for the latest paper
-                for (let j = 0; j < chartData.datasets.length; j++) {
-                    const mark = chartData.datasets[j].data[latestPaperIndex];
+                for (let j = 0; j < window.chartData.datasets.length; j++) {
+                    const mark = window.chartData.datasets[j].data[latestPaperIndex];
                     if (mark !== null && mark !== undefined) {
                         shouldEnable = true; // Found at least one mark for the latest paper
                         break; // No need to check other datasets for this paper
@@ -1436,17 +1500,18 @@
 
             if (paperName) {
                 // Add new paper to labels, applying "Paper " prefix if it's a number
-                chartData.labels.push(isNaN(paperName) ? paperName : `Paper ${paperName}`);
+                window.chartData.labels.push(isNaN(paperName) ? paperName : `Paper ${paperName}`);
 
                 // Add mark for Udara (main user), which can be null
-                chartData.datasets[0].data.push(markPercentage);
+                window.chartData.datasets[0].data.push(markPercentage);
 
                 // For other members, push null to indicate no mark yet for this paper
-                chartData.datasets[1].data.push(null);
-                chartData.datasets[2].data.push(null);
+                for (let i = 1; i < window.chartData.datasets.length; i++) {
+                    window.chartData.datasets[i].data.push(null);
+                }
 
                 // Update the chart
-                marksChart.update();
+                window.marksChart.update();
 
                 // Update overall percentage and papers list
                 updateOverallPercentage();
@@ -1454,6 +1519,8 @@
                 updateMarkPercentageLabel(); // Update the label after adding a paper
                 checkAndToggleAddPaperButton(); // Check button state after adding a paper
                 populatePaperSuggestionsMenu(); // Refresh the mini-menu
+                saveChartToFirebase(); // Save changes to Firebase
+
                 // Clear form fields
                 paperNameInput.value = '';
                 markPercentageInput.value = ''; // Clear mark field as well
@@ -1480,18 +1547,19 @@
             const markPercentageInput = document.getElementById('mark-percentage');
             const markPercentage = parseFloat(markPercentageInput.value);
 
-            if (chartData.labels.length === 0) {
+            if (window.chartData.labels.length === 0) {
                 console.error("No papers added yet to add marks to.");
                 return;
             }
 
             if (!isNaN(markPercentage) && markPercentage >= 0 && markPercentage <= 100) {
-                const latestPaperIndex = chartData.labels.length - 1;
+                const latestPaperIndex = window.chartData.labels.length - 1;
                 updateUdaraMark(latestPaperIndex, markPercentage); // Update the mark for the latest paper
                 markPercentageInput.value = ''; // Clear the mark input field
                 renderAllPapers(); // Re-render to show updated mark in the list
                 checkAndToggleAddPaperButton(); // Check button state after adding a mark
                 populatePaperSuggestionsMenu(); // Refresh the mini-menu
+                saveChartToFirebase(); // Save changes to Firebase
             } else {
                 console.error("Please enter a valid mark (0-100).");
             }
@@ -1563,10 +1631,10 @@
         }
 
         // Function to populate the member suggestions menu
-        function populateMemberSuggestionsMenu() {
+        window.populateMemberSuggestionsMenu = function() { // Make global for Firebase load
             memberSuggestionsMenu.innerHTML = ''; // Clear existing items
             // Start from index 1 to exclude "Udara" from the leave list
-            if (chartData.datasets.length <= 1) {
+            if (window.chartData.datasets.length <= 1) {
                 const noMembersMessage = document.createElement('div');
                 noMembersMessage.textContent = 'No other members to leave.';
                 noMembersMessage.classList.add('text-gray-500', 'italic', 'text-center', 'py-2');
@@ -1574,8 +1642,8 @@
                 return;
             }
 
-            for (let i = 1; i < chartData.datasets.length; i++) {
-                const dataset = chartData.datasets[i];
+            for (let i = 1; i < window.chartData.datasets.length; i++) {
+                const dataset = window.chartData.datasets[i];
                 const item = document.createElement('div');
                 item.className = 'menu-item';
                 item.setAttribute('tabindex', '0'); // Make menu item focusable
@@ -1608,9 +1676,9 @@
 
         // Function to remove a member from the chart (actual removal logic)
         function removeMemberConfirmed(index) {
-            if (index > 0 && index < chartData.datasets.length) { // Ensure "Udara" (index 0) cannot be removed
-                const memberName = chartData.datasets[index].label;
-                chartData.datasets.splice(index, 1); // Remove the dataset
+            if (index > 0 && index < window.chartData.datasets.length) { // Ensure "Udara" (index 0) cannot be removed
+                const memberName = window.chartData.datasets[index].label;
+                window.chartData.datasets.splice(index, 1); // Remove the dataset
                 
                 // Also remove the member from validMemberIds if they were there
                 const validIndex = validMemberIds.indexOf(memberName);
@@ -1618,8 +1686,9 @@
                     validMemberIds.splice(validIndex, 1);
                 }
 
-                marksChart.update(); // Update the chart
+                window.marksChart.update(); // Update the chart
                 populateMemberSuggestionsMenu(); // Refresh the member list menu
+                saveChartToFirebase(); // Save changes to Firebase
             }
         }
 
@@ -1666,7 +1735,7 @@
 
             if (newMemberName) {
                 // 1. Check if the member is already in the chartData datasets (actual existing members)
-                const isDuplicate = chartData.datasets.some(dataset => dataset.label === newMemberName);
+                const isDuplicate = window.chartData.datasets.some(dataset => dataset.label === newMemberName);
                 if (isDuplicate) {
                     showErrorMessage("Member ID already exists in chart.");
                     return; // Stop execution if it's a duplicate
@@ -1675,9 +1744,9 @@
                 // 2. If not a duplicate, check if the entered member ID is in our predefined list of valid IDs
                 if (validMemberIds.includes(newMemberName)) {
                     // Add new dataset for the new member
-                    chartData.datasets.push({
+                    window.chartData.datasets.push({
                         label: newMemberName,
-                        data: new Array(chartData.labels.length).fill(null), // Initialize with nulls for existing papers
+                        data: new Array(window.chartData.labels.length).fill(null), // Initialize with nulls for existing papers
                         borderColor: getRandomColor(), // Function to get a random color
                         backgroundColor: getRandomColor(0.2),
                         tension: 0.4,
@@ -1688,10 +1757,11 @@
                         pointRadius: 5,
                         pointHoverRadius: 7,
                     });
-                    marksChart.update();
+                    window.marksChart.update();
                     memberNameInput.value = ''; // Clear input
                     toggleMemberInput(); // Hide input and button
                     populateMemberSuggestionsMenu(); // Refresh the member list menu
+                    saveChartToFirebase(); // Save changes to Firebase
                 } else {
                     // If the ID is not found in the validMemberIds list
                     showErrorMessage("Account ID not found.");
@@ -1731,53 +1801,5 @@
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
     </script>
-<!-- ✅ Paste this near the bottom of your HTML file, before </body> -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-
-  // ✅ Step 2: Your Firebase configuration (paste here)
-  const firebaseConfig = {
-    apiKey: "AIzaSyApLfVQ6hv0IAAN5ZkFlOQ-y5KXK-x1Q_M",
-    authDomain: "reminderapp-d84e9.firebaseapp.com",
-    databaseURL: "https://reminderapp-d84e9-default-rtdb.firebaseio.com",
-    projectId: "reminderapp-d84e9",
-    storageBucket: "reminderapp-d84e9.appspot.com",
-    messagingSenderId: "312145339940",
-    appId: "1:312145339940:web:ade59de4d6de6cec221ab1"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const database = getDatabase(app);
-
-  const chartRef = ref(database, 'charts/Udara'); // use member ID dynamically if needed
-
-  function saveChartToFirebase() {
-  const chartDataToSave = {
-    labels: chartData.labels,
-    data: chartData.datasets[0].data
-  };
-  set(chartRef, chartDataToSave)
-    .then(() => console.log("✅ Chart saved to Firebase"))
-    .catch((err) => console.error("❌ Save failed", err));
-}
-
-
-  onValue(chartRef, (snapshot) => {
-  const firebaseData = snapshot.val();
-  if (firebaseData) {
-    chartData.labels = firebaseData.labels;
-    chartData.datasets[0].data = firebaseData.data;
-    marksChart.update();
-    updateOverallPercentage();
-    renderAllPapers();
-    updateMarkPercentageLabel();
-  }
-});
-
-</script>
-
 </body>
-
 </html>
-
