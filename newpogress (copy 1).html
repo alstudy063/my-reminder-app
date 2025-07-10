@@ -10,9 +10,10 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Your Firebase config
-        const firebaseConfig = {
+        // Your Firebase config (using global __firebase_config if available)
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyApLfVQ6hv0IAAN5ZkFlOQ-y5KXK-x1Q_M",
             authDomain: "reminderapp-d84e9.firebaseapp.com",
             databaseURL: "https://reminderapp-d84e9-default-rtdb.firebaseio.com",
@@ -25,15 +26,20 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+        const auth = getAuth(app); // Initialize Firebase Auth
 
-        // Reference for saving paper marks - using "Udara" as the userId as provided
-        const userId = "Udara"; // This can be made dynamic with authentication later
-        const chartRef = ref(database, 'charts/' + userId);
-
-        // Make Firebase variables globally accessible within the script
+        // Global variables for Firebase and user data
         window.firebaseDatabase = database;
-        window.chartRef = chartRef;
+        window.firebaseAuth = auth; // Make auth globally accessible
+        window.chartRef = null; // Will be set after authentication
+        window.currentUserId = null; // Will be set after authentication
+
+        // Make saveChartToFirebase globally accessible
         window.saveChartToFirebase = function() {
+            if (!window.chartRef) {
+                console.error("Firebase chart reference not set. User not authenticated yet.");
+                return;
+            }
             const chartDataToSave = {
                 labels: window.chartData.labels,
                 datasets: window.chartData.datasets.map(dataset => ({
@@ -51,48 +57,167 @@
                 }))
             };
             set(window.chartRef, chartDataToSave)
-                .then(() => console.log("Data saved to Firebase"))
+                .then(() => console.log("Data saved to Firebase for user:", window.currentUserId))
                 .catch((error) => console.error("Error saving to Firebase:", error));
         };
 
-        // Load data from Firebase on page load
-        onValue(window.chartRef, (snapshot) => {
-            const firebaseData = snapshot.val();
-            if (firebaseData) {
-                // Update chartData with data from Firebase
-                window.chartData.labels = firebaseData.labels || [];
-                // Ensure datasets are properly loaded, handling potential undefined properties
-                window.chartData.datasets = firebaseData.datasets.map(fbDataset => {
-                    // Try to find an existing dataset to merge properties, or create a new one
-                    const existingDataset = window.chartData.datasets.find(ds => ds.label === fbDataset.label);
-                    return {
-                        ...existingDataset, // Keep existing chart-specific properties if any
-                        label: fbDataset.label,
-                        data: fbDataset.data,
-                        borderColor: fbDataset.borderColor || (existingDataset ? existingDataset.borderColor : undefined),
-                        backgroundColor: fbDataset.backgroundColor || (existingDataset ? existingDataset.backgroundColor : undefined),
-                        tension: fbDataset.tension !== undefined ? fbDataset.tension : (existingDataset ? existingDataset.tension : undefined),
-                        fill: fbDataset.fill !== undefined ? fbDataset.fill : (existingDataset ? existingDataset.fill : undefined),
-                        pointBackgroundColor: fbDataset.pointBackgroundColor || (existingDataset ? existingDataset.pointBackgroundColor : undefined),
-                        pointBorderColor: fbDataset.pointBorderColor || (existingDataset ? existingDataset.pointBorderColor : undefined),
-                        pointBorderWidth: fbDataset.pointBorderWidth !== undefined ? fbDataset.pointBorderWidth : (existingDataset ? existingDataset.pointBorderWidth : undefined),
-                        pointRadius: fbDataset.pointRadius !== undefined ? fbDataset.pointRadius : (existingDataset ? existingDataset.pointRadius : undefined),
-                        pointHoverRadius: fbDataset.pointHoverRadius !== undefined ? fbDataset.pointHoverRadius : (existingDataset ? existingDataset.pointHoverRadius : undefined),
-                    };
-                });
+        // Function to set up the Firebase Realtime Database listener
+        function setupFirebaseListener(userId) {
+            if (window.chartRef) {
+                // Detach previous listener if exists (important for re-authentication)
+                // This is a simplified approach; for complex apps, manage listeners more robustly.
+                // For onValue, you'd typically store the unsubscribe function and call it.
+                // For this example, we'll assume a single active listener per user session.
+            }
+            window.currentUserId = userId;
+            // Use the app ID from the environment for the base path
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            window.chartRef = ref(database, `artifacts/${appId}/users/${userId}/charts/mainChart`); // Dynamic path based on user ID and app ID
 
-                // Update the chart and UI elements after loading data
-                if (window.marksChart) { // Ensure chart is initialized before updating
-                    window.marksChart.update();
-                    window.updateOverallPercentage();
-                    window.renderAllPapers();
-                    window.updateMarkPercentageLabel();
-                    window.checkAndToggleAddPaperButton();
-                    window.populatePaperSuggestionsMenu();
-                    window.populateMemberSuggestionsMenu();
+            // Load data from Firebase on page load and listen for changes
+            onValue(window.chartRef, (snapshot) => {
+                const firebaseData = snapshot.val();
+                if (firebaseData) {
+                    // Update chartData with data from Firebase
+                    window.chartData.labels = firebaseData.labels || [];
+                    // Ensure datasets are properly loaded, handling potential undefined properties
+                    window.chartData.datasets = firebaseData.datasets.map(fbDataset => {
+                        const existingDataset = window.chartData.datasets.find(ds => ds.label === fbDataset.label);
+                        return {
+                            ...existingDataset,
+                            label: fbDataset.label,
+                            data: fbDataset.data,
+                            borderColor: fbDataset.borderColor || (existingDataset ? existingDataset.borderColor : undefined),
+                            backgroundColor: fbDataset.backgroundColor || (existingDataset ? existingDataset.backgroundColor : undefined),
+                            tension: fbDataset.tension !== undefined ? fbDataset.tension : (existingDataset ? existingDataset.tension : undefined),
+                            fill: fbDataset.fill !== undefined ? fbDataset.fill : (existingDataset ? existingDataset.fill : undefined),
+                            pointBackgroundColor: fbDataset.pointBackgroundColor || (existingDataset ? existingDataset.pointBackgroundColor : undefined),
+                            pointBorderColor: fbDataset.pointBorderColor || (existingDataset ? existingDataset.pointBorderColor : undefined),
+                            pointBorderWidth: fbDataset.pointBorderWidth !== undefined ? fbDataset.pointBorderWidth : (existingDataset ? existingDataset.pointBorderWidth : undefined),
+                            pointRadius: fbDataset.pointRadius !== undefined ? fbDataset.pointRadius : (existingDataset ? existingDataset.pointRadius : undefined),
+                            pointHoverRadius: fbDataset.pointHoverRadius !== undefined ? fbDataset.pointHoverRadius : (existingDataset ? existingDataset.pointHoverRadius : undefined),
+                        };
+                    });
+
+                    // Update the chart and UI elements after loading data
+                    if (window.marksChart) {
+                        window.marksChart.update();
+                        window.updateOverallPercentage();
+                        window.renderAllPapers();
+                        window.updateMarkPercentageLabel();
+                        window.checkAndToggleAddPaperButton();
+                        window.populatePaperSuggestionsMenu();
+                        window.populateMemberSuggestionsMenu();
+                    } else {
+                        console.log("Chart not yet initialized, data will be applied on init.");
+                    }
                 } else {
-                    // If chart not yet initialized, set a flag or call a deferred update
-                    console.log("Chart not yet initialized, data will be applied on init.");
+                    // If no data exists for this user, initialize with default data
+                    console.log("No Firebase data for this user, initializing with default chartData.");
+                    window.chartData = {
+                        labels: ['Paper 1', 'Paper 2', 'Paper 3', 'Paper 4'],
+                        datasets: [
+                            {
+                                label: 'Udara', // Default label, will be replaced if user logs in with different name
+                                data: [50, 80, 15, 38],
+                                borderColor: '#3B82F6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                                tension: 0.4,
+                                fill: false,
+                                pointBackgroundColor: '#3B82F6',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                pointRadius: 5,
+                                pointHoverRadius: 7,
+                            },
+                            {
+                                label: 'Member 2',
+                                data: [40, 60, null, null],
+                                borderColor: '#EF4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                                tension: 0.4,
+                                fill: false,
+                                pointBackgroundColor: '#EF4444',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                pointRadius: 5,
+                                pointHoverRadius: 7,
+                            },
+                            {
+                                label: 'Member 3',
+                                data: [30, 50, null, null],
+                                borderColor: '#22C55E',
+                                backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                                tension: 0.4,
+                                fill: false,
+                                pointBackgroundColor: '#22C55E',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                pointRadius: 5,
+                                pointHoverRadius: 7,
+                            }
+                        ]
+                    };
+                    // Save initial data to Firebase for the new user
+                    window.saveChartToFirebase();
+                    if (window.marksChart) {
+                        window.marksChart.update();
+                        window.updateOverallPercentage();
+                        window.renderAllPapers();
+                        window.updateMarkPercentageLabel();
+                        window.checkAndToggleAddPaperButton();
+                        window.populatePaperSuggestionsMenu();
+                        window.populateMemberSuggestionsMenu();
+                    }
+                }
+                // Update the displayed user ID
+                document.getElementById('user-id-display').textContent = `User ID: ${userId}`;
+            });
+        }
+
+        // Firebase Authentication setup
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in.
+                console.log("Firebase user authenticated:", user.uid);
+                setupFirebaseListener(user.uid);
+            } else {
+                // User is signed out.
+                console.log("No Firebase user signed in. Attempting anonymous sign-in or custom token.");
+                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                if (initialAuthToken) {
+                    signInWithCustomToken(auth, initialAuthToken)
+                        .then((userCredential) => {
+                            // Signed in
+                            console.log("Signed in with custom token:", userCredential.user.uid);
+                            setupFirebaseListener(userCredential.user.uid);
+                        })
+                        .catch((error) => {
+                            const errorCode = error.code;
+                            const errorMessage = error.message;
+                            console.error("Error signing in with custom token:", errorCode, errorMessage);
+                            // Fallback to anonymous if custom token fails
+                            signInAnonymously(auth)
+                                .then((userCredential) => {
+                                    console.log("Signed in anonymously:", userCredential.user.uid);
+                                    setupFirebaseListener(userCredential.user.uid);
+                                })
+                                .catch((anonError) => {
+                                    console.error("Error signing in anonymously:", anonError);
+                                    document.getElementById('user-id-display').textContent = `Authentication Failed: ${anonError.message}`;
+                                });
+                        });
+                } else {
+                    // No custom token, sign in anonymously
+                    signInAnonymously(auth)
+                        .then((userCredential) => {
+                            console.log("Signed in anonymously:", userCredential.user.uid);
+                            setupFirebaseListener(userCredential.user.uid);
+                        })
+                        .catch((error) => {
+                            console.error("Error signing in anonymously:", error);
+                            document.getElementById('user-id-display').textContent = `Authentication Failed: ${error.message}`;
+                        });
                 }
             }
         });
@@ -491,7 +616,8 @@
 <body class="flex items-center justify-center min-h-screen p-4">
     <div class="flex flex-col lg:flex-row bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-6xl flex-grow relative">
         <div class="w-full lg:w-2/3 p-6 md:p-8 flex flex-col relative"> <div class="mb-6">
-                <h2 class="text-2xl font-semibold text-gray-800">Udara's Paper Marks</h2>
+                <h2 class="text-2xl font-semibold text-gray-800">Paper Marks</h2>
+                <p id="user-id-display" class="text-sm text-gray-500 mb-4">User ID: Authenticating...</p>
                 <div class="flex items-baseline mt-2">
                     <span id="overall-percentage" class="text-4xl font-bold text-gray-900">64.72%</span>
                     <span id="percentage-change" class="ml-3 text-lg font-semibold text-green-600 flex items-center">
@@ -571,6 +697,8 @@
                         <div id="paper-suggestions-menu" class="paper-suggestions-menu hidden">
                             </div>
                     </div>
+                    <!-- New error message div for paper name -->
+                    <div id="paper-name-error-message" class="error-message"></div>
                 </div>
                 <div>
                     <label for="mark-percentage" id="mark-percentage-label" class="block text-sm font-medium text-gray-700">Add Marks</label>
@@ -705,7 +833,7 @@
 
         // Define a list of valid member IDs for validation purposes
         // These are the IDs that are initially recognized as valid accounts.
-        const validMemberIds = ["Udara", "Member 2", "Member 3"];
+        const validMemberIds = ["Udara", "Member 2", "Member 3"]; // This will be dynamic with auth
         const ADMIN_PASSWORD = "801176"; // The password for leaving members
 
         // Chart configuration
@@ -1008,6 +1136,22 @@
         const paperNameIcon = document.getElementById('paper-name-icon');
         const paperSuggestionsMenu = document.getElementById('paper-suggestions-menu');
         const paperNameInputContainer = document.getElementById('paper-name-input-container'); // The relative container
+        // New error message element for paper name
+        const paperNameErrorMessage = document.getElementById('paper-name-error-message');
+
+
+        // Function to show paper name error message
+        function showPaperNameErrorMessage(message) {
+            paperNameErrorMessage.textContent = message;
+            paperNameErrorMessage.classList.add('visible');
+        }
+
+        // Function to hide paper name error message
+        function hidePaperNameErrorMessage() {
+            paperNameErrorMessage.classList.remove('visible');
+            paperNameErrorMessage.textContent = '';
+        }
+
 
         // Function to toggle the visibility of the paper suggestions menu
         function togglePaperSuggestionsMenu() {
@@ -1234,6 +1378,8 @@
                 if (memberNameInput.classList.contains('visible')) {
                     toggleMemberInput();
                 }
+                // Hide paper name error message if visible
+                hidePaperNameErrorMessage();
             }
         });
 
@@ -1633,7 +1779,7 @@
         // Function to populate the member suggestions menu
         window.populateMemberSuggestionsMenu = function() { // Make global for Firebase load
             memberSuggestionsMenu.innerHTML = ''; // Clear existing items
-            // Start from index 1 to exclude "Udara" from the leave list
+            // Start from index 1 to exclude the current user from the leave list
             if (window.chartData.datasets.length <= 1) {
                 const noMembersMessage = document.createElement('div');
                 noMembersMessage.textContent = 'No other members to leave.';
@@ -1644,6 +1790,10 @@
 
             for (let i = 1; i < window.chartData.datasets.length; i++) {
                 const dataset = window.chartData.datasets[i];
+                // Ensure we don't list the current authenticated user as someone to "leave"
+                if (dataset.label === window.currentUserId) {
+                    continue;
+                }
                 const item = document.createElement('div');
                 item.className = 'menu-item';
                 item.setAttribute('tabindex', '0'); // Make menu item focusable
@@ -1654,18 +1804,16 @@
                 item.addEventListener('click', (event) => {
                     event.stopPropagation(); // Prevent the click from bubbling up to document.body
                     const memberIndex = parseInt(event.currentTarget.dataset.index);
-                    if (memberIndex > 0) { // Ensure "Udara" (index 0) cannot be removed
-                        showPasswordModal(memberIndex); // Show password modal before removing
-                        // The member suggestions menu will be hidden by the global click listener
-                        // when the password modal is clicked outside its content.
+                    if (window.chartData.datasets[memberIndex].label !== window.currentUserId) { // Double check
+                        showPasswordModal(memberIndex);
                     }
                 });
                 item.addEventListener('keydown', (event) => {
                     if (event.key === 'Enter' || event.key === 'Space') {
-                        event.preventDefault(); // Prevent default scroll for space
+                        event.preventDefault();
                         event.stopPropagation();
                         const memberIndex = parseInt(event.currentTarget.dataset.index);
-                        if (memberIndex > 0) {
+                        if (window.chartData.datasets[memberIndex].label !== window.currentUserId) {
                             showPasswordModal(memberIndex);
                         }
                     }
@@ -1676,9 +1824,15 @@
 
         // Function to remove a member from the chart (actual removal logic)
         function removeMemberConfirmed(index) {
-            if (index > 0 && index < window.chartData.datasets.length) { // Ensure "Udara" (index 0) cannot be removed
+            // Ensure the user is not trying to remove themselves
+            if (window.chartData.datasets[index].label === window.currentUserId) {
+                console.warn("Cannot remove the currently authenticated user.");
+                return;
+            }
+
+            if (index > 0 && index < window.chartData.datasets.length) {
                 const memberName = window.chartData.datasets[index].label;
-                window.chartData.datasets.splice(index, 1); // Remove the dataset
+                window.chartData.datasets.splice(index, 1);
                 
                 // Also remove the member from validMemberIds if they were there
                 const validIndex = validMemberIds.indexOf(memberName);
@@ -1686,9 +1840,9 @@
                     validMemberIds.splice(validIndex, 1);
                 }
 
-                window.marksChart.update(); // Update the chart
-                populateMemberSuggestionsMenu(); // Refresh the member list menu
-                saveChartToFirebase(); // Save changes to Firebase
+                window.marksChart.update();
+                populateMemberSuggestionsMenu();
+                saveChartToFirebase();
             }
         }
 
@@ -1742,30 +1896,28 @@
                 }
 
                 // 2. If not a duplicate, check if the entered member ID is in our predefined list of valid IDs
-                if (validMemberIds.includes(newMemberName)) {
-                    // Add new dataset for the new member
-                    window.chartData.datasets.push({
-                        label: newMemberName,
-                        data: new Array(window.chartData.labels.length).fill(null), // Initialize with nulls for existing papers
-                        borderColor: getRandomColor(), // Function to get a random color
-                        backgroundColor: getRandomColor(0.2),
-                        tension: 0.4,
-                        fill: false,
-                        pointBackgroundColor: getRandomColor(),
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                    });
-                    window.marksChart.update();
-                    memberNameInput.value = ''; // Clear input
-                    toggleMemberInput(); // Hide input and button
-                    populateMemberSuggestionsMenu(); // Refresh the member list menu
-                    saveChartToFirebase(); // Save changes to Firebase
-                } else {
-                    // If the ID is not found in the validMemberIds list
-                    showErrorMessage("Account ID not found.");
-                }
+                // For now, we'll allow adding any new member, as authentication handles the user ID.
+                // If you want to restrict to specific "valid" members, you'd need a backend for that.
+                
+                // Add new dataset for the new member
+                window.chartData.datasets.push({
+                    label: newMemberName,
+                    data: new Array(window.chartData.labels.length).fill(null), // Initialize with nulls for existing papers
+                    borderColor: getRandomColor(), // Function to get a random color
+                    backgroundColor: getRandomColor(0.2),
+                    tension: 0.4,
+                    fill: false,
+                    pointBackgroundColor: getRandomColor(),
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                });
+                window.marksChart.update();
+                memberNameInput.value = ''; // Clear input
+                toggleMemberInput(); // Hide input and button
+                populateMemberSuggestionsMenu(); // Refresh the member list menu
+                saveChartToFirebase(); // Save changes to Firebase
             } else {
                 // If input is empty, just clear and hide without an error message
                 memberNameInput.value = '';
