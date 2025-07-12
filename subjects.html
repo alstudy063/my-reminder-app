@@ -196,14 +196,11 @@
         </div>
     </div>
 
-    <!-- Subject Selection -->
-    <div class="mb-6 px-4 md:px-0">
-        <label for="subject-select" class="block text-lg font-medium text-gray-700 mb-2">Select Subject:</label>
-        <select id="subject-select" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-            <option value="Biology">Biology</option>
-            <option value="Physics">Physics</option>
-            <option value="Chemistry">Chemistry</option>
-        </select>
+    <!-- Subject Selection Buttons -->
+    <div class="mb-6 px-4 md:px-0 flex flex-wrap justify-center gap-3">
+        <button id="biology-btn" class="subject-button px-5 py-2 rounded-full font-semibold text-lg transition-all duration-200 ease-in-out bg-blue-600 text-white shadow-md hover:bg-blue-700">Biology</button>
+        <button id="physics-btn" class="subject-button px-5 py-2 rounded-full font-semibold text-lg transition-all duration-200 ease-in-out bg-gray-200 text-gray-700 shadow-md hover:bg-gray-300">Physics</button>
+        <button id="chemistry-btn" class="subject-button px-5 py-2 rounded-full font-semibold text-lg transition-all duration-200 ease-in-out bg-gray-200 text-gray-700 shadow-md hover:bg-gray-300">Chemistry</button>
     </div>
 
     <!-- Units Container -->
@@ -654,10 +651,15 @@
   const logoutBtn = document.getElementById('logout-btn');
   const userIdDisplay = document.getElementById('user-id-display');
   const loadingSpinner = document.getElementById('loading-spinner');
-  const subjectSelect = document.getElementById('subject-select');
+  // Removed subjectSelect
   const unitsContainer = document.getElementById('units-container');
   const totalUnitsDisplay = document.getElementById('total-units-display');
   const totalSubtopicsDisplay = document.getElementById('total-subtopics-display');
+
+  // New UI Elements for subject buttons
+  const biologyBtn = document.getElementById('biology-btn');
+  const physicsBtn = document.getElementById('physics-btn');
+  const chemistryBtn = document.getElementById('chemistry-btn');
 
 
   // Data for each subject
@@ -734,7 +736,7 @@
   signInEmailBtn.addEventListener('click', async () => {
     hideAuthError();
     const email = emailInput.value;
-    const password = password.value;
+    const password = passwordInput.value; // Corrected variable name
     if (!email || !password) {
       showAuthError("Please enter both email and password.");
       return;
@@ -831,6 +833,17 @@
     // Update the summary section totals
     totalUnitsDisplay.textContent = currentTotalUnits;
     totalSubtopicsDisplay.textContent = currentTotalSubtopics;
+
+    // Update active button styling
+    document.querySelectorAll('.subject-button').forEach(button => {
+        if (button.id === `${currentSubject.toLowerCase()}-btn`) {
+            button.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            button.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+        } else {
+            button.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+            button.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+        }
+    });
   }
 
 
@@ -1054,14 +1067,33 @@
     });
   }
 
-  // Event listener for subject selection change
-  subjectSelect.addEventListener('change', (event) => {
-    currentSubject = event.target.value;
+  // Event listeners for subject buttons
+  biologyBtn.addEventListener('click', () => {
+    currentSubject = "Biology";
     console.log("Subject changed to:", currentSubject);
     if (userId) {
-      loadSubjectData(currentSubject); // Load data for the new subject
+      loadSubjectData(currentSubject);
     } else {
-      // If not logged in, just switch the display and reset counts
+      initializeUnitDisplaysForCurrentSubject();
+    }
+  });
+
+  physicsBtn.addEventListener('click', () => {
+    currentSubject = "Physics";
+    console.log("Subject changed to:", currentSubject);
+    if (userId) {
+      loadSubjectData(currentSubject);
+    } else {
+      initializeUnitDisplaysForCurrentSubject();
+    }
+  });
+
+  chemistryBtn.addEventListener('click', () => {
+    currentSubject = "Chemistry";
+    console.log("Subject changed to:", currentSubject);
+    if (userId) {
+      loadSubjectData(currentSubject);
+    } else {
       initializeUnitDisplaysForCurrentSubject();
     }
   });
