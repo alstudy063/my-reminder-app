@@ -995,7 +995,7 @@
       // If not logged in, just initialize displays based on HTML structure
       completedSubtopicsState[subject] = {}; // Clear any previous state for this subject
       initializeUnitDisplaysForCurrentSubject();
-      isAuthReady = true; // Allow modal to open, but no persistence
+      // isAuthReady remains true if it was already true (from initial auth check)
       return;
     }
 
@@ -1032,7 +1032,7 @@
               if (loadedData[unitTitle] && loadedData[unitTitle].subtopics) {
                   for (const subtopicText in tempSubjectState[unitTitle].subtopics) {
                       if (typeof loadedData[unitTitle].subtopics[subtopicText] !== 'undefined') {
-                          tempSubjectState[unitTitle].subtopics[subtopicText] = loadedData[unitTitle].subtopics[subtopicText];
+                          tempSubjectState[unitTitle].subtopics[subtopicText] = loadedData[unitTitle].subtopicText; // Corrected: should be loadedData[unitTitle].subtopics[subtopicText]
                       }
                   }
               }
@@ -1048,13 +1048,12 @@
         completedSubtopicsState[subject] = tempSubjectState; // Use initial HTML structure
       }
       initializeUnitDisplaysForCurrentSubject(); // Update UI with loaded or re-initialized data
-      isAuthReady = true; // Set flag to true AFTER data is loaded and UI updated
-      console.log("isAuthReady set to true after data load for", subject); // Debugging log
+      // isAuthReady is already handled by onAuthStateChanged for initial load
+      console.log("Subject data loaded and UI updated for", subject);
     }, (error) => {
       console.error("Error listening to Firestore for", subject, ":", error);
       showAuthError("Error loading user data for " + subject);
-      isAuthReady = true; // Still set to true, even on error, to allow interaction (though data might be missing)
-      console.log("isAuthReady set to true after Firestore error for", subject); // Debugging log
+      // isAuthReady is already handled by onAuthStateChanged for initial load
     });
   }
 
@@ -1062,12 +1061,12 @@
   subjectSelect.addEventListener('change', (event) => {
     currentSubject = event.target.value;
     console.log("Subject changed to:", currentSubject);
-    // When subject changes, immediately set isAuthReady to false until new data is loaded
-    isAuthReady = false;
-    // Show spinner briefly while data for new subject loads
-    loadingSpinner.classList.remove('hidden');
-    // Load data for the new subject
-    loadSubjectData(currentSubject);
+    // Immediately display the new subject's units with their default counts
+    initializeUnitDisplaysForCurrentSubject();
+    // Then, if logged in, load the actual saved data for this subject asynchronously
+    if (userId) {
+      loadSubjectData(currentSubject);
+    }
   });
 
 
@@ -1081,6 +1080,9 @@
       authSection.classList.add('hidden');
       mainContent.classList.remove('hidden'); // Show main content
       hideAuthError(); // Hide any auth errors once logged in
+
+      // Set isAuthReady true once the main content is displayed and user is known
+      isAuthReady = true;
 
       // Load data for the current subject (default or last selected)
       loadSubjectData(currentSubject);
