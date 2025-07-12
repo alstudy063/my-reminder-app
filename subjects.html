@@ -129,11 +129,31 @@
       visibility: visible; /* Make immediately visible */
       pointer-events: auto; /* Clickable when shown */
     }
+
+    /* Spinner styles */
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: #3b82f6;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body class="bg-gray-100 p-4 md:p-8 max-w-4xl mx-auto text-gray-800 rounded-lg shadow-lg">
 
-<div id="auth-section" class="flex flex-col items-center justify-center min-h-screen p-4 md:p-8">
+<!-- Loading Spinner -->
+<div id="loading-spinner" class="fixed inset-0 flex items-center justify-center bg-gray-100 z-50">
+  <div class="spinner"></div>
+</div>
+
+<div id="auth-section" class="flex flex-col items-center justify-center min-h-screen p-4 md:p-8 hidden">
     <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg w-full max-w-md">
         <h2 class="text-center text-2xl md:text-3xl font-extrabold mb-6 text-blue-800">Sign In / Sign Up</h2>
         <div id="auth-error" class="text-red-500 text-center mb-4 hidden text-sm md:text-base"></div>
@@ -387,6 +407,7 @@
   const signInGoogleBtn = document.getElementById('signin-google-btn');
   const logoutBtn = document.getElementById('logout-btn');
   const userIdDisplay = document.getElementById('user-id-display');
+  const loadingSpinner = document.getElementById('loading-spinner');
 
   // Function to display authentication errors
   function showAuthError(message) {
@@ -677,8 +698,9 @@
       // User is signed in
       userId = user.uid;
       userIdDisplay.textContent = `User ID: ${userId}`;
-      authSection.classList.add('hidden');
-      mainContent.classList.remove('hidden');
+      loadingSpinner.classList.add('hidden'); // Hide spinner
+      authSection.classList.add('hidden'); // Ensure auth section is hidden
+      mainContent.classList.remove('hidden'); // Show main content
       hideAuthError(); // Hide any auth errors once logged in
 
       // Unsubscribe from previous snapshot listener if it exists
@@ -743,8 +765,9 @@
       // User is signed out
       userId = null;
       userIdDisplay.textContent = '';
-      authSection.classList.remove('hidden');
-      mainContent.classList.add('hidden');
+      loadingSpinner.classList.add('hidden'); // Hide spinner
+      authSection.classList.remove('hidden'); // Show auth section
+      mainContent.classList.add('hidden'); // Ensure main content is hidden
       completedSubtopicsState = {}; // Clear state on logout
       initializeUnitDisplays(); // Reset UI counts to 0
       isAuthReady = false; // Reset flag when logged out
@@ -760,6 +783,7 @@
 
   // Initial anonymous sign-in or custom token sign-in
   document.addEventListener('DOMContentLoaded', async () => {
+    loadingSpinner.classList.remove('hidden'); // Show spinner immediately on DOMContentLoaded
     try {
       if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
         await signInWithCustomToken(auth, __initial_auth_token);
@@ -778,6 +802,9 @@
       else {
         console.error("Initial authentication error:", error);
       }
+      // If initial auth fails, ensure the auth section is shown and spinner is hidden
+      loadingSpinner.classList.add('hidden');
+      authSection.classList.remove('hidden');
       isAuthReady = true; // Allow interaction even if initial auth fails, user can sign in manually
       console.log("isAuthReady set to true after initial auth attempt (success or fail)."); // Debugging log
     }
