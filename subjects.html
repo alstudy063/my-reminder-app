@@ -396,20 +396,181 @@
             </div>
         </div>
 
-        <!-- Physics Units (Initially hidden) -->
+        <!-- Physics Units -->
         <div id="physics-units" class="subject-units hidden">
-            <h3 class="text-xl md:text-2xl font-bold text-blue-700 mb-4">Physics Units (Placeholder)</h3>
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4">
-                <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                    <span class="flex-grow min-w-0">Physics Unit 01</span>
-                    <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(0)</span>
-                </div>
-                <ul class="subtopics">
-                    <li>Physics Subtopic 1.1</li>
-                    <li>Physics Subtopic 1.2</li>
-                </ul>
+            <h3 class="text-xl md:text-2xl font-bold text-blue-700 mb-4">භෞතික විද්‍යා ඒකක</h3>
+            <!-- Unit 01: Measurement -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">01. මිනුම</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(5)</span>
+              </div>
+              <ul class="subtopics">
+                <li>භෞතික රාශි</li>
+                <li>මාන</li>
+                <li>මිනුම් උපකරණ</li>
+                <li>අදිග රාශි සහ දෛශික රාශි</li>
+              </ul>
             </div>
-            <!-- Add more Physics units here -->
+
+            <!-- Unit 02: Mechanics -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">02. යාන්ත්‍ර විද්‍යාව</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(8)</span>
+              </div>
+              <ul class="subtopics">
+                <li>ප්‍රගති විද්‍යාව</li>
+                <li>ඒකතල බල පද්ධතියක සම්ප්‍රයුක්තය</li>
+                <li>බලය හා චලිතය</li>
+                <li>බල සමතුලිතාව</li>
+                <li>කාර්යය, ශක්තිය සහ ජවය</li>
+                <li>භ්‍රමණ චලිතය හා වෘත්තාකාර චලිතය</li>
+                <li>ද්‍රවස්ථිති විද්‍යාව</li>
+                <li>තරල ගති විද්‍යාව</li>
+              </ul>
+            </div>
+
+            <!-- Unit 03: Oscillations and Waves -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">03. දෝලන හා තරංග</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(10)</span>
+              </div>
+              <ul class="subtopics">
+                <li>තරංග චලිතය</li>
+                <li>තරංගවල ගුණ</li>
+                <li>ඇදි තන්තුවල ඇති වන ස්ථාවර තරංග</li>
+                <li>වායු තුළින් ධ්වනි සම්ප්‍රේෂණය</li>
+                <li>ඩොප්ලර් ආචරණය</li>
+                <li>ධ්වනියේ ස්වභාවය</li>
+                <li>විද්‍යුත් චුම්බක තරංග</li>
+                <li>ජ්‍යාමිතික ප්‍රකාශ විද්‍යාව</li>
+                <li>මිනිස් ඇස හා අක්‍ෂි දෝෂ</li>
+                <li>ප්‍රකාශ උපකරණ</li>
+              </ul>
+            </div>
+
+            <!-- Unit 04: Thermodynamics -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">04. තාපගති විද්‍යාව</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(8)</span>
+              </div>
+              <ul class="subtopics">
+                <li>උෂ්ණත්වය</li>
+                <li>ඝන සහ ද්‍රව ප්‍රසාරණය</li>
+                <li>වායු නියම</li>
+                <li>වායු පිළිබඳ චාලක අණුක වාදය</li>
+                <li>තාප හුවමාරුව අවස්ථා විපර්යාස</li>
+                <li>වාෂ්ප සහ ආර්ද්‍රතාව</li>
+                <li>තාපගති විද්‍යාව</li>
+                <li>තාප සංක්‍රාමණය</li>
+              </ul>
+            </div>
+
+            <!-- Unit 05: Gravitational Field -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">05. ගුරුත්වාකර්ෂණ ක්ෂේත්‍රය</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(2)</span>
+              </div>
+              <ul class="subtopics">
+                <li>ගුරුත්වාකර්ෂණ බල ක්ෂේත්‍රය</li>
+                <li>පෘථිවි ගුරුත්වාකර්ෂණ ක්ෂේත්‍රය</li>
+              </ul>
+            </div>
+
+            <!-- Unit 06: Electrostatic Field -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">06. ස්ථිති විද්‍යුත් ක්ෂේත්‍රය</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(7)</span>
+              </div>
+              <ul class="subtopics">
+                <li>පළමු වන පරිච්ඡේදය</li>
+                <li>දෙවන පරිච්ඡේදය</li>
+                <li>තුන්වන පරිච්ඡේදය</li>
+                <li>හතර වන පරිච්ඡේදය</li>
+                <li>ස්ථිති විද්‍යුත් බලය</li>
+                <li>ස්ථිති විද්‍යුත් ක්ෂේත්‍රයක ස්‍රාව ආකෘතිය</li>
+                <li>ස්ථිති විද්‍යුත් විභවය</li>
+              </ul>
+            </div>
+
+            <!-- Unit 07: Magnetic Field -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">07. චුම්බක ක්ෂේත්‍රය</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(4)</span>
+              </div>
+              <ul class="subtopics">
+                <li>විද්‍යුත් ධාරිතාව (ධාරණාව)</li>
+                <li>පළමු වන පරිච්ඡේදය - චුම්බක බලය</li>
+                <li>දෙවන පරිච්ඡේදය - චුම්බක බල ක්ෂේත්‍රය</li>
+                <li>තුන්වන පරිච්ඡේදය - ධාරා පුඩුවක් මත ක්‍රියාත්මක වන ව්‍යාවර්තය</li>
+              </ul>
+            </div>
+
+            <!-- Unit 08: Current Electricity -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">08. ධාරා විද්‍යුතය</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(6)</span>
+              </div>
+              <ul class="subtopics">
+                <li>ධාරා විද්‍යුතයේ මූලික සංකල්පය</li>
+                <li>විද්‍යුත් ශක්තිය හා ජවය</li>
+                <li>දෙවන පරිච්ඡේදය</li>
+                <li>තුන්වන පරිච්ඡේදය - විද්‍යුත්ගාමක බලය</li>
+                <li>හතරවන පරිච්ඡේදය - විද්‍යුත් පරිපථ : කචොෆ් නියම</li>
+                <li>පස්වන පරිච්ඡේදය - විද්‍යුත් ධාරාව සහ විභව අන්තරය මැනීම</li>
+                <li>හයවන පරිච්ඡේදය - විද්‍යුත් චුම්බක ප්‍රේරණය</li>
+              </ul>
+            </div>
+
+            <!-- Unit 09: Electronics -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">09. ඉලෙක්ට්‍රොනික්</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(4)</span>
+              </div>
+              <ul class="subtopics">
+                <li>අර්ධ සන්නායක හා ඩයෝඩවල භාවිත</li>
+                <li>ට්‍රාන්සිස්ටර</li>
+                <li>සංගෘහිත පරිපථ සහ කාරකාත්මක වර්ධක</li>
+                <li>සංඛ්‍යාංක ඉලෙක්ට්‍රොනික විද්‍යාව</li>
+              </ul>
+            </div>
+
+            <!-- Unit 10: Mechanical Properties of Matter -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">10. පදාර්ථයේ යාන්ත්‍රික ගුණ</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(2)</span>
+              </div>
+              <ul class="subtopics">
+                <li>ප්‍රත්‍යාස්ථතාව</li>
+                <li>දුස්ස්‍රාවිතාව</li>
+              </ul>
+            </div>
+
+            <!-- Unit 11: Matter and Radiation -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">11. පදාර්ථය හා විකරණ</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(7)</span>
+              </div>
+              <ul class="subtopics">
+                <li>විකිරණයේ ක්වොන්ටම් ස්වාභාව</li>
+                <li>ප්‍රකාශ විද්‍යුත් ආචරණය</li>
+                <li>පදාර්ථයේ තරංග ස්වභාවය</li>
+                <li>X කිරණ</li>
+                <li>විකිරශීලීතාවය</li>
+                <li>න්‍යෂ්ටික ශක්තිය හා එහි භාවිත</li>
+                <li>පදාර්ථයේ මුලික සංඝටක හා ඒවායේ අන්තර්ක්‍රියා</li>
+              </ul>
+            </div>
         </div>
 
         <!-- Chemistry Units (Initially hidden) -->
@@ -507,8 +668,8 @@
       unitsHtmlId: 'biology-units'
     },
     "Physics": {
-      totalUnits: 0, // Placeholder, will be updated by user input
-      totalSubtopics: 0, // Placeholder, will be updated by user input
+      totalUnits: 11, // Updated total units for Physics
+      totalSubtopics: 53, // Updated total subtopics for Physics
       unitsHtmlId: 'physics-units'
     },
     "Chemistry": {
@@ -846,7 +1007,8 @@
       const tempSubjectState = {};
       document.querySelectorAll(`#${subjectData[subject].unitsHtmlId} .unit`).forEach(unitElement => {
           const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
-          const initialTotalSubtopics = parseInt(unitElement.querySelector('.unit-title span:last-child').textContent.replace(/[()]/g, ''));
+          const totalSubtopicsSpan = unitElement.querySelector('.unit-title span:last-child');
+          const initialTotalSubtopics = parseInt(totalSubtopicsSpan.textContent.replace(/[()]/g, ''));
           const subtopicsList = unitElement.querySelector('.subtopics');
 
           tempSubjectState[unitTitleText] = {
