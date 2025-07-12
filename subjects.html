@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Biology Units and Sub Units</title>
+  <title>Subject Units and Sub Units</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -189,193 +189,251 @@
 
 <div id="main-content" class="hidden">
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 px-4 md:px-0">
-        <h2 class="text-2xl md:text-4xl font-extrabold text-blue-800 text-center md:text-left mb-4 md:mb-0">📘 Biology Units and Sub Units</h2>
+        <h2 class="text-2xl md:text-4xl font-extrabold text-blue-800 text-center md:text-left mb-4 md:mb-0">📘 Subject Units and Sub Units</h2>
         <div class="flex items-center space-x-2 md:space-x-4">
             <span id="user-id-display" class="text-gray-600 text-xs md:text-sm"></span>
             <button id="logout-btn" class="bg-gray-300 text-gray-800 p-2 rounded-lg font-semibold hover:bg-gray-400 transition-colors duration-200 text-sm md:text-base">Logout</button>
         </div>
     </div>
 
-    <!-- Unit 01: Introduction to Biology -->
-    <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-      <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-        <span class="flex-grow min-w-0">01. ජීව විද්‍යාව හඳුන්වා දීම</span>
-        <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(2)</span>
-      </div>
-      <ul class="subtopics">
-        <li>මිනිසා මුහුණ දෙන අභියෝග හා ජීව විද්‍යාවේ ස්වභාවය</li>
-        <li>ජෛව ලෝකයේ ස්වභාවය හා සංවිධාන රටා</li>
-      </ul>
+    <!-- Subject Selection -->
+    <div class="mb-6 px-4 md:px-0">
+        <label for="subject-select" class="block text-lg font-medium text-gray-700 mb-2">Select Subject:</label>
+        <select id="subject-select" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+            <option value="Biology">Biology</option>
+            <option value="Physics">Physics</option>
+            <option value="Chemistry">Chemistry</option>
+        </select>
     </div>
 
-    <!-- Unit 02: Chemical and Cellular Basis of Life -->
-    <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-      <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-        <span class="flex-grow min-w-0">02. ජීවයේ රසායනික හා සෛලීය පදනම</span>
-        <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(9)</span>
-      </div>
-      <ul class="subtopics">
-        <li>මූලද්‍රව්‍යමය සංයුතිය</li>
-        <li>ජලයේ ගුණ</li>
-        <li>කාබනික සංයෝග</li>
-        <li>සෛල ව්‍යූහය</li>
-        <li>සෛල චක්‍රය</li>
-        <li>ශක්ති සම්බන්ධතා</li>
-        <li>එන්සයිම</li>
-        <li>ප්‍රභාසංශ්ලේෂණය</li>
-        <li>සෛලීය ශ්වසනය</li>
-      </ul>
+    <!-- Units Container -->
+    <div id="units-container">
+        <!-- Biology Units (Initially displayed) -->
+        <div id="biology-units" class="subject-units">
+            <!-- Unit 01: Introduction to Biology -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">01. ජීව විද්‍යාව හඳුන්වා දීම</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(2)</span>
+              </div>
+              <ul class="subtopics">
+                <li>මිනිසා මුහුණ දෙන අභියෝග හා ජීව විද්‍යාවේ ස්වභාවය</li>
+                <li>ජෛව ලෝකයේ ස්වභාවය හා සංවිධාන රටා</li>
+              </ul>
+            </div>
+
+            <!-- Unit 02: Chemical and Cellular Basis of Life -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">02. ජීවයේ රසායනික හා සෛලීය පදනම</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(9)</span>
+              </div>
+              <ul class="subtopics">
+                <li>මූලද්‍රව්‍යමය සංයුතිය</li>
+                <li>ජලයේ ගුණ</li>
+                <li>කාබනික සංයෝග</li>
+                <li>සෛල ව්‍යූහය</li>
+                <li>සෛල චක්‍රය</li>
+                <li>ශක්ති සම්බන්ධතා</li>
+                <li>එන්සයිම</li>
+                <li>ප්‍රභාසංශ්ලේෂණය</li>
+                <li>සෛලීය ශ්වසනය</li>
+              </ul>
+            </div>
+
+            <!-- Unit 03: Evolution and Diversity of Organisms -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">03. පරිණාමය හා ජීවීන්ගේ විවිධත්වය</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(8)</span>
+              </div>
+              <ul class="subtopics">
+                <li>පරිණාම ක්‍රියාවලිය</li>
+                <li>තක්සෝන විද්‍යාව</li>
+                <li>බැක්ටීරියා</li>
+                <li>ප්‍රෝටිස්ටා</li>
+                <li>ශාක රාජධානිය</li>
+                <li>දිලීර රාජධානිය</li>
+                <li>ඇනිමාලියා</li>
+                <li>කෝඩේටා වංශය</li>
+              </ul>
+            </div>
+
+            <!-- Unit 04: Plant Form and Function -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">04. ශාක ආකාරය හා ක්‍රියාකාරිත්වය</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(13)</span>
+              </div>
+              <ul class="subtopics">
+                <li>ශාක වර්ධනය හා විකසනය</li>
+                <li>පටක පද්ධති</li>
+                <li>ආලෝකය අධිග්‍රහණය</li>
+                <li>වායු හුවමාරුව</li>
+                <li>ජල හා ඛනිජ අවශ්‍යතා</li>
+                <li>ද්‍රව්‍ය පරිවහනය</li>
+                <li>ජලය ඉවත් කිරීම</li>
+                <li>පෝෂණ ක්‍රියාවලි</li>
+                <li>පෝෂණ අවශ්‍යතා</li>
+                <li>ජීවන චක්‍ර</li>
+                <li>ප්‍රජනනය</li>
+                <li>උත්තේජ වලට ප්‍රතිචාර</li>
+                <li>ආතති වලට ප්‍රතිචාර</li>
+              </ul>
+            </div>
+
+            <!-- Unit 05: Animal Form and Function -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">05. සත්ත්ව ආකාරය හා ක්‍රියාකාරිත්වය</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(14)</span>
+              </div>
+              <ul class="subtopics">
+                <li>සන්ධාරණය</li>
+                <li>ස්නායු පද්ධතිය</li>
+                <li>සංවේදක පද්ධතිය</li>
+                <li>සම</li>
+                <li>අන්තරාසර්ග පද්ධතිය</li>
+                <li>අභ්‍යන්තර පරිසරය</li>
+                <li>පුරුෂ ප්‍රජනක පද්ධතිය</li>
+                <li>ස්ත්‍රී ප්‍රජනක පද්ධතිය</li>
+                <li>ප්‍රජනක චක්‍රය</li>
+                <li>උපත් පාලන ක්‍රම</li>
+                <li>මානව සැකිල්ල</li>
+                <li>ගාත්‍රා සැකිල්ල</li>
+                <li>කංකාල පේශි</li>
+                <li>සංකෝචන යන්ත්‍රණය</li>
+              </ul>
+            </div>
+
+            <!-- Unit 06: Genetics -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">06. ප්‍රවේණිය</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(9)</span>
+              </div>
+              <ul class="subtopics">
+                <li>ප්‍රවේණි වාග්මාලව</li>
+                <li>මුහුම</li>
+                <li>මෙන්ඩල්ගේ පරීක්ෂණ</li>
+                <li>සම්භාවිතා නියම</li>
+                <li>මානව ලක්ෂණ</li>
+                <li>නොවන ආවේණිය</li>
+                <li>බහු ඇලීලතාව</li>
+                <li>ගහන ප්‍රවේණිය</li>
+                <li>අභිජනනය</li>
+              </ul>
+            </div>
+
+            <!-- Unit 07: Molecular Biology and Recombinant DNA Technology -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">07. අණුක ජීව විද්‍යාව හා ප්‍රතිසංයෝජිත DNA තාක්ෂණය</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(8)</span>
+              </div>
+              <ul class="subtopics">
+                <li>වර්ණදේහවල වව්‍යුහ නිර්මාණය</li>
+                <li>DNA ප්‍රතිචලිතය</li>
+                <li>ජාන සහ ඒවා ක්‍රියාකරන ආකාරය</li>
+                <li>විකෘති</li>
+                <li>ජාන තාක්ෂණය</li>
+                <li>DNA විශ්ලේෂණය</li>
+                <li>කාෂිකර්මාන්තයේ දී GMO වල භාවිතයන්</li>
+                <li>ජෛව සුරක්ෂිතතාව පිළිබඳ කාටජිනා ගිවිසුම ශ්‍රී ලංකාවේ ජාතික ජෛව සුරක්ෂිතතා රාමුව</li>
+              </ul>
+            </div>
+
+            <!-- Unit 08: Environmental Biology -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">08. පාරසරික ජීව විද්‍යාව</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(7)</span>
+              </div>
+              <ul class="subtopics">
+                <li>පාරිසරික ජීව විද්‍යාව යනු කුමක් ද?</li>
+                <li>පරිසරයේ සංවිධාන පෙරම්</li>
+                <li>බියෝමයක් යනු කුමක් ද ?</li>
+                <li>ශ්‍රී ලංකාවේ පරිසර පද්ධති</li>
+                <li>ජෛව විවිධත්වය</li>
+                <li>භූගෝලීය උණුසුම සහ දේශගුණ විපර්යාසය</li>
+                <li>පරිසර සංරක්ෂණයට අදාළ සම්මුති</li>
+              </ul>
+            </div>
+
+            <!-- Unit 09: Microbiology -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">09. ක්ෂුද්‍ර ජීව විද්‍යාව</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(7)</span>
+              </div>
+              <ul class="subtopics">
+                <li>ක්ෂුද්‍ර ජීවීන්ගේ ස්වභාවය</li>
+                <li>ක්ෂුද්‍ර ජීවීන්ගේ ආකාර</li>
+                <li>තාක්ෂණික ශිල්ප</li>
+                <li>කර්මාන්ත සහ පරිසරය</li>
+                <li>පාංශු ක්ෂුද්‍රජීවීන්</li>
+                <li>අපජල කළමනාකරණය</li>
+                <li>ආහාර හා ක්ෂුද්‍රජීවීන්</li>
+              </ul>
+            </div>
+
+            <!-- Unit 10: Applied Biology -->
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
+              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                <span class="flex-grow min-w-0">10. ව්‍යවහාරික ජීව විද්‍යාව</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(8)</span>
+              </div>
+              <ul class="subtopics">
+                <li>ජලජීවී වගාව</li>
+                <li>මත්ස්‍ය වගාව</li>
+                <li>මිරිදිය රෝග</li>
+                <li>තවාන් කළමනාකරණය</li>
+                <li>ආහාර පරිරක්ෂණය</li>
+                <li>අස්වනු හානිය</li>
+                <li>ඩෙංගු සහ බරවා</li>
+                <li>නැනෝ තාක්ෂණය</li>
+              </ul>
+            </div>
+        </div>
+
+        <!-- Physics Units (Initially hidden) -->
+        <div id="physics-units" class="subject-units hidden">
+            <h3 class="text-xl md:text-2xl font-bold text-blue-700 mb-4">Physics Units (Placeholder)</h3>
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4">
+                <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                    <span class="flex-grow min-w-0">Physics Unit 01</span>
+                    <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(0)</span>
+                </div>
+                <ul class="subtopics">
+                    <li>Physics Subtopic 1.1</li>
+                    <li>Physics Subtopic 1.2</li>
+                </ul>
+            </div>
+            <!-- Add more Physics units here -->
+        </div>
+
+        <!-- Chemistry Units (Initially hidden) -->
+        <div id="chemistry-units" class="subject-units hidden">
+            <h3 class="text-xl md:text-2xl font-bold text-blue-700 mb-4">Chemistry Units (Placeholder)</h3>
+            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4">
+                <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
+                    <span class="flex-grow min-w-0">Chemistry Unit 01</span>
+                    <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(0)</span>
+                </div>
+                <ul class="subtopics">
+                    <li>Chemistry Subtopic 1.1</li>
+                    <li>Chemistry Subtopic 1.2</li>
+                </ul>
+            </div>
+            <!-- Add more Chemistry units here -->
+        </div>
     </div>
 
-    <!-- Unit 03: Evolution and Diversity of Organisms -->
-    <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-      <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-        <span class="flex-grow min-w-0">03. පරිණාමය හා ජීවීන්ගේ විවිධත්වය</span>
-        <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(8)</span>
-      </div>
-      <ul class="subtopics">
-        <li>පරිණාම ක්‍රියාවලිය</li>
-        <li>තක්සෝන විද්‍යාව</li>
-        <li>බැක්ටීරියා</li>
-        <li>ප්‍රෝටිස්ටා</li>
-        <li>ශාක රාජධානිය</li>
-        <li>දිලීර රාජධානිය</li>
-        <li>ඇනිමාලියා</li>
-        <li>කෝඩේටා වංශය</li>
-      </ul>
-    </div>
-
-    <!-- Unit 04: Plant Form and Function -->
-    <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-      <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-        <span class="flex-grow min-w-0">04. ශාක ආකාරය හා ක්‍රියාකාරිත්වය</span>
-        <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(13)</span>
-      </div>
-      <ul class="subtopics">
-        <li>ශාක වර්ධනය හා විකසනය</li>
-        <li>පටක පද්ධති</li>
-        <li>ආලෝකය අධිග්‍රහණය</li>
-        <li>වායු හුවමාරුව</li>
-        <li>ජල හා ඛනිජ අවශ්‍යතා</li>
-        <li>ද්‍රව්‍ය පරිවහනය</li>
-        <li>ජලය ඉවත් කිරීම</li>
-        <li>පෝෂණ ක්‍රියාවලි</li>
-        <li>පෝෂණ අවශ්‍යතා</li>
-        <li>ජීවන චක්‍ර</li>
-        <li>ප්‍රජනනය</li>
-        <li>උත්තේජ වලට ප්‍රතිචාර</li>
-        <li>ආතති වලට ප්‍රතිචාර</li>
-      </ul>
-    </div>
-
-    <!-- Unit 05: Animal Form and Function -->
-    <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-      <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-        <span class="flex-grow min-w-0">05. සත්ත්ව ආකාරය හා ක්‍රියාකාරිත්වය</span>
-        <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(14)</span>
-      </div>
-      <ul class="subtopics">
-        <li>සන්ධාරණය</li>
-        <li>ස්නායු පද්ධතිය</li>
-        <li>සංවේදක පද්ධතිය</li>
-        <li>සම</li>
-        <li>අන්තරාසර්ග පද්ධතිය</li>
-        <li>අභ්‍යන්තර පරිසරය</li>
-        <li>පුරුෂ ප්‍රජනක පද්ධතිය</li>
-        <li>ස්ත්‍රී ප්‍රජනක පද්ධතිය</li>
-        <li>ප්‍රජනක චක්‍රය</li>
-        <li>උපත් පාලන ක්‍රම</li>
-        <li>මානව සැකිල්ල</li>
-        <li>ගාත්‍රා සැකිල්ල</li>
-        <li>කංකාල පේශි</li>
-        <li>සංකෝචන යන්ත්‍රණය</li>
-      </ul>
-    </div>
-
-    <!-- Unit 06: Genetics -->
-    <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-      <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-        <span class="flex-grow min-w-0">06. ප්‍රවේණිය</span>
-        <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(9)</span>
-      </div>
-      <ul class="subtopics">
-        <li>ප්‍රවේණි වාග්මාලව</li>
-        <li>මුහුම</li>
-        <li>මෙන්ඩල්ගේ පරීක්ෂණ</li>
-        <li>සම්භාවිතා නියම</li>
-        <li>මානව ලක්ෂණ</li>
-        <li>නොවන ආවේණිය</li>
-        <li>බහු ඇලීලතාව</li>
-        <li>ගහන ප්‍රවේණිය</li>
-        <li>අභිජනනය</li>
-      </ul>
-    </div>
-
-    <!-- New Unit 07: Ecology -->
-    <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-      <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-        <span class="flex-grow min-w-0">07. පරිසර විද්‍යාව</span>
-        <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(3)</span>
-      </div>
-      <ul class="subtopics">
-        <li>පරිසර විද්‍යාව</li>
-        <li>ජෛව විවිධත්වය</li>
-        <li>පරිසර දූෂණය</li>
-      </ul>
-    </div>
-
-    <!-- New Unit 08: Human Biology and Health -->
-    <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-      <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-        <span class="flex-grow min-w-0">08. මානව ජීව විද්‍යාව හා සෞඛ්‍යය</span>
-        <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(3)</span>
-      </div>
-      <ul class="subtopics">
-        <li>ආහාර හා පෝෂණය</li>
-        <li>රෝග හා සෞඛ්‍යය</li>
-        <li>ප්‍රතිශක්තිකරණය</li>
-      </ul>
-    </div>
-
-    <!-- Unit 09: Microbiology -->
-    <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-      <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-        <span class="flex-grow min-w-0">09. ක්ෂුද්‍ර ජීව විද්‍යාව</span>
-        <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(7)</span>
-      </div>
-      <ul class="subtopics">
-        <li>ක්ෂුද්‍ර ජීවීන්ගේ ස්වභාවය</li>
-        <li>ක්ෂුද්‍ර ජීවීන්ගේ ආකාර</li>
-        <li>තාක්ෂණික ශිල්ප</li>
-        <li>කර්මාන්ත සහ පරිසරය</li>
-        <li>පාංශු ක්ෂුද්‍රජීවීන්</li>
-        <li>අපජල කළමනාකරණය</li>
-        <li>ආහාර හා ක්ෂුද්‍රජීවීන්</li>
-      </ul>
-    </div>
-
-    <!-- Unit 10: Applied Biology -->
-    <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-      <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-        <span class="flex-grow min-w-0">10. ව්‍යවහාරික ජීව විද්‍යාව</span>
-        <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(8)</span>
-      </div>
-      <ul class="subtopics">
-        <li>ජලජීවී වගාව</li>
-        <li>මත්ස්‍ය වගාව</li>
-        <li>මිරිදිය රෝග</li>
-        <li>තවාන් කළමනාකරණය</li>
-        <li>ආහාර පරිරක්ෂණය</li>
-        <li>අස්වනු හානිය</li>
-        <li>ඩෙංගු සහ බරවා</li>
-        <li>නැනෝ තාක්ෂණය</li>
-      </ul>
-    </div>
 
     <!-- Summary Section -->
     <div class="summary mt-10 bg-green-50 border-l-8 border-green-500 p-4 md:p-6 text-base md:text-xl rounded-lg text-green-800">
-      🔢 <strong class="font-bold">Total Units:</strong> 10<br>
-      🟩 <strong class="font-bold">Total Subtopics:</strong> 76
+      🔢 <strong class="font-bold">Total Units:</strong> <span id="total-units-display"></span><br>
+      🟩 <strong class="font-bold">Total Subtopics:</strong> <span id="total-subtopics-display"></span>
     </div>
 </div>
 
@@ -417,10 +475,11 @@
   // Global variables
   let userId = null;
   const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-  // Updated structure for completedSubtopicsState
-  let completedSubtopicsState = {}; // Stores { "Unit Title": { total: N, subtopics: { "Subtopic Text": true/false, ... } } }
+  // Updated structure for completedSubtopicsState to support multiple subjects
+  let completedSubtopicsState = {}; // Stores { "SubjectName": { "Unit Title": { total: N, subtopics: { "Subtopic Text": true/false, ... } } } }
   let unsubscribeSnapshot = null; // To store the unsubscribe function for Firestore listener
   let isAuthReady = false; // New flag to indicate if auth and initial data load are complete
+  let currentSubject = "Biology"; // Default subject
 
   // UI Elements
   const authSection = document.getElementById('auth-section');
@@ -434,6 +493,31 @@
   const logoutBtn = document.getElementById('logout-btn');
   const userIdDisplay = document.getElementById('user-id-display');
   const loadingSpinner = document.getElementById('loading-spinner');
+  const subjectSelect = document.getElementById('subject-select');
+  const unitsContainer = document.getElementById('units-container');
+  const totalUnitsDisplay = document.getElementById('total-units-display');
+  const totalSubtopicsDisplay = document.getElementById('total-subtopics-display');
+
+
+  // Data for each subject
+  const subjectData = {
+    "Biology": {
+      totalUnits: 10,
+      totalSubtopics: 85,
+      unitsHtmlId: 'biology-units'
+    },
+    "Physics": {
+      totalUnits: 0, // Placeholder, will be updated by user input
+      totalSubtopics: 0, // Placeholder, will be updated by user input
+      unitsHtmlId: 'physics-units'
+    },
+    "Chemistry": {
+      totalUnits: 0, // Placeholder, will be updated by user input
+      totalSubtopics: 0, // Placeholder, will be updated by user input
+      unitsHtmlId: 'chemistry-units'
+    }
+  };
+
 
   // Function to display authentication errors
   function showAuthError(message) {
@@ -512,44 +596,13 @@
     }
   });
 
-  // Function to initialize unit completion displays
-  function initializeUnitDisplays() {
-    document.querySelectorAll('.unit').forEach(unitElement => {
-      const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
-      const subtopicsList = unitElement.querySelector('.subtopics');
-      const totalSubtopicsSpan = unitElement.querySelector('.unit-title span:last-child');
-      const initialTotalSubtopics = parseInt(totalSubtopicsSpan.textContent.replace(/[()]/g, ''));
-
-      // Ensure the unit's entry exists in completedSubtopicsState with its total
-      if (!completedSubtopicsState[unitTitleText]) {
-        completedSubtopicsState[unitTitleText] = {
-          total: initialTotalSubtopics,
-          subtopics: {}
-        };
-      } else if (typeof completedSubtopicsState[unitTitleText].total === 'undefined' || isNaN(completedSubtopicsState[unitTitleText].total)) {
-        // If total was not set in loaded data or is NaN, set it from initial HTML
-        completedSubtopicsState[unitTitleText].total = initialTotalSubtopics;
-      }
-
-      // Initialize subtopics within the state if they don't exist
-      Array.from(subtopicsList.children).forEach(subtopic => {
-        const subtopicText = subtopic.textContent;
-        if (typeof completedSubtopicsState[unitTitleText].subtopics[subtopicText] === 'undefined') {
-          completedSubtopicsState[unitTitleText].subtopics[subtopicText] = false;
-        }
-      });
-      // Update display to reflect current state or (0/Total)
-      updateUnitCompletionDisplay(unitElement);
-    });
-  }
-
   // Function to update the count on the main unit button
   function updateUnitCompletionDisplay(unitElement) {
     const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
     const totalSubtopicsSpan = unitElement.querySelector('.unit-title span:last-child');
 
     let completedCount = 0;
-    const unitData = completedSubtopicsState[unitTitleText];
+    const unitData = completedSubtopicsState[currentSubject] && completedSubtopicsState[currentSubject][unitTitleText];
 
     if (unitData && unitData.subtopics) {
       for (const subtopicText in unitData.subtopics) {
@@ -557,14 +610,68 @@
           completedCount++;
         }
       }
-      // Use the stored total from completedSubtopicsState
+      // Use the stored total from unitData
       totalSubtopicsSpan.textContent = `(${completedCount}/${unitData.total})`;
     } else {
       // Fallback if data is not yet initialized for some reason
-      // This should ideally not be reached if initializeUnitDisplays runs correctly
       totalSubtopicsSpan.textContent = `(0/${parseInt(totalSubtopicsSpan.textContent.replace(/[()]/g, '')) || 0})`;
     }
   }
+
+  // Function to initialize unit completion displays for the current subject
+  function initializeUnitDisplaysForCurrentSubject() {
+    let currentTotalUnits = 0;
+    let currentTotalSubtopics = 0;
+
+    // Hide all subject unit containers first
+    document.querySelectorAll('.subject-units').forEach(container => {
+      container.classList.add('hidden');
+    });
+
+    // Show the container for the current subject
+    const currentSubjectUnitsContainer = document.getElementById(subjectData[currentSubject].unitsHtmlId);
+    if (currentSubjectUnitsContainer) {
+      currentSubjectUnitsContainer.classList.remove('hidden');
+    }
+
+    document.querySelectorAll(`#${subjectData[currentSubject].unitsHtmlId} .unit`).forEach(unitElement => {
+      currentTotalUnits++;
+      const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
+      const subtopicsList = unitElement.querySelector('.subtopics');
+      const totalSubtopicsSpan = unitElement.querySelector('.unit-title span:last-child');
+      const initialTotalSubtopics = parseInt(totalSubtopicsSpan.textContent.replace(/[()]/g, ''));
+
+      currentTotalSubtopics += initialTotalSubtopics;
+
+      // Ensure the subject and unit entries exist in completedSubtopicsState
+      if (!completedSubtopicsState[currentSubject]) {
+        completedSubtopicsState[currentSubject] = {};
+      }
+      if (!completedSubtopicsState[currentSubject][unitTitleText]) {
+        completedSubtopicsState[currentSubject][unitTitleText] = {
+          total: initialTotalSubtopics,
+          subtopics: {}
+        };
+      } else if (typeof completedSubtopicsState[currentSubject][unitTitleText].total === 'undefined' || isNaN(completedSubtopicsState[currentSubject][unitTitleText].total)) {
+        completedSubtopicsState[currentSubject][unitTitleText].total = initialTotalSubtopics;
+      }
+
+      // Initialize subtopics within the state if they don't exist
+      Array.from(subtopicsList.children).forEach(subtopic => {
+        const subtopicText = subtopic.textContent;
+        if (typeof completedSubtopicsState[currentSubject][unitTitleText].subtopics[subtopicText] === 'undefined') {
+          completedSubtopicsState[currentSubject][unitTitleText].subtopics[subtopicText] = false;
+        }
+      });
+      // Update display to reflect current state or (0/Total)
+      updateUnitCompletionDisplay(unitElement);
+    });
+
+    // Update the summary section totals
+    totalUnitsDisplay.textContent = currentTotalUnits;
+    totalSubtopicsDisplay.textContent = currentTotalSubtopics;
+  }
+
 
   // Function to open the subtopics modal
   window.openSubtopicsModal = async (unitElement) => { // Added 'async' here as it calls async functions
@@ -591,7 +698,7 @@
     // Clear previous subtopics
     modalSubtopics.innerHTML = '';
 
-    const unitData = completedSubtopicsState[unitTitleText];
+    const unitData = completedSubtopicsState[currentSubject] && completedSubtopicsState[currentSubject][unitTitleText];
 
     // Populate modal with subtopics and add tick circles
     Array.from(subtopicsList.children).forEach(subtopic => {
@@ -618,14 +725,16 @@
         tickCircle.innerHTML = isChecked ? '&#10003;' : '';
 
         // Update global state
-        if (!completedSubtopicsState[unitTitleText]) {
-            // This case should ideally not be hit if initializeUnitDisplays runs correctly
-            completedSubtopicsState[unitTitleText] = { total: 0, subtopics: {} };
+        if (!completedSubtopicsState[currentSubject]) {
+            completedSubtopicsState[currentSubject] = {};
         }
-        if (!completedSubtopicsState[unitTitleText].subtopics) {
-            completedSubtopicsState[unitTitleText].subtopics = {};
+        if (!completedSubtopicsState[currentSubject][unitTitleText]) {
+            completedSubtopicsState[currentSubject][unitTitleText] = { total: 0, subtopics: {} };
         }
-        completedSubtopicsState[unitTitleText].subtopics[subtopicTextContent] = isChecked;
+        if (!completedSubtopicsState[currentSubject][unitTitleText].subtopics) {
+            completedSubtopicsState[currentSubject][unitTitleText].subtopics = {};
+        }
+        completedSubtopicsState[currentSubject][unitTitleText].subtopics[subtopicTextContent] = isChecked;
 
         // Update the count on the main unit button
         updateUnitCompletionDisplay(unitElement);
@@ -633,10 +742,10 @@
         // Save to Firestore
         if (userId) {
           try {
-            const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData/completedSubtopics`);
-            // Save the entire completedSubtopicsState object
-            await setDoc(userDocRef, { data: JSON.stringify(completedSubtopicsState) }, { merge: true });
-            console.log("Subtopic state saved to Firestore.");
+            const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData/${currentSubject}`);
+            // Save the entire completedSubtopicsState object for the current subject
+            await setDoc(userDocRef, { data: JSON.stringify(completedSubtopicsState[currentSubject]) }, { merge: true });
+            console.log("Subtopic state saved to Firestore for", currentSubject);
           } catch (e) {
             console.error("Error saving document: ", e);
             showAuthError("Error saving progress. Please try again.");
@@ -718,6 +827,84 @@
     }
   });
 
+  // Function to load data for the selected subject
+  async function loadSubjectData(subject) {
+    if (!userId) {
+      console.warn("User not logged in, cannot load subject data.");
+      return;
+    }
+
+    // Unsubscribe from previous snapshot listener if it exists
+    if (unsubscribeSnapshot) {
+      unsubscribeSnapshot();
+      unsubscribeSnapshot = null;
+    }
+
+    const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData/${subject}`);
+    unsubscribeSnapshot = onSnapshot(userDocRef, (docSnap) => {
+      // Create a temporary state based on initial HTML structure for the current subject
+      const tempSubjectState = {};
+      document.querySelectorAll(`#${subjectData[subject].unitsHtmlId} .unit`).forEach(unitElement => {
+          const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
+          const initialTotalSubtopics = parseInt(unitElement.querySelector('.unit-title span:last-child').textContent.replace(/[()]/g, ''));
+          const subtopicsList = unitElement.querySelector('.subtopics');
+
+          tempSubjectState[unitTitleText] = {
+              total: initialTotalSubtopics,
+              subtopics: {}
+          };
+          Array.from(subtopicsList.children).forEach(subtopic => {
+              tempSubjectState[unitTitleText].subtopics[subtopic.textContent] = false;
+          });
+      });
+
+      if (docSnap.exists() && docSnap.data().data) {
+        try {
+          const loadedData = JSON.parse(docSnap.data().data);
+          // Merge loaded data into the temporary state for the current subject
+          for (const unitTitle in tempSubjectState) {
+              if (loadedData[unitTitle] && loadedData[unitTitle].subtopics) {
+                  for (const subtopicText in tempSubjectState[unitTitle].subtopics) {
+                      if (typeof loadedData[unitTitle].subtopics[subtopicText] !== 'undefined') {
+                          tempSubjectState[unitTitle].subtopics[subtopicText] = loadedData[unitTitle].subtopics[subtopicText];
+                      }
+                  }
+              }
+          }
+          completedSubtopicsState[subject] = tempSubjectState; // Assign the merged state for this subject
+          console.log("Loaded and merged completed subtopics for", subject, ":", completedSubtopicsState[subject]);
+        } catch (e) {
+          console.error("Error parsing Firestore data for", subject, ":", e);
+          completedSubtopicsState[subject] = tempSubjectState; // Fallback to initial HTML structure
+        }
+      } else {
+        console.log("No completed subtopics found for", subject, ", initializing empty state from HTML.");
+        completedSubtopicsState[subject] = tempSubjectState; // Use initial HTML structure
+      }
+      initializeUnitDisplaysForCurrentSubject(); // Update UI with loaded or re-initialized data
+      isAuthReady = true; // Set flag to true after data is loaded and UI updated
+      console.log("isAuthReady set to true after data load for", subject); // Debugging log
+    }, (error) => {
+      console.error("Error listening to Firestore for", subject, ":", error);
+      showAuthError("Error loading user data for " + subject);
+      isAuthReady = true; // Still set to true, even on error, to allow interaction (though data might be missing)
+      console.log("isAuthReady set to true after Firestore error for", subject); // Debugging log
+    });
+  }
+
+  // Event listener for subject selection change
+  subjectSelect.addEventListener('change', (event) => {
+    currentSubject = event.target.value;
+    console.log("Subject changed to:", currentSubject);
+    if (userId) {
+      loadSubjectData(currentSubject); // Load data for the new subject
+    } else {
+      // If not logged in, just switch the display and reset counts
+      initializeUnitDisplaysForCurrentSubject();
+    }
+  });
+
+
   // Firebase Auth State Listener
   onAuthStateChanged(auth, async (user) => {
     loadingSpinner.classList.add('hidden'); // Always hide spinner once auth state is determined
@@ -729,63 +916,8 @@
       mainContent.classList.remove('hidden');
       hideAuthError(); // Hide any auth errors once logged in
 
-      // Unsubscribe from previous snapshot listener if it exists
-      if (unsubscribeSnapshot) {
-        unsubscribeSnapshot();
-      }
-
-      // Listen for real-time updates to user's data
-      const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData/completedSubtopics`);
-      unsubscribeSnapshot = onSnapshot(userDocRef, (docSnap) => {
-        // Create a temporary state based on initial HTML structure
-        const tempCompletedSubtopicsState = {};
-        document.querySelectorAll('.unit').forEach(unitElement => {
-            const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
-            const initialTotalSubtopics = parseInt(unitElement.querySelector('.unit-title span:last-child').textContent.replace(/[()]/g, ''));
-            const subtopicsList = unitElement.querySelector('.subtopics');
-
-            tempCompletedSubtopicsState[unitTitleText] = {
-                total: initialTotalSubtopics,
-                subtopics: {}
-            };
-            Array.from(subtopicsList.children).forEach(subtopic => {
-                tempCompletedSubtopicsState[unitTitleText].subtopics[subtopic.textContent] = false;
-            });
-        });
-
-        if (docSnap.exists() && docSnap.data().data) {
-          try {
-            const loadedData = JSON.parse(docSnap.data().data);
-            // Merge loaded data into the temporary state
-            for (const unitTitle in tempCompletedSubtopicsState) {
-                if (loadedData[unitTitle] && loadedData[unitTitle].subtopics) {
-                    // Merge subtopic completion status from loaded data
-                    for (const subtopicText in tempCompletedSubtopicsState[unitTitle].subtopics) {
-                        if (typeof loadedData[unitTitle].subtopics[subtopicText] !== 'undefined') {
-                            tempCompletedSubtopicsState[unitTitle].subtopics[subtopicText] = loadedData[unitTitle].subtopics[subtopicText];
-                        }
-                    }
-                }
-            }
-            completedSubtopicsState = tempCompletedSubtopicsState; // Assign the merged state
-            console.log("Loaded and merged completed subtopics:", completedSubtopicsState);
-          } catch (e) {
-            console.error("Error parsing Firestore data:", e);
-            completedSubtopicsState = tempCompletedSubtopicsState; // Fallback to initial HTML structure
-          }
-        } else {
-          console.log("No completed subtopics found for this user, initializing empty state from HTML.");
-          completedSubtopicsState = tempCompletedSubtopicsState; // Use initial HTML structure
-        }
-        initializeUnitDisplays(); // Update UI with loaded or re-initialized data
-        isAuthReady = true; // Set flag to true after data is loaded and UI updated
-        console.log("isAuthReady set to true after data load."); // Debugging log
-      }, (error) => {
-        console.error("Error listening to Firestore:", error);
-        showAuthError("Error loading user data.");
-        isAuthReady = true; // Still set to true, even on error, to allow interaction (though data might be missing)
-        console.log("isAuthReady set to true after Firestore error."); // Debugging log
-      });
+      // Load data for the current subject (default or last selected)
+      loadSubjectData(currentSubject);
 
     } else {
       // User is signed out
@@ -794,7 +926,7 @@
       authSection.classList.remove('hidden'); // Show auth section
       mainContent.classList.add('hidden'); // Ensure main content is hidden
       completedSubtopicsState = {}; // Clear state on logout
-      initializeUnitDisplays(); // Reset UI counts to 0
+      initializeUnitDisplaysForCurrentSubject(); // Reset UI counts to 0 for current subject
       isAuthReady = false; // Reset flag when logged out
       console.log("isAuthReady set to false after logout."); // Debugging log
 
@@ -809,26 +941,29 @@
   // Initial anonymous sign-in or custom token sign-in
   document.addEventListener('DOMContentLoaded', async () => {
     loadingSpinner.classList.remove('hidden'); // Show spinner immediately on DOMContentLoaded
-    // Do not try to sign in here. Let onAuthStateChanged handle the initial state.
-    // The onAuthStateChanged listener will fire immediately if a session is persisted.
-    // If no session, it will fire with user=null, and then the auth section will show.
-    // Explicitly call signInAnonymously if no token is provided.
-    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-        // Firebase automatically handles custom token sign-in if a token is provided
-        // and onAuthStateChanged will reflect the result.
-        // No explicit signInWithCustomToken call needed here if onAuthStateChanged is the primary handler.
-        // If you *must* force a sign-in attempt here, ensure it's awaited and its outcome
-        // is handled to hide the spinner and show correct UI.
-        // For now, relying solely on onAuthStateChanged to manage initial UI state.
-    } else {
-        // If no initial token, attempt anonymous sign-in.
-        try {
-            await signInAnonymously(auth);
-            console.log("Attempted anonymous sign-in on DOMContentLoaded.");
-        } catch (error) {
-            console.error("Anonymous sign-in failed on DOMContentLoaded:", error);
-            // If anonymous sign-in fails, onAuthStateChanged will still handle showing auth section
-        }
+    try {
+      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+        await signInWithCustomToken(auth, __initial_auth_token);
+        console.log("Signed in with custom token.");
+      } else {
+        await signInAnonymously(auth);
+        console.log("Signed in anonymously.");
+      }
+    } catch (error) {
+      // Handle the specific custom-token-mismatch error more gracefully
+      if (error.code === 'auth/custom-token-mismatch') {
+        console.warn("Initial authentication with custom token failed (token mismatch). Please sign in manually.");
+      } else if (error.code === 'auth/admin-restricted-operation') {
+        console.warn("Initial authentication failed (admin-restricted-operation). Please sign in manually.");
+      }
+      else {
+        console.error("Initial authentication error:", error);
+      }
+      // If initial auth fails, ensure the auth section is shown and spinner is hidden
+      loadingSpinner.classList.add('hidden');
+      authSection.classList.remove('hidden');
+      isAuthReady = true; // Allow interaction even if initial auth fails, user can sign in manually
+      console.log("isAuthReady set to true after initial auth attempt (success or fail)."); // Debugging log
     }
   });
 </script>
