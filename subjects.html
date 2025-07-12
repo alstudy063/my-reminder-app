@@ -370,7 +370,8 @@
   // Global variables
   let userId = null;
   const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-  let completedSubtopicsState = {}; // Stores { "Unit Title": { "Subtopic Text": true/false, ... } }
+  // Updated structure for completedSubtopicsState
+  let completedSubtopicsState = {}; // Stores { "Unit Title": { total: N, subtopics: { "Subtopic Text": true/false, ... } } }
   let unsubscribeSnapshot = null; // To store the unsubscribe function for Firestore listener
   let isAuthReady = false; // New flag to indicate if auth and initial data load are complete
 
@@ -459,18 +460,24 @@
       const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
       const subtopicsList = unitElement.querySelector('.subtopics');
       const totalSubtopicsSpan = unitElement.querySelector('.unit-title span:last-child');
-      const totalSubtopics = parseInt(totalSubtopicsSpan.textContent.replace(/[()]/g, ''));
+      const initialTotalSubtopics = parseInt(totalSubtopicsSpan.textContent.replace(/[()]/g, ''));
 
-      // Ensure the unit's entry exists in completedSubtopicsState
+      // Ensure the unit's entry exists in completedSubtopicsState with its total
       if (!completedSubtopicsState[unitTitleText]) {
-        completedSubtopicsState[unitTitleText] = {};
+        completedSubtopicsState[unitTitleText] = {
+          total: initialTotalSubtopics,
+          subtopics: {}
+        };
+      } else if (typeof completedSubtopicsState[unitTitleText].total === 'undefined') {
+        // If total was not set in loaded data, set it from initial HTML
+        completedSubtopicsState[unitTitleText].total = initialTotalSubtopics;
       }
 
       // Initialize subtopics within the state if they don't exist
       Array.from(subtopicsList.children).forEach(subtopic => {
         const subtopicText = subtopic.textContent;
-        if (typeof completedSubtopicsState[unitTitleText][subtopicText] === 'undefined') {
-          completedSubtopicsState[unitTitleText][subtopicText] = false;
+        if (typeof completedSubtopicsState[unitTitleText].subtopics[subtopicText] === 'undefined') {
+          completedSubtopicsState[unitTitleText].subtopics[subtopicText] = false;
         }
       });
       // Update display to reflect current state or (0/Total)
@@ -482,17 +489,22 @@
   function updateUnitCompletionDisplay(unitElement) {
     const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
     const totalSubtopicsSpan = unitElement.querySelector('.unit-title span:last-child');
-    const totalSubtopics = parseInt(totalSubtopicsSpan.textContent.match(/\d+/g)[1]);
 
     let completedCount = 0;
-    if (completedSubtopicsState[unitTitleText]) {
-      for (const subtopicText in completedSubtopicsState[unitTitleText]) {
-        if (completedSubtopicsState[unitTitleText][subtopicText]) {
+    const unitData = completedSubtopicsState[unitTitleText];
+
+    if (unitData && unitData.subtopics) {
+      for (const subtopicText in unitData.subtopics) {
+        if (unitData.subtopics[subtopicText]) {
           completedCount++;
         }
       }
+      // Use the stored total from completedSubtopicsState
+      totalSubtopicsSpan.textContent = `(${completedCount}/${unitData.total})`;
+    } else {
+      // Fallback if data is not yet initialized for some reason
+      totalSubtopicsSpan.textContent = `(0/${parseInt(totalSubtopicsSpan.textContent.replace(/[()]/g, '')) || 0})`;
     }
-    totalSubtopicsSpan.textContent = `(${completedCount}/${totalSubtopics})`;
   }
 
   // Function to open the subtopics modal
@@ -517,6 +529,8 @@
     // Clear previous subtopics
     modalSubtopics.innerHTML = '';
 
+    const unitData = completedSubtopicsState[unitTitleText];
+
     // Populate modal with subtopics and add tick circles
     Array.from(subtopicsList.children).forEach(subtopic => {
       const li = document.createElement('li');
@@ -528,7 +542,7 @@
       const subtopicTextContent = subtopic.textContent;
 
       // Set initial state of tick circle from global state
-      if (completedSubtopicsState[unitTitleText] && completedSubtopicsState[unitTitleText][subtopicTextContent]) {
+      if (unitData && unitData.subtopics && unitData.subtopics[subtopicTextContent]) {
         tickCircle.classList.add('checked');
         tickCircle.innerHTML = '&#10003;';
       } else {
@@ -543,9 +557,12 @@
 
         // Update global state
         if (!completedSubtopicsState[unitTitleText]) {
-            completedSubtopicsState[unitTitleText] = {};
+            completedSubtopicsState[unitTitleText] = { total: 0, subtopics: {} }; // Ensure total is initialized
         }
-        completedSubtopicsState[unitTitleText][subtopicTextContent] = isChecked;
+        if (!completedSubtopicsState[unitTitleText].subtopics) {
+            completedSubtopicsState[unitTitleText].subtopics = {};
+        }
+        completedSubtopicsState[unitTitleText].subtopics[subtopicTextContent] = isChecked;
 
         // Update the count on the main unit button
         updateUnitCompletionDisplay(unitElement);
@@ -554,6 +571,11 @@
         if (userId) {
           try {
             const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData/completedSubtopics`);
+            // Only save the 'subtopics' part, and ensure 'total' is preserved if it exists
+            const dataToSave = {
+                total: completedSubtopicsState[unitTitleText].total,
+                subtopics: completedSubtopicsState[unitTitleText].subtopics
+            };
             await setDoc(userDocRef, { data: JSON.stringify(completedSubtopicsState) }, { merge: true });
             console.log("Subtopic state saved to Firestore.");
           } catch (e) {
@@ -654,17 +676,38 @@
       unsubscribeSnapshot = onSnapshot(userDocRef, (docSnap) => {
         if (docSnap.exists() && docSnap.data().data) {
           try {
-            completedSubtopicsState = JSON.parse(docSnap.data().data);
-            console.log("Loaded completed subtopics:", completedSubtopicsState);
+            const loadedData = JSON.parse(docSnap.data().data);
+            // Merge loaded data with initial structure, preserving totals from HTML if not in loaded data
+            document.querySelectorAll('.unit').forEach(unitElement => {
+                const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
+                const initialTotalSubtopics = parseInt(unitElement.querySelector('.unit-title span:last-child').textContent.replace(/[()]/g, ''));
+
+                if (loadedData[unitTitleText]) {
+                    // If unit exists in loaded data, use its subtopics and ensure total is set
+                    completedSubtopicsState[unitTitleText] = {
+                        total: loadedData[unitTitleText].total || initialTotalSubtopics, // Use loaded total or initial
+                        subtopics: loadedData[unitTitleText].subtopics || {}
+                    };
+                } else {
+                    // If unit not in loaded data, initialize with total from HTML and empty subtopics
+                    completedSubtopicsState[unitTitleText] = {
+                        total: initialTotalSubtopics,
+                        subtopics: {}
+                    };
+                }
+            });
+            console.log("Loaded and merged completed subtopics:", completedSubtopicsState);
           } catch (e) {
             console.error("Error parsing Firestore data:", e);
             completedSubtopicsState = {}; // Reset if data is corrupted
+            initializeUnitDisplays(); // Re-initialize with default if parsing fails
           }
         } else {
-          console.log("No completed subtopics found for this user, initializing empty state.");
-          completedSubtopicsState = {}; // Initialize empty if document doesn't exist
+          console.log("No completed subtopics found for this user, initializing empty state from HTML.");
+          completedSubtopicsState = {}; // Ensure it's empty before re-initializing
+          initializeUnitDisplays(); // Initialize with default 0/Total
         }
-        initializeUnitDisplays(); // Update UI with loaded data
+        initializeUnitDisplays(); // Update UI with loaded or re-initialized data
         isAuthReady = true; // Set flag to true after data is loaded and UI updated
       }, (error) => {
         console.error("Error listening to Firestore:", error);
