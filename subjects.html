@@ -401,12 +401,10 @@
 
   // Function to show the reminder message
   function showReminderMessage(message) {
+    console.log("showReminderMessage function called with message:", message); // Debugging log
     reminderMessageDiv.textContent = message;
     reminderMessageDiv.classList.add('show');
-    // Optionally hide after a few seconds
-    setTimeout(() => {
-      hideReminderMessage();
-    }, 5000); // Hide after 5 seconds
+    // Removed setTimeout to keep the message showing until modal closes
   }
 
   // Handle Google Sign-In
@@ -441,7 +439,7 @@
   signInEmailBtn.addEventListener('click', async () => {
     hideAuthError();
     const email = emailInput.value;
-    const password = passwordInput.value;
+    const password = password.value;
     if (!email || !password) {
       showAuthError("Please enter both email and password.");
       return;
@@ -597,6 +595,7 @@
 
         // Show reminder message if ticked
         if (isChecked) {
+          console.log("Subtopic ticked. Attempting to show reminder message."); // Debugging log
           showReminderMessage(`[${subtopicTextContent}] සඳහා මතක් කිරීමක් එක් කරන්න`);
         } else {
           // If unticked, hide the reminder message if it's currently showing for this subtopic
@@ -615,14 +614,14 @@
       modalSubtopics.appendChild(li);
     });
 
-    console.log("Removing hidden class from modal."); // Debugging line
+    console.log("Removing hidden class from modal."); // Debugging log
     // Show the modal overlay
     subtopicModal.classList.remove('hidden');
 
     // Force a reflow to ensure the 'display' change is rendered before applying 'is-active'
     subtopicModal.offsetWidth;
 
-    console.log("Adding is-active class to modal."); // Debugging line
+    console.log("Adding is-active class to modal."); // Debugging log
     // Add 'is-active' class to trigger the pop-in animation
     subtopicModal.classList.add('is-active');
     subtopicModal.classList.remove('is-closing'); // Ensure closing animation class is removed
@@ -729,12 +728,12 @@
         }
         initializeUnitDisplays(); // Update UI with loaded or re-initialized data
         isAuthReady = true; // Set flag to true after data is loaded and UI updated
-        console.log("isAuthReady set to true after data load."); // Debugging line
+        console.log("isAuthReady set to true after data load."); // Debugging log
       }, (error) => {
         console.error("Error listening to Firestore:", error);
         showAuthError("Error loading user data.");
         isAuthReady = true; // Still set to true, even on error, to allow interaction (though data might be missing)
-        console.log("isAuthReady set to true after Firestore error."); // Debugging line
+        console.log("isAuthReady set to true after Firestore error."); // Debugging log
       });
 
     } else {
@@ -746,7 +745,7 @@
       completedSubtopicsState = {}; // Clear state on logout
       initializeUnitDisplays(); // Reset UI counts to 0
       isAuthReady = false; // Reset flag when logged out
-      console.log("isAuthReady set to false after logout."); // Debugging line
+      console.log("isAuthReady set to false after logout."); // Debugging log
 
       // Unsubscribe from snapshot listener when user logs out
       if (unsubscribeSnapshot) {
@@ -777,7 +776,7 @@
         console.error("Initial authentication error:", error);
       }
       isAuthReady = true; // Allow interaction even if initial auth fails, user can sign in manually
-      console.log("isAuthReady set to true after initial auth attempt (success or fail)."); // Debugging line
+      console.log("isAuthReady set to true after initial auth attempt (success or fail)."); // Debugging log
     }
   });
 </script>
