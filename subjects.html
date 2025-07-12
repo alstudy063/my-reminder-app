@@ -694,13 +694,13 @@
 
   // Firebase Auth State Listener
   onAuthStateChanged(auth, async (user) => {
+    loadingSpinner.classList.add('hidden'); // Always hide spinner once auth state is determined
     if (user) {
       // User is signed in
       userId = user.uid;
       userIdDisplay.textContent = `User ID: ${userId}`;
-      loadingSpinner.classList.add('hidden'); // Hide spinner
-      authSection.classList.add('hidden'); // Ensure auth section is hidden
-      mainContent.classList.remove('hidden'); // Show main content
+      authSection.classList.add('hidden');
+      mainContent.classList.remove('hidden');
       hideAuthError(); // Hide any auth errors once logged in
 
       // Unsubscribe from previous snapshot listener if it exists
@@ -765,7 +765,6 @@
       // User is signed out
       userId = null;
       userIdDisplay.textContent = '';
-      loadingSpinner.classList.add('hidden'); // Hide spinner
       authSection.classList.remove('hidden'); // Show auth section
       mainContent.classList.add('hidden'); // Ensure main content is hidden
       completedSubtopicsState = {}; // Clear state on logout
@@ -784,29 +783,26 @@
   // Initial anonymous sign-in or custom token sign-in
   document.addEventListener('DOMContentLoaded', async () => {
     loadingSpinner.classList.remove('hidden'); // Show spinner immediately on DOMContentLoaded
-    try {
-      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-        await signInWithCustomToken(auth, __initial_auth_token);
-        console.log("Signed in with custom token.");
-      } else {
-        await signInAnonymously(auth);
-        console.log("Signed in anonymously.");
-      }
-    } catch (error) {
-      // Handle the specific custom-token-mismatch error more gracefully
-      if (error.code === 'auth/custom-token-mismatch') {
-        console.warn("Initial authentication with custom token failed (token mismatch). Please sign in manually.");
-      } else if (error.code === 'auth/admin-restricted-operation') {
-        console.warn("Initial authentication failed (admin-restricted-operation). Please sign in manually.");
-      }
-      else {
-        console.error("Initial authentication error:", error);
-      }
-      // If initial auth fails, ensure the auth section is shown and spinner is hidden
-      loadingSpinner.classList.add('hidden');
-      authSection.classList.remove('hidden');
-      isAuthReady = true; // Allow interaction even if initial auth fails, user can sign in manually
-      console.log("isAuthReady set to true after initial auth attempt (success or fail)."); // Debugging log
+    // Do not try to sign in here. Let onAuthStateChanged handle the initial state.
+    // The onAuthStateChanged listener will fire immediately if a session is persisted.
+    // If no session, it will fire with user=null, and then the auth section will show.
+    // Explicitly call signInAnonymously if no token is provided.
+    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+        // Firebase automatically handles custom token sign-in if a token is provided
+        // and onAuthStateChanged will reflect the result.
+        // No explicit signInWithCustomToken call needed here if onAuthStateChanged is the primary handler.
+        // If you *must* force a sign-in attempt here, ensure it's awaited and its outcome
+        // is handled to hide the spinner and show correct UI.
+        // For now, relying solely on onAuthStateChanged to manage initial UI state.
+    } else {
+        // If no initial token, attempt anonymous sign-in.
+        try {
+            await signInAnonymously(auth);
+            console.log("Attempted anonymous sign-in on DOMContentLoaded.");
+        } catch (error) {
+            console.error("Anonymous sign-in failed on DOMContentLoaded:", error);
+            // If anonymous sign-in fails, onAuthStateChanged will still handle showing auth section
+        }
     }
   });
 </script>
