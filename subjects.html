@@ -399,117 +399,9 @@
     authErrorDiv.textContent = '';
   }
 
-  // Handle Google Sign-In
-  signInGoogleBtn.addEventListener('click', async () => {
-    hideAuthError();
-    try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
-    } catch (error) {
-      console.error("Google Sign-In Error:", error);
-      showAuthError(error.message);
-    }
-  });
-
-  // Handle Email/Password Sign-Up
-  signUpEmailBtn.addEventListener('click', async () => {
-    hideAuthError();
-    const email = emailInput.value;
-    const password = passwordInput.value;
-    if (!email || !password) {
-      showAuthError("Please enter both email and password.");
-      return;
-    }
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-      console.error("Email Sign-Up Error:", error);
-      showAuthError(error.message);
-    }
-  });
-
-  // Handle Email/Password Sign-In
-  signInEmailBtn.addEventListener('click', async () => {
-    hideAuthError();
-    const email = emailInput.value;
-    const password = passwordInput.value;
-    if (!email || !password) {
-      showAuthError("Please enter both email and password.");
-      return;
-    }
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-      console.error("Email Sign-In Error:", error);
-      showAuthError(error.message);
-    }
-  });
-
-  // Handle Logout
-  logoutBtn.addEventListener('click', async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error("Logout Error:", error);
-      showAuthError("Failed to log out."); // Display error if logout fails
-    }
-  });
-
-  // Function to initialize unit completion displays
-  function initializeUnitDisplays() {
-    document.querySelectorAll('.unit').forEach(unitElement => {
-      const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
-      const subtopicsList = unitElement.querySelector('.subtopics');
-      const totalSubtopicsSpan = unitElement.querySelector('.unit-title span:last-child');
-      const initialTotalSubtopics = parseInt(totalSubtopicsSpan.textContent.replace(/[()]/g, ''));
-
-      // Ensure the unit's entry exists in completedSubtopicsState with its total
-      if (!completedSubtopicsState[unitTitleText]) {
-        completedSubtopicsState[unitTitleText] = {
-          total: initialTotalSubtopics,
-          subtopics: {}
-        };
-      } else if (typeof completedSubtopicsState[unitTitleText].total === 'undefined') {
-        // If total was not set in loaded data, set it from initial HTML
-        completedSubtopicsState[unitTitleText].total = initialTotalSubtopics;
-      }
-
-      // Initialize subtopics within the state if they don't exist
-      Array.from(subtopicsList.children).forEach(subtopic => {
-        const subtopicText = subtopic.textContent;
-        if (typeof completedSubtopicsState[unitTitleText].subtopics[subtopicText] === 'undefined') {
-          completedSubtopicsState[unitTitleText].subtopics[subtopicText] = false;
-        }
-      });
-      // Update display to reflect current state or (0/Total)
-      updateUnitCompletionDisplay(unitElement);
-    });
-  }
-
-  // Function to update the count on the main unit button
-  function updateUnitCompletionDisplay(unitElement) {
-    const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
-    const totalSubtopicsSpan = unitElement.querySelector('.unit-title span:last-child');
-
-    let completedCount = 0;
-    const unitData = completedSubtopicsState[unitTitleText];
-
-    if (unitData && unitData.subtopics) {
-      for (const subtopicText in unitData.subtopics) {
-        if (unitData.subtopics[subtopicText]) {
-          completedCount++;
-        }
-      }
-      // Use the stored total from completedSubtopicsState
-      totalSubtopicsSpan.textContent = `(${completedCount}/${unitData.total})`;
-    } else {
-      // Fallback if data is not yet initialized for some reason
-      // This should ideally not be reached if initializeUnitDisplays runs correctly
-      totalSubtopicsSpan.textContent = `(0/${parseInt(totalSubtopicsSpan.textContent.replace(/[()]/g, '')) || 0})`;
-    }
-  }
-
-  // Function to open the subtopics modal
-  function openSubtopicsModal(unitElement) {
+  // Make openSubtopicsModal globally accessible
+  window.openSubtopicsModal = async (unitElement) => { // Added 'async' here as it calls async functions
+    console.log("openSubtopicsModal called. isAuthReady:", isAuthReady); // Debugging line
     // Prevent modal from opening if authentication and data loading are not ready
     if (!isAuthReady) {
       showAuthError("Please wait, loading your data or sign in to track your progress.");
@@ -523,6 +415,8 @@
     const modalSubtopics = document.getElementById('modalSubtopics');
     const subtopicModal = document.getElementById('subtopicModal');
     const reminderMessageDiv = document.getElementById('reminderMessage');
+
+    console.log("Subtopics list children count:", subtopicsList.children.length); // Debugging line
 
     // Set modal title
     modalTitle.textContent = unitTitleText;
@@ -602,15 +496,71 @@
       modalSubtopics.appendChild(li);
     });
 
+    console.log("Removing hidden class from modal."); // Debugging line
     // Show the modal overlay
     subtopicModal.classList.remove('hidden');
 
     // Force a reflow to ensure the 'display' change is rendered before applying 'is-active'
     subtopicModal.offsetWidth;
 
+    console.log("Adding is-active class to modal."); // Debugging line
     // Add 'is-active' class to trigger the pop-in animation
     subtopicModal.classList.add('is-active');
     subtopicModal.classList.remove('is-closing'); // Ensure closing animation class is removed
+  }; // End of window.openSubtopicsModal definition
+
+  // Function to initialize unit completion displays
+  function initializeUnitDisplays() {
+    document.querySelectorAll('.unit').forEach(unitElement => {
+      const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
+      const subtopicsList = unitElement.querySelector('.subtopics');
+      const totalSubtopicsSpan = unitElement.querySelector('.unit-title span:last-child');
+      const initialTotalSubtopics = parseInt(totalSubtopicsSpan.textContent.replace(/[()]/g, ''));
+
+      // Ensure the unit's entry exists in completedSubtopicsState with its total
+      if (!completedSubtopicsState[unitTitleText]) {
+        completedSubtopicsState[unitTitleText] = {
+          total: initialTotalSubtopics,
+          subtopics: {}
+        };
+      } else if (typeof completedSubtopicsState[unitTitleText].total === 'undefined' || isNaN(completedSubtopicsState[unitTitleText].total)) {
+        // If total was not set in loaded data or is NaN, set it from initial HTML
+        completedSubtopicsState[unitTitleText].total = initialTotalSubtopics;
+      }
+
+      // Initialize subtopics within the state if they don't exist
+      Array.from(subtopicsList.children).forEach(subtopic => {
+        const subtopicText = subtopic.textContent;
+        if (typeof completedSubtopicsState[unitTitleText].subtopics[subtopicText] === 'undefined') {
+          completedSubtopicsState[unitTitleText].subtopics[subtopicText] = false;
+        }
+      });
+      // Update display to reflect current state or (0/Total)
+      updateUnitCompletionDisplay(unitElement);
+    });
+  }
+
+  // Function to update the count on the main unit button
+  function updateUnitCompletionDisplay(unitElement) {
+    const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
+    const totalSubtopicsSpan = unitElement.querySelector('.unit-title span:last-child');
+
+    let completedCount = 0;
+    const unitData = completedSubtopicsState[unitTitleText];
+
+    if (unitData && unitData.subtopics) {
+      for (const subtopicText in unitData.subtopics) {
+        if (unitData.subtopics[subtopicText]) {
+          completedCount++;
+        }
+      }
+      // Use the stored total from completedSubtopicsState
+      totalSubtopicsSpan.textContent = `(${completedCount}/${unitData.total})`;
+    } else {
+      // Fallback if data is not yet initialized for some reason
+      // This should ideally not be reached if initializeUnitDisplays runs correctly
+      totalSubtopicsSpan.textContent = `(0/${parseInt(totalSubtopicsSpan.textContent.replace(/[()]/g, '')) || 0})`;
+    }
   }
 
   // Get modal elements (these are global for the modal)
@@ -714,10 +664,12 @@
         }
         initializeUnitDisplays(); // Update UI with loaded or re-initialized data
         isAuthReady = true; // Set flag to true after data is loaded and UI updated
+        console.log("isAuthReady set to true after data load."); // Debugging line
       }, (error) => {
         console.error("Error listening to Firestore:", error);
         showAuthError("Error loading user data.");
         isAuthReady = true; // Still set to true, even on error, to allow interaction (though data might be missing)
+        console.log("isAuthReady set to true after Firestore error."); // Debugging line
       });
 
     } else {
@@ -729,6 +681,7 @@
       completedSubtopicsState = {}; // Clear state on logout
       initializeUnitDisplays(); // Reset UI counts to 0
       isAuthReady = false; // Reset flag when logged out
+      console.log("isAuthReady set to false after logout."); // Debugging line
 
       // Unsubscribe from snapshot listener when user logs out
       if (unsubscribeSnapshot) {
@@ -752,13 +705,18 @@
       // Handle the specific custom-token-mismatch error more gracefully
       if (error.code === 'auth/custom-token-mismatch') {
         console.warn("Initial authentication with custom token failed (token mismatch). Please sign in manually.");
-      } else {
+      } else if (error.code === 'auth/admin-restricted-operation') {
+        console.warn("Initial authentication failed (admin-restricted-operation). Please sign in manually.");
+      }
+      else {
         console.error("Initial authentication error:", error);
       }
       isAuthReady = true; // Allow interaction even if initial auth fails, user can sign in manually
+      console.log("isAuthReady set to true after initial auth attempt (success or fail)."); // Debugging line
     }
   });
 </script>
 
 </body>
 </html>
+
