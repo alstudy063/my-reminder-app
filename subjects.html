@@ -293,7 +293,7 @@
     <!-- Unit 09: Microbiology -->
     <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
       <div class="unit-title flex justify-between items-center text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-        <span class="flex-grow min-w-0">09. ක්ෂuද්‍ර ජීව විද්‍යාව</span>
+        <span class="flex-grow min-w-0">09. ක්ෂුද්‍ර ජීව විද්‍යාව</span>
         <span class="text-green-600 text-lg w-12 text-right flex-shrink-0">(7)</span>
       </div>
       <ul class="subtopics">
@@ -372,6 +372,7 @@
   const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
   let completedSubtopicsState = {}; // Stores { "Unit Title": { "Subtopic Text": true/false, ... } }
   let unsubscribeSnapshot = null; // To store the unsubscribe function for Firestore listener
+  let isAuthReady = false; // New flag to indicate if auth and initial data load are complete
 
   // UI Elements
   const authSection = document.getElementById('auth-section');
@@ -400,9 +401,8 @@
   // Handle Google Sign-In
   signInGoogleBtn.addEventListener('click', async () => {
     hideAuthError();
-    const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      await signInWithPopup(auth, new GoogleAuthProvider());
     } catch (error) {
       console.error("Google Sign-In Error:", error);
       showAuthError(error.message);
@@ -497,8 +497,9 @@
 
   // Function to open the subtopics modal
   function openSubtopicsModal(unitElement) {
-    if (!userId) {
-      showAuthError("Please sign in to track your progress.");
+    // Prevent modal from opening if authentication and data loading are not ready
+    if (!isAuthReady) {
+      showAuthError("Please wait, loading your data or sign in to track your progress.");
       return;
     }
     hideAuthError(); // Hide any previous auth errors
@@ -664,9 +665,11 @@
           completedSubtopicsState = {}; // Initialize empty if document doesn't exist
         }
         initializeUnitDisplays(); // Update UI with loaded data
+        isAuthReady = true; // Set flag to true after data is loaded and UI updated
       }, (error) => {
         console.error("Error listening to Firestore:", error);
         showAuthError("Error loading user data.");
+        isAuthReady = true; // Still set to true, even on error, to allow interaction (though data might be missing)
       });
 
     } else {
@@ -677,6 +680,7 @@
       mainContent.classList.add('hidden');
       completedSubtopicsState = {}; // Clear state on logout
       initializeUnitDisplays(); // Reset UI counts to 0
+      isAuthReady = false; // Reset flag when logged out
 
       // Unsubscribe from snapshot listener when user logs out
       if (unsubscribeSnapshot) {
@@ -703,6 +707,7 @@
       } else {
         console.error("Initial authentication error:", error);
       }
+      isAuthReady = true; // Allow interaction even if initial auth fails, user can sign in manually
     }
   });
 </script>
