@@ -668,8 +668,8 @@
       unitsHtmlId: 'biology-units'
     },
     "Physics": {
-      totalUnits: 11, // Updated total units for Physics
-      totalSubtopics: 62, // Updated total subtopics for Physics
+      totalUnits: 11,
+      totalSubtopics: 62,
       unitsHtmlId: 'physics-units'
     },
     "Chemistry": {
@@ -992,6 +992,10 @@
   async function loadSubjectData(subject) {
     if (!userId) {
       console.warn("User not logged in, cannot load subject data.");
+      // If not logged in, just initialize displays based on HTML structure
+      completedSubtopicsState[subject] = {}; // Clear any previous state for this subject
+      initializeUnitDisplaysForCurrentSubject();
+      isAuthReady = true; // Allow modal to open, but no persistence
       return;
     }
 
@@ -1044,7 +1048,7 @@
         completedSubtopicsState[subject] = tempSubjectState; // Use initial HTML structure
       }
       initializeUnitDisplaysForCurrentSubject(); // Update UI with loaded or re-initialized data
-      isAuthReady = true; // Set flag to true after data is loaded and UI updated
+      isAuthReady = true; // Set flag to true AFTER data is loaded and UI updated
       console.log("isAuthReady set to true after data load for", subject); // Debugging log
     }, (error) => {
       console.error("Error listening to Firestore for", subject, ":", error);
@@ -1058,12 +1062,12 @@
   subjectSelect.addEventListener('change', (event) => {
     currentSubject = event.target.value;
     console.log("Subject changed to:", currentSubject);
-    if (userId) {
-      loadSubjectData(currentSubject); // Load data for the new subject
-    } else {
-      // If not logged in, just switch the display and reset counts
-      initializeUnitDisplaysForCurrentSubject();
-    }
+    // When subject changes, immediately set isAuthReady to false until new data is loaded
+    isAuthReady = false;
+    // Show spinner briefly while data for new subject loads
+    loadingSpinner.classList.remove('hidden');
+    // Load data for the new subject
+    loadSubjectData(currentSubject);
   });
 
 
@@ -1077,10 +1081,6 @@
       authSection.classList.add('hidden');
       mainContent.classList.remove('hidden'); // Show main content
       hideAuthError(); // Hide any auth errors once logged in
-
-      // Initialize UI for the current subject immediately after showing main content
-      // This ensures the correct subject's units are displayed even before Firestore data loads
-      initializeUnitDisplaysForCurrentSubject();
 
       // Load data for the current subject (default or last selected)
       loadSubjectData(currentSubject);
@@ -1107,26 +1107,29 @@
   // Initial anonymous sign-in or custom token sign-in
   document.addEventListener('DOMContentLoaded', async () => {
     loadingSpinner.classList.remove('hidden'); // Show spinner immediately on DOMContentLoaded
-    // Do not try to sign in here. Let onAuthStateChanged handle the initial state.
-    // The onAuthStateChanged listener will fire immediately if a session is persisted.
-    // If no session, it will fire with user=null, and then the auth section will show.
-    // Explicitly call signInAnonymously if no token is provided.
-    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-        // Firebase automatically handles custom token sign-in if a token is provided
-        // and onAuthStateChanged will reflect the result.
-        // No explicit signInWithCustomToken call needed here if onAuthStateChanged is the primary handler.
-        // If you *must* force a sign-in attempt here, ensure it's awaited and its outcome
-        // is handled to hide the spinner and show correct UI.
-        // For now, relying solely on onAuthStateChanged to manage initial UI state.
-    } else {
-        // If no initial token, attempt anonymous sign-in.
-        try {
-            await signInAnonymously(auth);
-            console.log("Attempted anonymous sign-in on DOMContentLoaded.");
-        } catch (error) {
-            console.error("Anonymous sign-in failed on DOMContentLoaded:", error);
-            // If anonymous sign-in fails, onAuthStateChanged will still handle showing auth section
-        }
+    try {
+      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+        await signInWithCustomToken(auth, __initial_auth_token);
+        console.log("Signed in with custom token.");
+      } else {
+        await signInAnonymously(auth);
+        console.log("Signed in anonymously.");
+      }
+    } catch (error) {
+      // Handle the specific custom-token-mismatch error more gracefully
+      if (error.code === 'auth/custom-token-mismatch') {
+        console.warn("Initial authentication with custom token failed (token mismatch). Please sign in manually.");
+      } else if (error.code === 'auth/admin-restricted-operation') {
+        console.warn("Initial authentication failed (admin-restricted-operation). Please sign in manually.");
+      }
+      else {
+        console.error("Initial authentication error:", error);
+      }
+      // If initial auth fails, ensure the auth section is shown and spinner is hidden
+      loadingSpinner.classList.add('hidden');
+      authSection.classList.remove('hidden');
+      isAuthReady = true; // Allow interaction even if initial auth fails, user can sign in manually
+      console.log("isAuthReady set to true after initial auth attempt (success or fail)."); // Debugging log
     }
   });
 </script>
