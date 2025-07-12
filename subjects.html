@@ -697,12 +697,8 @@
         console.log("Signed in anonymously.");
       }
     } catch (error) {
-      // Handle the specific custom-token-mismatch error more gracefully
-      if (error.code === 'auth/custom-token-mismatch') {
-        console.warn("Initial authentication with custom token failed (token mismatch). Please sign in manually.");
-      } else {
-        console.error("Initial authentication error:", error);
-      }
+      console.error("Initial authentication error:", error);
+      // If anonymous or custom token sign-in fails, the user will see the login screen.
     }
   });
 </script>
