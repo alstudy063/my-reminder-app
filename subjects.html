@@ -503,6 +503,7 @@
       totalSubtopicsSpan.textContent = `(${completedCount}/${unitData.total})`;
     } else {
       // Fallback if data is not yet initialized for some reason
+      // This should ideally not be reached if initializeUnitDisplays runs correctly
       totalSubtopicsSpan.textContent = `(0/${parseInt(totalSubtopicsSpan.textContent.replace(/[()]/g, '')) || 0})`;
     }
   }
@@ -557,7 +558,8 @@
 
         // Update global state
         if (!completedSubtopicsState[unitTitleText]) {
-            completedSubtopicsState[unitTitleText] = { total: 0, subtopics: {} }; // Ensure total is initialized
+            // This case should ideally not be hit if initializeUnitDisplays runs correctly
+            completedSubtopicsState[unitTitleText] = { total: 0, subtopics: {} };
         }
         if (!completedSubtopicsState[unitTitleText].subtopics) {
             completedSubtopicsState[unitTitleText].subtopics = {};
@@ -571,11 +573,7 @@
         if (userId) {
           try {
             const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData/completedSubtopics`);
-            // Only save the 'subtopics' part, and ensure 'total' is preserved if it exists
-            const dataToSave = {
-                total: completedSubtopicsState[unitTitleText].total,
-                subtopics: completedSubtopicsState[unitTitleText].subtopics
-            };
+            // Save the entire completedSubtopicsState object
             await setDoc(userDocRef, { data: JSON.stringify(completedSubtopicsState) }, { merge: true });
             console.log("Subtopic state saved to Firestore.");
           } catch (e) {
@@ -674,38 +672,45 @@
       // Listen for real-time updates to user's data
       const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData/completedSubtopics`);
       unsubscribeSnapshot = onSnapshot(userDocRef, (docSnap) => {
+        // Create a temporary state based on initial HTML structure
+        const tempCompletedSubtopicsState = {};
+        document.querySelectorAll('.unit').forEach(unitElement => {
+            const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
+            const initialTotalSubtopics = parseInt(unitElement.querySelector('.unit-title span:last-child').textContent.replace(/[()]/g, ''));
+            const subtopicsList = unitElement.querySelector('.subtopics');
+
+            tempCompletedSubtopicsState[unitTitleText] = {
+                total: initialTotalSubtopics,
+                subtopics: {}
+            };
+            Array.from(subtopicsList.children).forEach(subtopic => {
+                tempCompletedSubtopicsState[unitTitleText].subtopics[subtopic.textContent] = false;
+            });
+        });
+
         if (docSnap.exists() && docSnap.data().data) {
           try {
             const loadedData = JSON.parse(docSnap.data().data);
-            // Merge loaded data with initial structure, preserving totals from HTML if not in loaded data
-            document.querySelectorAll('.unit').forEach(unitElement => {
-                const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
-                const initialTotalSubtopics = parseInt(unitElement.querySelector('.unit-title span:last-child').textContent.replace(/[()]/g, ''));
-
-                if (loadedData[unitTitleText]) {
-                    // If unit exists in loaded data, use its subtopics and ensure total is set
-                    completedSubtopicsState[unitTitleText] = {
-                        total: loadedData[unitTitleText].total || initialTotalSubtopics, // Use loaded total or initial
-                        subtopics: loadedData[unitTitleText].subtopics || {}
-                    };
-                } else {
-                    // If unit not in loaded data, initialize with total from HTML and empty subtopics
-                    completedSubtopicsState[unitTitleText] = {
-                        total: initialTotalSubtopics,
-                        subtopics: {}
-                    };
+            // Merge loaded data into the temporary state
+            for (const unitTitle in tempCompletedSubtopicsState) {
+                if (loadedData[unitTitle] && loadedData[unitTitle].subtopics) {
+                    // Merge subtopic completion status from loaded data
+                    for (const subtopicText in tempCompletedSubtopicsState[unitTitle].subtopics) {
+                        if (typeof loadedData[unitTitle].subtopics[subtopicText] !== 'undefined') {
+                            tempCompletedSubtopicsState[unitTitle].subtopics[subtopicText] = loadedData[unitTitle].subtopics[subtopicText];
+                        }
+                    }
                 }
-            });
+            }
+            completedSubtopicsState = tempCompletedSubtopicsState; // Assign the merged state
             console.log("Loaded and merged completed subtopics:", completedSubtopicsState);
           } catch (e) {
             console.error("Error parsing Firestore data:", e);
-            completedSubtopicsState = {}; // Reset if data is corrupted
-            initializeUnitDisplays(); // Re-initialize with default if parsing fails
+            completedSubtopicsState = tempCompletedSubtopicsState; // Fallback to initial HTML structure
           }
         } else {
           console.log("No completed subtopics found for this user, initializing empty state from HTML.");
-          completedSubtopicsState = {}; // Ensure it's empty before re-initializing
-          initializeUnitDisplays(); // Initialize with default 0/Total
+          completedSubtopicsState = tempCompletedSubtopicsState; // Use initial HTML structure
         }
         initializeUnitDisplays(); // Update UI with loaded or re-initialized data
         isAuthReady = true; // Set flag to true after data is loaded and UI updated
