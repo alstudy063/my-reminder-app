@@ -293,7 +293,7 @@
     <!-- Unit 09: Microbiology -->
     <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
       <div class="unit-title flex justify-between items-center text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-        <span class="flex-grow min-w-0">09. ක්ෂුද්‍ර ජීව විද්‍යාව</span>
+        <span class="flex-grow min-w-0">09. ක්ෂuද්‍ර ජීව විද්‍යාව</span>
         <span class="text-green-600 text-lg w-12 text-right flex-shrink-0">(7)</span>
       </div>
       <ul class="subtopics">
@@ -697,8 +697,12 @@
         console.log("Signed in anonymously.");
       }
     } catch (error) {
-      console.error("Initial authentication error:", error);
-      // If anonymous or custom token sign-in fails, the user will see the login screen.
+      // Handle the specific custom-token-mismatch error more gracefully
+      if (error.code === 'auth/custom-token-mismatch') {
+        console.warn("Initial authentication with custom token failed (token mismatch). Please sign in manually.");
+      } else {
+        console.error("Initial authentication error:", error);
+      }
     }
   });
 </script>
