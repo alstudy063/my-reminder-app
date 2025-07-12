@@ -733,7 +733,9 @@
     <!-- Summary Section -->
     <div class="summary mt-10 bg-green-50 border-l-8 border-green-500 p-4 md:p-6 text-base md:text-xl rounded-lg text-green-800">
       🔢 <strong class="font-bold">Total Units:</strong> <span id="total-units-display"></span><br>
-      🟩 <strong class="font-bold">Total Subtopics:</strong> <span id="total-subtopics-display"></span>
+      ✅ <strong class="font-bold">Completed Units:</strong> <span id="completed-units-display"></span><br>
+      🟩 <strong class="font-bold">Total Subtopics:</strong> <span id="total-subtopics-display"></span><br>
+      🔵 <strong class="font-bold">Completed Subtopics:</strong> <span id="completed-subtopics-display"></span>
     </div>
 </div>
 
@@ -802,6 +804,10 @@
   const biologyBtn = document.getElementById('biology-btn');
   const physicsBtn = document.getElementById('physics-btn');
   const chemistryBtn = document.getElementById('chemistry-btn');
+
+  // New UI Elements for summary counts
+  const completedUnitsDisplay = document.getElementById('completed-units-display');
+  const completedSubtopicsDisplay = document.getElementById('completed-subtopics-display');
 
 
   // Data for each subject
@@ -927,6 +933,8 @@
   function initializeUnitDisplaysForCurrentSubject() {
     let currentTotalUnits = 0;
     let currentTotalSubtopics = 0;
+    let currentCompletedUnits = 0; // New counter for completed units
+    let currentCompletedSubtopics = 0; // New counter for completed subtopics
 
     // Hide all subject unit containers first
     document.querySelectorAll('.subject-units').forEach(container => {
@@ -968,6 +976,23 @@
           completedSubtopicsState[currentSubject][unitTitleText].subtopics[subtopicText] = false;
         }
       });
+
+      // Calculate completed subtopics for this unit and overall
+      let unitCompletedSubtopicsCount = 0;
+      if (completedSubtopicsState[currentSubject][unitTitleText] && completedSubtopicsState[currentSubject][unitTitleText].subtopics) {
+          for (const subtopicText in completedSubtopicsState[currentSubject][unitTitleText].subtopics) {
+              if (completedSubtopicsState[currentSubject][unitTitleText].subtopics[subtopicText]) {
+                  unitCompletedSubtopicsCount++;
+                  currentCompletedSubtopics++; // Increment overall completed subtopics
+              }
+          }
+      }
+
+      // Check if the unit is completed (all its subtopics are completed)
+      if (unitCompletedSubtopicsCount === initialTotalSubtopics && initialTotalSubtopics > 0) {
+          currentCompletedUnits++;
+      }
+
       // Update display to reflect current state or (0/Total)
       updateUnitCompletionDisplay(unitElement);
     });
@@ -975,6 +1000,8 @@
     // Update the summary section totals
     totalUnitsDisplay.textContent = currentTotalUnits;
     totalSubtopicsDisplay.textContent = currentTotalSubtopics;
+    completedUnitsDisplay.textContent = currentCompletedUnits; // Update completed units display
+    completedSubtopicsDisplay.textContent = currentCompletedSubtopics; // Update completed subtopics display
 
     // Update active button styling
     document.querySelectorAll('.subject-button').forEach(button => {
@@ -1054,6 +1081,9 @@
 
         // Update the count on the main unit button
         updateUnitCompletionDisplay(unitElement);
+        // Re-initialize displays to update the overall summary counts
+        initializeUnitDisplaysForCurrentSubject();
+
 
         // Save to Firestore
         if (userId) {
