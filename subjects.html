@@ -275,7 +275,7 @@
                 <li>ජලය ඉවත් කිරීම</li>
                 <li>පෝෂණ ක්‍රියාවලි</li>
                 <li>පෝෂණ අවශ්‍යතා</li>
-                <li>ජීවන චක්‍ර</li>
+                <li>ජීවන චක්‍රය</li>
                 <li>ප්‍රජනනය</li>
                 <li>උත්තේජ වලට ප්‍රතිචාර</li>
                 <li>ආතති වලට ප්‍රතිචාර</li>
@@ -403,7 +403,7 @@
             <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
               <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
                 <span class="flex-grow min-w-0">01. මිනුම</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(5)</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(4)</span>
               </div>
               <ul class="subtopics">
                 <li>භෞතික රාශි</li>
@@ -669,7 +669,7 @@
     },
     "Physics": {
       totalUnits: 11, // Updated total units for Physics
-      totalSubtopics: 53, // Updated total subtopics for Physics
+      totalSubtopics: 62, // Updated total subtopics for Physics
       unitsHtmlId: 'physics-units'
     },
     "Chemistry": {
@@ -1075,8 +1075,12 @@
       userId = user.uid;
       userIdDisplay.textContent = `User ID: ${userId}`;
       authSection.classList.add('hidden');
-      mainContent.classList.remove('hidden');
+      mainContent.classList.remove('hidden'); // Show main content
       hideAuthError(); // Hide any auth errors once logged in
+
+      // Initialize UI for the current subject immediately after showing main content
+      // This ensures the correct subject's units are displayed even before Firestore data loads
+      initializeUnitDisplaysForCurrentSubject();
 
       // Load data for the current subject (default or last selected)
       loadSubjectData(currentSubject);
