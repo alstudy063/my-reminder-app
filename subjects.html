@@ -106,8 +106,9 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       z-index: 1001; /* Higher than modal content to ensure visibility */
       opacity: 0;
-      transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; /* Add visibility transition */
-      visibility: hidden; /* Initially hidden, but not display: none */
+      /* Changed transition to only apply to opacity for immediate visibility */
+      transition: opacity 0.3s ease-in-out;
+      visibility: hidden; /* Initially hidden */
       pointer-events: none; /* Not clickable when hidden */
       font-size: 0.875rem; /* Base font size for responsiveness (text-sm in Tailwind) */
       text-align: center; /* Center text */
@@ -125,7 +126,7 @@
 
     #reminderMessage.show {
       opacity: 1;
-      visibility: visible;
+      visibility: visible; /* Make immediately visible */
       pointer-events: auto; /* Clickable when shown */
     }
   </style>
@@ -399,12 +400,14 @@
     authErrorDiv.textContent = '';
   }
 
-  // Function to show the reminder message
+  // Function to show the reminder message with a delay
   function showReminderMessage(message) {
     console.log("showReminderMessage function called with message:", message); // Debugging log
     reminderMessageDiv.textContent = message;
-    reminderMessageDiv.classList.add('show');
-    // Removed setTimeout to keep the message showing until modal closes
+    // Add a small delay before showing the message
+    setTimeout(() => {
+      reminderMessageDiv.classList.add('show');
+    }, 300); // 300ms delay
   }
 
   // Handle Google Sign-In
@@ -518,7 +521,7 @@
 
   // Function to open the subtopics modal
   window.openSubtopicsModal = async (unitElement) => { // Added 'async' here as it calls async functions
-    console.log("openSubtopicsModal called. isAuthReady:", isAuthReady); // Debugging line
+    console.log("openSubtopicsModal called. isAuthReady:", isAuthReady); // Debugging log
     // Prevent modal from opening if authentication and data loading are not ready
     if (!isAuthReady) {
       showAuthError("Please wait, loading your data or sign in to track your progress.");
@@ -533,7 +536,7 @@
     const subtopicModal = document.getElementById('subtopicModal');
     const reminderMessageDiv = document.getElementById('reminderMessage');
 
-    console.log("Subtopics list children count:", subtopicsList.children.length); // Debugging line
+    console.log("Subtopics list children count:", subtopicsList.children.length); // Debugging log
 
     // Set modal title
     modalTitle.textContent = unitTitleText;
