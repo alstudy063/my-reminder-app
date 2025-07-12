@@ -399,6 +399,16 @@
     authErrorDiv.textContent = '';
   }
 
+  // Function to show the reminder message
+  function showReminderMessage(message) {
+    reminderMessageDiv.textContent = message;
+    reminderMessageDiv.classList.add('show');
+    // Optionally hide after a few seconds
+    setTimeout(() => {
+      hideReminderMessage();
+    }, 5000); // Hide after 5 seconds
+  }
+
   // Handle Google Sign-In
   signInGoogleBtn.addEventListener('click', async () => {
     hideAuthError();
