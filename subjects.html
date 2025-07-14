@@ -4,31 +4,45 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Subject Units and Sub Units</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* Custom font for better Sinhala rendering and modern look */
+    /* Combined styles from subj (copy 1).html and login.html */
+
+    /* Base body font from login.html, also considering Sinhala fonts */
     body {
-      font-family: "Inter", "Segoe UI", "Iskoola Pota", sans-serif;
+      font-family: 'Inter', "Segoe UI", "Iskoola Pota", sans-serif;
     }
-    /* No custom styles for plus/minus icon as it's removed */
+
+    /* Spinner styles from login.html (more complete) */
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .spinner {
+      animation: spin 1s linear infinite;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: #3b82f6; /* Blue color for spinner from subj.html */
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+    }
 
     /* Subtopics within the unit are now always hidden as they are shown in a modal */
     .subtopics {
       display: none; /* Hide the original subtopics */
     }
 
-    /* Modal overlay animation styles (fade in/out) */
+    /* Modal overlay animation styles (fade in/out) from subj.html */
     #subtopicModal {
-      transition: opacity 0.3s ease-out; /* For the background overlay fade */
-      opacity: 0; /* Start hidden */
-      /* backdrop-filter: blur(5px); Removed blur effect */
+      transition: opacity 0.3s ease-out;
+      opacity: 0;
     }
     #subtopicModal.is-active {
-      opacity: 1; /* Fade in */
+      opacity: 1;
     }
 
-    /* Keyframe animations for the modal content */
+    /* Keyframe animations for the modal content from subj.html */
     @keyframes modal-pop-in {
       0% {
         opacity: 0;
@@ -55,139 +69,265 @@
       }
     }
 
-    /* Modal content animation styles */
+    /* Modal content animation styles from subj.html */
     #subtopicModal > div {
-      /* Initial state for animation */
       opacity: 0;
-      transform: scale(0.8); /* Start smaller */
-      transition: none; /* Remove default transition to use keyframes */
+      transform: scale(0.8);
+      transition: none;
     }
 
     #subtopicModal.is-active > div {
-      /* Apply pop-in animation when active */
-      animation: modal-pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; /* Custom cubic-bezier for bounce */
+      animation: modal-pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
 
     #subtopicModal.is-closing > div {
-      /* Apply pop-out animation when closing */
       animation: modal-pop-out 0.3s ease-in forwards;
     }
 
-    /* Styles for the custom tick circle */
+    /* Styles for the custom tick circle from subj.html */
     .tick-circle {
-      width: 1.5rem; /* 24px */
-      height: 1.5rem; /* 24px */
+      width: 1.5rem;
+      height: 1.5rem;
       border-radius: 50%;
-      border: 2px solid #cbd5e0; /* Gray border */
+      border: 2px solid #cbd5e0;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-      flex-shrink: 0; /* Prevent it from shrinking */
+      flex-shrink: 0;
     }
 
     .tick-circle.checked {
-      background-color: #3b82f6; /* Blue background */
-      border-color: #3b82f6; /* Blue border */
-      color: #ffffff; /* White tick */
+      background-color: #3b82f6;
+      border-color: #3b82f6;
+      color: #ffffff;
     }
 
-    /* Reminder message styles - POSITIONED RELATIVE TO MODAL CONTENT */
+    /* Reminder message styles from subj.html */
     #reminderMessage {
-      position: absolute; /* Relative to its parent, which is the modal content div */
-      top: calc(100% + 15px); /* Position below the modal content with some spacing */
+      position: absolute;
+      top: calc(100% + 15px);
       left: 50%;
       transform: translateX(-50%);
-      background-color: #ef4444; /* Red-500 */
+      background-color: #ef4444;
       color: white;
-      padding: 0.75rem 1.5rem; /* Responsive padding using rem */
+      padding: 0.75rem 1.5rem;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      z-index: 1001; /* Higher than modal content to ensure visibility */
+      z-index: 1001;
       opacity: 0;
-      /* Changed transition to only apply to opacity for immediate visibility */
       transition: opacity 0.3s ease-in-out;
-      visibility: hidden; /* Initially hidden */
-      pointer-events: none; /* Not clickable when hidden */
-      font-size: 0.875rem; /* Base font size for responsiveness (text-sm in Tailwind) */
-      text-align: center; /* Center text */
-      max-width: 90%; /* Allow it to take up to 90% of parent width */
-      box-sizing: border-box; /* Include padding in width calculation */
+      visibility: hidden;
+      pointer-events: none;
+      font-size: 0.875rem;
+      text-align: center;
+      max-width: 90%;
+      box-sizing: border-box;
     }
-
-    /* Media query for larger screens to increase font size and max-width */
-    @media (min-width: 768px) { /* md breakpoint in Tailwind */
+    @media (min-width: 768px) {
       #reminderMessage {
-        font-size: 1rem; /* text-base in Tailwind */
-        max-width: 300px; /* Max width for larger screens */
+        font-size: 1rem;
+        max-width: 300px;
       }
     }
-
     #reminderMessage.show {
       opacity: 1;
-      visibility: visible; /* Make immediately visible */
-      pointer-events: auto; /* Clickable when shown */
+      visibility: visible;
+      pointer-events: auto;
     }
 
-    /* Spinner styles */
-    .spinner {
-      border: 4px solid rgba(0, 0, 0, 0.1);
-      border-left-color: #3b82f6;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
+    /* Custom toggle switch styling from login.html */
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+    }
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 34px;
+    }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    input:checked + .slider {
+        background-color: #4b4bfa;
+    }
+    input:focus + .slider {
+        box-shadow: 0 0 1px #4b4bfa;
+    }
+    input:checked + .slider:before {
+        -webkit-transform: translateX(20px);
+        -ms-transform: translateX(20px);
+        transform: translateX(20px);
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    /* Styling for error messages from login.html */
+    .error-message {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+
+    /* Styling for success message from login.html */
+    .success-message {
+        color: #22c55e;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        text-align: center;
+        display: none;
+    }
+
+    /* Password toggle icon styling from login.html */
+    .password-toggle {
+        position: absolute;
+        right: 12px;
+        cursor: pointer;
+        color: #9ca3af;
     }
   </style>
 </head>
-<body class="bg-gray-100 p-4 md:p-8 max-w-4xl mx-auto text-gray-800 rounded-lg shadow-lg">
+<body class="flex min-h-screen bg-gray-50 relative">
 
-<!-- Loading Spinner -->
 <div id="loading-spinner" class="fixed inset-0 flex items-center justify-center bg-gray-100 z-50">
   <div class="spinner"></div>
 </div>
 
-<div id="auth-section" class="flex flex-col items-center justify-center min-h-screen p-4 md:p-8 hidden">
-    <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h2 class="text-center text-2xl md:text-3xl font-extrabold mb-6 text-blue-800">Sign In / Sign Up</h2>
-        <div id="auth-error" class="text-red-500 text-center mb-4 hidden text-sm md:text-base"></div>
+<div id="new-login-section" class="absolute inset-0 w-full h-full flex items-center justify-center p-8 sm:p-12 lg:p-16">
+    <div class="absolute inset-0 w-full h-full bg-cover bg-center" style="background-image: url('https://i.ibb.co/Q7gb06jk/Picsart-25-07-13-07-54-23-391.jpg');">
+        <div class="absolute inset-0 bg-black opacity-30"></div>
+    </div>
 
-        <div class="mb-4">
-            <input type="email" id="email-input" placeholder="Email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base">
-        </div>
-        <div class="mb-6">
-            <input type="password" id="password-input" placeholder="Password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base">
-        </div>
+    <div class="relative z-10 w-full max-w-md p-8 rounded-3xl shadow-2xl" style="background: radial-gradient(circle at center, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.75) 70%, rgba(255, 255, 255, 0.4) 100%);">
+        <h2 id="formTitle" class="text-3xl font-bold text-gray-900 mb-2">Welcome back</h2>
+        <p id="formDescription" class="text-gray-600 mb-8">Log in to add and manage your reminders effortlessly.</p>
 
-        <button id="signin-email-btn" class="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 mb-3 text-base md:text-lg">Sign In with Email</button>
-        <button id="signup-email-btn" class="w-full bg-green-600 text-white p-3 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-200 mb-6 text-base md:text-lg">Sign Up with Email</button>
-
-        <div class="relative flex items-center justify-center mb-6">
-            <div class="absolute inset-0 flex items-center">
-                <span class="w-full border-t border-gray-300"></span>
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label for="loginEmail" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input type="email" id="loginEmail" name="email" value="" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Enter your email">
+                <span id="loginEmailError" class="error-message"></span>
             </div>
-            <div class="relative bg-white px-4 text-sm text-gray-500">Or</div>
+
+            <div>
+                <label for="loginPassword" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                <div class="relative flex items-center">
+                    <input type="password" id="loginPassword" name="password" value="" class="block w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:ring-[#4b4bfa] focus:border-[#4b4bfa] sm:text-sm pr-10" placeholder="Enter your password">
+                    <span class="password-toggle" id="toggleLoginPassword">
+                        <svg fill="#000000" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;" class="w-5 h-5"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <rect id="Icons" x="-960" y="-256" width="1280" height="800" style="fill:none;"></rect> <g id="Icons1" serif:id="Icons"> <g id="Strike"> </g> <g id="H1"> </g> <g id="H2"> </g> <g id="H3"> </g> <g id="list-ul"> </g> <g id="hamburger-1"> </g> <g id="hamburger-2"> </g> <g id="list-ol"> </g> <g id="list-task"> </g> <g id="trash"> </g> <g id="vertical-menu"> </g> <g id="horizontal-menu"> </g> <g id="sidebar-2"> </g> <g id="Pen"> </g> <g id="Pen1" serif:id="Pen"> </g> <g id="clock"> </g> <g id="external-link"> </g> <g id="hr"> </g> <g id="info"> </g> <g id="warning"> </g> <g id="plus-circle"> </g> <g id="minus-circle"> </g> <g id="vue"> </g> <g id="cog"> </g> <g id="logo"> </g> <g id="radio-check"> </g> <g id="eye-slash"> <path d="M13.673,10.345l-3.097,3.096l39.853,39.854l3.097,-3.097l-39.853,-39.853Z"></path> <path d="M17.119,19.984l2.915,2.915c-3.191,2.717 -5.732,6.099 -7.374,9.058l-0.005,0.01c4.573,7.646 11.829,14.872 20.987,13.776c2.472,-0.296 4.778,-1.141 6.885,-2.35l2.951,2.95c-4.107,2.636 -8.815,4.032 -13.916,3.342c-9.198,-1.244 -16.719,-8.788 -21.46,-17.648c2.226,-4.479 5.271,-8.764 9.017,-12.053Zm6.63,-4.32c2.572,-1.146 5.355,-1.82 8.327,-1.868c0.165,-0.001 2.124,0.092 3.012,0.238c0.557,0.092 1.112,0.207 1.659,0.35c8.725,2.273 15.189,10.054 19.253,17.653c-1.705,3.443 -3.938,6.398 -6.601,9.277l-2.827,-2.827c1.967,-2.12 3.622,-4.161 4.885,-6.45c0,0 -1.285,-2.361 -2.248,-3.643c-0.619,-0.824 -1.27,-1.624 -1.954,-2.395c-0.54,-0.608 -2.637,-2.673 -3.136,-3.103c-3.348,-2.879 -7.279,-5.138 -11.994,-5.1c-1.826,0.029 -3.582,0.389 -5.249,0.995l-3.127,-3.127Z" style="fill-rule:nonzero;"></path> <path d="M25.054,27.92l2.399,2.398c-0.157,0.477 -0.243,0.987 -0.243,1.516c0,2.672 2.169,4.841 4.841,4.841c0.529,0 1.039,-0.085 1.516,-0.243l2.399,2.399c-1.158,0.65 -2.494,1.02 -3.915,1.02c-4.425,0 -8.017,-3.592 -8.017,-8.017c0,-1.421 0.371,-2.756 1.02,-3.914Zm6.849,-4.101c0.049,-0.001 0.099,-0.002 0.148,-0.002c4.425,0 8.017,3.593 8.017,8.017c0,0.05 0,0.099 -0.001,0.148l-8.164,-8.163Z"></path> </g> <g id="eye"> </g> <g id="toggle-off"> </g> <g id="shredder"> </g> <g id="spinner--loading--dots-" serif:id="spinner [loading, dots]"> </g> <g id="react"> </g> <g id="check-selected"> </g> <g id="turn-off"> </g> <g id="code-block"> </g> <g id="user"> </g> <g id="coffee-bean"> </g> <g id="coffee-beans"> <g id="coffee-bean1" serif:id="coffee-bean"> </g> </g> <g id="coffee-bean-filled"> </g> <g id="coffee-beans-filled"> <g id="coffee-bean2" serif:id="coffee-bean"> </g> </g> <g id="clipboard"> </g> <g id="clipboard-paste"> </g> <g id="clipboard-copy"> </g> <g id="Layer1"> </g> </g> </g></svg>
+                    </span>
+                </div>
+                <span id="loginPasswordError" class="error-message"></span>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <a href="#" class="text-sm font-medium text-[#4b4bfa] hover:text-blue-700 rounded-xl">Forgot password?</a>
+                <div class="flex items-center">
+                    <span class="text-sm font-medium text-gray-700 mr-3">Remember sign in details</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-xl shadow-sm text-lg font-medium text-white bg-[#4b4bfa] hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4b4bfa]">
+                    Log in
+                </button>
+            </div>
+        </form>
+
+        <form id="signupForm" class="space-y-6 hidden">
+            <div>
+                <label for="signupEmail" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input type="email" id="signupEmail" name="email" value="" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Enter your email">
+                <span id="signupEmailError" class="error-message"></span>
+            </div>
+
+            <div>
+                <label for="signupPassword" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                <div class="relative flex items-center">
+                    <input type="password" id="signupPassword" name="password" value="" class="block w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:ring-[#4b4bfa] focus:border-[#4b4bfa] sm:text-sm pr-10" placeholder="Create a password">
+                    <span class="password-toggle" id="toggleSignupPassword">
+                        <svg fill="#000000" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;" class="w-5 h-5"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <rect id="Icons" x="-960" y="-256" width="1280" height="800" style="fill:none;"></rect> <g id="Icons1" serif:id="Icons"> <g id="Strike"> </g> <g id="H1"> </g> <g id="H2"> </g> <g id="H3"> </g> <g id="list-ul"> </g> <g id="hamburger-1"> </g> <g id="hamburger-2"> </g> <g id="list-ol"> </g> <g id="list-task"> </g> <g id="trash"> </g> <g id="vertical-menu"> </g> <g id="horizontal-menu"> </g> <g id="sidebar-2"> </g> <g id="Pen"> </g> <g id="Pen1" serif:id="Pen"> </g> <g id="clock"> </g> <g id="external-link"> </g> <g id="hr"> </g> <g id="info"> </g> <g id="warning"> </g> <g id="plus-circle"> </g> <g id="minus-circle"> </g> <g id="vue"> </g> <g id="cog"> </g> <g id="logo"> </g> <g id="radio-check"> </g> <g id="eye-slash"> <path d="M13.673,10.345l-3.097,3.096l39.853,39.854l3.097,-3.097l-39.853,-39.853Z"></path> <path d="M17.119,19.984l2.915,2.915c-3.191,2.717 -5.732,6.099 -7.374,9.058l-0.005,0.01c4.573,7.646 11.829,14.872 20.987,13.776c2.472,-0.296 4.778,-1.141 6.885,-2.35l2.951,2.95c-4.107,2.636 -8.815,4.032 -13.916,3.342c-9.198,-1.244 -16.719,-8.788 -21.46,-17.648c2.226,-4.479 5.271,-8.764 9.017,-12.053Zm6.63,-4.32c2.572,-1.146 5.355,-1.82 8.327,-1.868c0.165,-0.001 2.124,0.092 3.012,0.238c0.557,0.092 1.112,0.207 1.659,0.35c8.725,2.273 15.189,10.054 19.253,17.653c-1.705,3.443 -3.938,6.398 -6.601,9.277l-2.827,-2.827c1.967,-2.12 3.622,-4.161 4.885,-6.45c0,0 -1.285,-2.361 -2.248,-3.643c-0.619,-0.824 -1.27,-1.624 -1.954,-2.395c-0.54,-0.608 -2.637,-2.673 -3.136,-3.103c-3.348,-2.879 -7.279,-5.138 -11.994,-5.1c-1.826,0.029 -3.582,0.389 -5.249,0.995l-3.127,-3.127Z" style="fill-rule:nonzero;"></path> <path d="M25.054,27.92l2.399,2.398c-0.157,0.477 -0.243,0.987 -0.243,1.516c0,2.672 2.169,4.841 4.841,4.841c0.529,0 1.039,-0.085 1.516,-0.243l2.399,2.399c-1.158,0.65 -2.494,1.02 -3.915,1.02c-4.425,0 -8.017,-3.592 -8.017,-8.017c0,-1.421 0.371,-2.756 1.02,-3.914Zm6.849,-4.101c0.049,-0.001 0.099,-0.002 0.148,-0.002c4.425,0 8.017,3.593 8.017,8.017c0,0.05 0,0.099 -0.001,0.148l-8.164,-8.163Z"></path> </g> <g id="eye"> </g> <g id="toggle-off"> </g> <g id="shredder"> </g> <g id="spinner--loading--dots-" serif:id="spinner [loading, dots]"> </g> <g id="react"> </g> <g id="check-selected"> </g> <g id="turn-off"> </g> <g id="code-block"> </g> <g id="user"> </g> <g id="coffee-bean"> </g> <g id="coffee-beans"> <g id="coffee-bean1" serif:id="coffee-bean"> </g> </g> <g id="coffee-bean-filled"> </g> <g id="coffee-beans-filled"> <g id="coffee-bean2" serif:id="coffee-bean"> </g> </g> <g id="clipboard"> </g> <g id="clipboard-paste"> </g> <g id="clipboard-copy"> </g> <g id="Layer1"> </g> </g> </g></svg>
+                    </span>
+                </div>
+                <span id="signupPasswordError" class="error-message"></span>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <a href="#" class="text-sm font-medium text-[#4b4bfa] hover:text-blue-700 rounded-xl">Forgot password?</a>
+                <div class="flex items-center">
+                    <span class="text-sm font-medium text-gray-700 mr-3">Remember sign in details</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-xl shadow-sm text-lg font-medium text-white bg-[#4b4bfa] hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4b4bfa]">
+                    Sign Up
+                </button>
+            </div>
+        </form>
+
+        <div class="relative flex py-5 items-center">
+            <div class="flex-grow border-t border-gray-300"></div>
+            <span class="flex-shrink mx-4 text-gray-500">Or</span>
+            <div class="flex-grow border-t border-gray-300"></div>
         </div>
 
-        <button id="signin-google-btn" class="w-full bg-red-600 text-white p-3 rounded-lg font-semibold hover:bg-red-700 transition-colors duration-200 flex items-center justify-center space-x-2 text-base md:text-lg">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12.0003 4.75C14.0503 4.75 15.8303 5.44 17.2403 6.72L19.9903 3.97C18.1903 2.31 15.8003 1.25 12.0003 1.25C7.79031 1.25 4.10031 3.75 2.37031 7.52L5.61031 9.97C6.41031 7.97 9.03031 4.75 12.0003 4.75Z" fill="#EA4335"></path>
-                <path d="M23.4903 12.27C23.4903 11.49 23.4303 10.74 23.3203 10H12.2503V14.52H18.7203C18.4303 15.93 17.5803 17.15 16.4203 17.99L19.6603 20.44C21.5403 18.73 22.9503 16.31 23.4903 12.27Z" fill="#4285F4"></path>
-                <path d="M5.61031 14.97C5.35031 14.21 5.21031 13.44 5.21031 12.67C5.21031 11.9 5.35031 11.13 5.61031 10.37L2.37031 7.92C1.41031 9.92 0.870312 12.2 0.870312 14.67C0.870312 17.14 1.41031 19.42 2.37031 21.42L5.61031 18.97C5.35031 18.21 5.21031 17.44 5.21031 16.67C5.21031 15.9 5.35031 15.13 5.61031 14.37L5.61031 14.97Z" fill="#FBBC04"></path>
-                <path d="M12.0003 23.75C15.0203 23.75 17.6903 22.72 19.6603 20.44L16.4203 17.99C15.5303 18.61 14.3503 19.06 12.0003 19.06C9.03031 19.06 6.41031 15.84 5.61031 13.84L2.37031 16.29C4.10031 20.06 7.79031 22.56 12.0003 22.56L12.0003 23.75Z" fill="#34A853"></path>
-            </svg>
-            <span>Sign In with Google</span>
-        </button>
+        <div class="mt-4">
+            <button id="google-signin-btn" class="w-full flex items-center justify-center py-2 px-4 border border-gray-300 rounded-xl shadow-sm text-lg font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <svg class="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12.0003 4.75C14.0003 4.75 15.6373 5.49 16.9083 6.749L19.2003 4.479C17.2193 2.509 14.7303 1.5 12.0003 1.5C7.72831 1.5 4.05831 3.976 2.37831 7.555L5.05231 9.675C5.99631 7.279 8.71831 5.75 12.0003 5.75V4.75Z" fill="#EA4335"/>
+                    <path d="M21.5 12.25C21.5 11.49 21.43 10.73 21.31 10H12V14.5H17.75C17.51 15.76 16.71 16.76 15.64 17.44L18.32 19.56C19.86 18.29 20.81 16.53 21.31 14.55C21.43 14.07 21.5 13.19 21.5 12.25Z" fill="#4285F4"/>
+                    <path d="M5.05231 9.675L2.37831 7.555C1.84831 8.847 1.5 10.428 1.5 12C1.5 13.572 1.84831 15.153 2.37831 16.445L5.05231 14.325C4.05831 12.721 3.99631 10.232 5.05231 9.675Z" fill="#FBBC04"/>
+                    <path d="M12.0003 22.5C14.7303 22.5 17.2193 21.491 19.2003 19.521L16.9083 17.251C15.6373 18.51 14.0003 19.25 12.0003 19.25C8.71831 19.25 5.99631 17.721 5.05231 15.325L2.37831 17.445C4.05831 21.024 7.72831 23.5 12.0003 23.5C12.0003 23.5 12.0003 22.5 12.0003 22.5Z" fill="#34A853"/>
+                </svg>
+                Sign in with Google
+            </button>
+        </div>
+
+        <div class="text-center mt-6">
+            <p class="text-sm text-gray-600">
+                <span id="toggleText">Don't have an account?</span>
+                <button id="toggleFormBtn" class="text-[#4b4bfa] hover:text-blue-700 font-medium ml-1">Sign Up</button>
+            </p>
+        </div>
+        <div id="authSuccessMessage" class="success-message mt-4"></div>
     </div>
 </div>
 
-<div id="main-content" class="hidden">
+
+<div id="main-content" class="bg-gray-100 p-4 md:p-8 max-w-4xl mx-auto text-gray-800 rounded-lg shadow-lg hidden">
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 px-4 md:px-0">
         <h2 class="text-2xl md:text-4xl font-extrabold text-blue-800 text-center md:text-left mb-4 md:mb-0">📘 Subject Units and Sub Units</h2>
         <div class="flex items-center space-x-2 md:space-x-4">
@@ -196,18 +336,14 @@
         </div>
     </div>
 
-    <!-- Subject Selection Buttons -->
     <div class="mb-6 px-4 md:px-0 flex flex-wrap justify-center gap-3">
         <button id="biology-btn" class="subject-button px-5 py-2 rounded-full font-semibold text-lg transition-all duration-200 ease-in-out bg-blue-600 text-white shadow-md hover:bg-blue-700">Biology</button>
         <button id="physics-btn" class="subject-button px-5 py-2 rounded-full font-semibold text-lg transition-all duration-200 ease-in-out bg-gray-200 text-gray-700 shadow-md hover:bg-gray-300">Physics</button>
         <button id="chemistry-btn" class="subject-button px-5 py-2 rounded-full font-semibold text-lg transition-all duration-200 ease-in-out bg-gray-200 text-gray-700 shadow-md hover:bg-gray-300">Chemistry</button>
     </div>
 
-    <!-- Units Container -->
     <div id="units-container">
-        <!-- Biology Units (Initially displayed) -->
         <div id="biology-units" class="subject-units">
-            <!-- Unit 01: Introduction to Biology -->
             <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
               <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
                 <span class="flex-grow min-w-0">01. ජීව විද්‍යාව හඳුන්වා දීම</span>
@@ -219,7 +355,6 @@
               </ul>
             </div>
 
-            <!-- Unit 02: Chemical and Cellular Basis of Life -->
             <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
               <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
                 <span class="flex-grow min-w-0">02. ජීවයේ රසායනික හා සෛලීය පදනම</span>
@@ -238,7 +373,6 @@
               </ul>
             </div>
 
-            <!-- Unit 03: Evolution and Diversity of Organisms -->
             <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
               <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
                 <span class="flex-grow min-w-0">03. පරිණාමය හා ජීවීන්ගේ විවිධත්වය</span>
@@ -256,7 +390,6 @@
               </ul>
             </div>
 
-            <!-- Unit 04: Plant Form and Function -->
             <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
               <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
                 <span class="flex-grow min-w-0">04. ශාක ආකාරය හා ක්‍රියාකාරිත්වය</span>
@@ -279,7 +412,6 @@
               </ul>
             </div>
 
-            <!-- Unit 05: Animal Form and Function -->
             <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
               <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
                 <span class="flex-grow min-w-0">05. සත්ත්ව ආකාරය හා ක්‍රියාකාරිත්වය</span>
@@ -303,7 +435,6 @@
               </ul>
             </div>
 
-            <!-- Unit 06: Genetics -->
             <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
               <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
                 <span class="flex-grow min-w-0">06. ප්‍රවේණිය</span>
@@ -322,986 +453,325 @@
               </ul>
             </div>
 
-            <!-- Unit 07: Molecular Biology and Recombinant DNA Technology -->
             <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
               <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
                 <span class="flex-grow min-w-0">07. අණුක ජීව විද්‍යාව හා ප්‍රතිසංයෝජිත DNA තාක්ෂණය</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(8)</span>
-              </div>
-              <ul class="subtopics">
-                <li>වර්ණදේහවල වව්‍යුහ නිර්මාණය</li>
-                <li>DNA ප්‍රතිචලිතය</li>
-                <li>ජාන සහ ඒවා ක්‍රියාකරන ආකාරය</li>
-                <li>විකෘති</li>
-                <li>ජාන තාක්ෂණය</li>
-                <li>DNA විශ්ලේෂණය</li>
-                <li>කාෂිකර්මාන්තයේ දී GMO වල භාවිතයන්</li>
-                <li>ජෛව සුරක්ෂිතතාව පිළිබඳ කාටජිනා ගිවිසුම ශ්‍රී ලංකාවේ ජාතික ජෛව සුරක්ෂිතතා රාමුව</li>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(...
               </ul>
             </div>
-
-            <!-- Unit 08: Environmental Biology -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">08. පාරසරික ජීව විද්‍යාව</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(7)</span>
-              </div>
-              <ul class="subtopics">
-                <li>පාරිසරික ජීව විද්‍යාව යනු කුමක් ද?</li>
-                <li>පරිසරයේ සංවිධාන පෙරම්</li>
-                <li>බියෝමයක් යනු කුමක් ද ?</li>
-                <li>ශ්‍රී ලංකාවේ පරිසර පද්ධති</li>
-                <li>ජෛව විවිධත්වය</li>
-                <li>භූගෝලීය උණුසුම සහ දේශගුණ විපර්යාසය</li>
-                <li>පරිසර සංරක්ෂණයට අදාළ සම්මුති</li>
-              </ul>
             </div>
 
-            <!-- Unit 09: Microbiology -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">09. ක්ෂුද්‍ර ජීව විද්‍යාව</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(7)</span>
-              </div>
-              <ul class="subtopics">
-                <li>ක්ෂුද්‍ර ජීවීන්ගේ ස්වභාවය</li>
-                <li>ක්ෂුද්‍ර ජීවීන්ගේ ආකාර</li>
-                <li>තාක්ෂණික ශිල්ප</li>
-                <li>කර්මාන්ත සහ පරිසරය</li>
-                <li>පාංශු ක්ෂුද්‍රජීවීන්</li>
-                <li>අපජල කළමනාකරණය</li>
-                <li>ආහාර හා ක්ෂුද්‍රජීවීන්</li>
-              </ul>
-            </div>
-
-            <!-- Unit 10: Applied Biology -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">10. ව්‍යවහාරික ජීව විද්‍යාව</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(8)</span>
-              </div>
-              <ul class="subtopics">
-                <li>ජලජීවී වගාව</li>
-                <li>මත්ස්‍ය වගාව</li>
-                <li>මිරිදිය රෝග</li>
-                <li>තවාන් කළමනාකරණය</li>
-                <li>ආහාර පරිරක්ෂණය</li>
-                <li>අස්වනු හානිය</li>
-                <li>ඩෙංගු සහ බරවා</li>
-                <li>නැනෝ තාක්ෂණය</li>
-              </ul>
-            </div>
-        </div>
-
-        <!-- Physics Units -->
         <div id="physics-units" class="subject-units hidden">
-            <h3 class="text-xl md:text-2xl font-bold text-blue-700 mb-4">භෞතික විද්‍යා ඒකක</h3>
-            <!-- Unit 01: Measurement -->
             <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
               <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">01. මිනුම</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(4)</span>
+                <span class="flex-grow min-w-0">01. ඒකක හා මාන</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(3)</span>
               </div>
               <ul class="subtopics">
                 <li>භෞතික රාශි</li>
+                <li>ඒකක</li>
                 <li>මාන</li>
-                <li>මිනුම් උපකරණ</li>
-                <li>අදිග රාශි සහ දෛශික රාශි</li>
-              </ul>
-            </div>
-
-            <!-- Unit 02: Mechanics -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">02. යාන්ත්‍ර විද්‍යාව</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(8)</span>
-              </div>
-              <ul class="subtopics">
-                <li>ප්‍රගති විද්‍යාව</li>
-                <li>ඒකතල බල පද්ධතියක සම්ප්‍රයුක්තය</li>
-                <li>බලය හා චලිතය</li>
-                <li>බල සමතුලිතාව</li>
-                <li>කාර්යය, ශක්තිය සහ ජවය</li>
-                <li>භ්‍රමණ චලිතය හා වෘත්තාකාර චලිතය</li>
-                <li>ද්‍රවස්ථිති විද්‍යාව</li>
-                <li>තරල ගති විද්‍යාව</li>
-              </ul>
-            </div>
-
-            <!-- Unit 03: Oscillations and Waves -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">03. දෝලන හා තරංග</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(10)</span>
-              </div>
-              <ul class="subtopics">
-                <li>තරංග චලිතය</li>
-                <li>තරංගවල ගුණ</li>
-                <li>ඇදි තන්තුවල ඇති වන ස්ථාවර තරංග</li>
-                <li>වායු තුළින් ධ්වනි සම්ප්‍රේෂණය</li>
-                <li>ඩොප්ලර් ආචරණය</li>
-                <li>ධ්වනියේ ස්වභාවය</li>
-                <li>විද්‍යුත් චුම්බක තරංග</li>
-                <li>ජ්‍යාමිතික ප්‍රකාශ විද්‍යාව</li>
-                <li>මිනිස් ඇස හා අක්‍ෂි දෝෂ</li>
-                <li>ප්‍රකාශ උපකරණ</li>
-              </ul>
-            </div>
-
-            <!-- Unit 04: Thermodynamics -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">04. තාපගති විද්‍යාව</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(8)</span>
-              </div>
-              <ul class="subtopics">
-                <li>උෂ්ණත්වය</li>
-                <li>ඝන සහ ද්‍රව ප්‍රසාරණය</li>
-                <li>වායු නියම</li>
-                <li>වායු පිළිබඳ චාලක අණුක වාදය</li>
-                <li>තාප හුවමාරුව අවස්ථා විපර්යාස</li>
-                <li>වාෂ්ප සහ ආර්ද්‍රතාව</li>
-                <li>තාපගති විද්‍යාව</li>
-                <li>තාප සංක්‍රාමණය</li>
-              </ul>
-            </div>
-
-            <!-- Unit 05: Gravitational Field -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">05. ගුරුත්වාකර්ෂණ ක්ෂේත්‍රය</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(2)</span>
-              </div>
-              <ul class="subtopics">
-                <li>ගුරුත්වාකර්ෂණ බල ක්ෂේත්‍රය</li>
-                <li>පෘථිවි ගුරුත්වාකර්ෂණ ක්ෂේත්‍රය</li>
-              </ul>
-            </div>
-
-            <!-- Unit 06: Electrostatic Field -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">06. ස්ථිති විද්‍යුත් ක්ෂේත්‍රය</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(7)</span>
-              </div>
-              <ul class="subtopics">
-                <li>පළමු වන පරිච්ඡේදය</li>
-                <li>දෙවන පරිච්ඡේදය</li>
-                <li>තුන්වන පරිච්ඡේදය</li>
-                <li>හතර වන පරිච්ඡේදය</li>
-                <li>ස්ථිති විද්‍යුත් බලය</li>
-                <li>ස්ථිති විද්‍යුත් ක්ෂේත්‍රයක ස්‍රාව ආකෘතිය</li>
-                <li>ස්ථිති විද්‍යුත් විභවය</li>
-              </ul>
-            </div>
-
-            <!-- Unit 07: Magnetic Field -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">07. චුම්බක ක්ෂේත්‍රය</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(4)</span>
-              </div>
-              <ul class="subtopics">
-                <li>විද්‍යුත් ධාරිතාව (ධාරණාව)</li>
-                <li>පළමු වන පරිච්ඡේදය - චුම්බක බලය</li>
-                <li>දෙවන පරිච්ඡේදය - චුම්බක බල ක්ෂේත්‍රය</li>
-                <li>තුන්වන පරිච්ඡේදය - ධාරා පුඩුවක් මත ක්‍රියාත්මක වන ව්‍යාවර්තය</li>
-              </ul>
-            </div>
-
-            <!-- Unit 08: Current Electricity -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">08. ධාරා විද්‍යුතය</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(6)</span>
-              </div>
-              <ul class="subtopics">
-                <li>ධාරා විද්‍යුතයේ මූලික සංකල්පය</li>
-                <li>විද්‍යුත් ශක්තිය හා ජවය</li>
-                <li>දෙවන පරිච්ඡේදය</li>
-                <li>තුන්වන පරිච්ඡේදය - විද්‍යුත්ගාමක බලය</li>
-                <li>හතරවන පරිච්ඡේදය - විද්‍යුත් පරිපථ : කචොෆ් නියම</li>
-                <li>පස්වන පරිච්ඡේදය - විද්‍යුත් ධාරාව සහ විභව අන්තරය මැනීම</li>
-                <li>හයවන පරිච්ඡේදය - විද්‍යුත් චුම්බක ප්‍රේරණය</li>
-              </ul>
-            </div>
-
-            <!-- Unit 09: Electronics -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">09. ඉලෙක්ට්‍රොනික්</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(4)</span>
-              </div>
-              <ul class="subtopics">
-                <li>අර්ධ සන්නායක හා ඩයෝඩවල භාවිත</li>
-                <li>ට්‍රාන්සිස්ටර</li>
-                <li>සංගෘහිත පරිපථ සහ කාරකාත්මක වර්ධක</li>
-                <li>සංඛ්‍යාංක ඉලෙක්ට්‍රොනික විද්‍යාව</li>
-              </ul>
-            </div>
-
-            <!-- Unit 10: Mechanical Properties of Matter -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">10. පදාර්ථයේ යාන්ත්‍රික ගුණ</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(2)</span>
-              </div>
-              <ul class="subtopics">
-                <li>ප්‍රත්‍යාස්ථතාව</li>
-                <li>දුස්ස්‍රාවිතාව</li>
-              </ul>
-            </div>
-
-            <!-- Unit 11: Matter and Radiation -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">11. පදාර්ථය හා විකරණ</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(7)</span>
-              </div>
-              <ul class="subtopics">
-                <li>විකිරණයේ ක්වොන්ටම් ස්වාභාව</li>
-                <li>ප්‍රකාශ විද්‍යුත් ආචරණය</li>
-                <li>පදාර්ථයේ තරංග ස්වභාවය</li>
-                <li>X කිරණ</li>
-                <li>විකිරශීලීතාවය</li>
-                <li>න්‍යෂ්ටික ශක්තිය හා එහි භාවිත</li>
-                <li>පදාර්ථයේ මුලික සංඝටක හා ඒවායේ අන්තර්ක්‍රියා</li>
               </ul>
             </div>
         </div>
 
-        <!-- Chemistry Units -->
         <div id="chemistry-units" class="subject-units hidden">
-            <h3 class="text-xl md:text-2xl font-bold text-blue-700 mb-4">රසායන විද්‍යා ඒකක</h3>
-            <!-- Chemistry Unit 01: පරමාණුක ව්‍යුහය -->
             <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
               <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">01. පරමාණුක ව්‍යුහය</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(1)</span>
+                <span class="flex-grow min-w-0">01. පරමාණුවේ ව්‍යුහය</span>
+                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(4)</span>
               </div>
               <ul class="subtopics">
-                <li>පරමාණුක ව්‍යුහය</li>
-              </ul>
-            </div>
-
-            <!-- Chemistry Unit 02: ව්‍යුහය හා බන්ධන -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">02. ව්‍යුහය හා බන්ධන</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(1)</span>
-              </div>
-              <ul class="subtopics">
-                <li>ව්‍යුහය හා බන්ධන</li>
-              </ul>
-            </div>
-
-            <!-- Chemistry Unit 03: රසායනික ගණනය -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">03. රසායනික ගණනය</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(1)</span>
-              </div>
-              <ul class="subtopics">
-                <li>රසායනික ගණනය</li>
-              </ul>
-            </div>
-
-            <!-- Chemistry Unit 04: පදාර්ථයේ වායුමය අවස්ථා -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">04. පadaර්ථයේ වායුමය අවස්ථා</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(1)</span>
-              </div>
-              <ul class="subtopics">
-                <li>පදාර්ථයේ වායුමය අවස්ථා</li>
-              </ul>
-            </div>
-
-            <!-- Chemistry Unit 05: ශක්ති විද්‍යාව -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">05. ශක්ති විද්‍යාව</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(1)</span>
-              </div>
-              <ul class="subtopics">
-                <li>ශක්ති විද්‍යාව</li>
-              </ul>
-            </div>
-
-            <!-- Chemistry Unit 06: SPD -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">06. SPD</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(1)</span>
-              </div>
-              <ul class="subtopics">
-                <li>SPD</li>
-              </ul>
-            </div>
-
-            <!-- Chemistry Unit 07: කාබනික රසායන විද්‍යාවේ මූලික සංකල්ප -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">07. කාබනික රසායන විද්‍යාවේ මූලික සංකල්ප</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(1)</span>
-              </div>
-              <ul class="subtopics">
-                <li>කාබනික රසායන විද්‍යාවේ මූලික සංකල්ප</li>
-              </ul>
-            </div>
-
-            <!-- Chemistry Unit 08: හයිඩ්‍රෝකාබන හා හෙලෝහයිඩ්‍රෝකාබන -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">08. හයිඩ්‍රෝකාබන හා හෙලෝහයිඩ්‍රෝකාබන</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(1)</span>
-              </div>
-              <ul class="subtopics">
-                <li>හයිඩ්‍රෝකාබන හා හෙලෝහයිඩ්‍රෝකාබන</li>
-              </ul>
-            </div>
-
-            <!-- Chemistry Unit 09: ඔක්සිජන් අන්තර්ගත කාබනික සංයෝග -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">09. ඔක්සිජන් අන්තර්ගත කාබනික සංයෝග</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(1)</span>
-              </div>
-              <ul class="subtopics">
-                <li>ඔක්සිජන් අන්තර්ගත කාබනික සංයෝග</li>
-              </ul>
-            </div>
-
-            <!-- Chemistry Unit 10: නයිට්‍රජන් අන්තර්ගත කාබනික සංයෝග -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">10. නයිට්‍රජන් අන්තර්ගත කාබනික සංයෝග</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(1)</span>
-              </div>
-              <ul class="subtopics">
-                <li>නයිට්‍රජන් අන්තර්ගත කාබනික සංයෝග</li>
-              </ul>
-            </div>
-
-            <!-- Chemistry Unit 11: චාලක -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">11. චාලක</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(1)</span>
-              </div>
-              <ul class="subtopics">
-                <li>චාලක</li>
-              </ul>
-            </div>
-
-            <!-- Chemistry Unit 12: සමතුලිතතාව -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">12. සමතුලිතතාව</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(1)</span>
-              </div>
-              <ul class="subtopics">
-                <li>සමතුලිතතාව</li>
-              </ul>
-            </div>
-
-            <!-- Chemistry Unit 13: විද්‍යුත් රසායනය -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">13. විද්‍යුත් රසායනය</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(1)</span>
-              </div>
-              <ul class="subtopics">
-                <li>විද්‍යුත් රසායනය</li>
-              </ul>
-            </div>
-
-            <!-- Chemistry Unit 14: කර්මාන්ත හා පරිසර දූෂණය -->
-            <div class="unit bg-white rounded-xl shadow-md mb-4 p-4 cursor-pointer hover:bg-blue-50 transition-all duration-300 ease-in-out" onclick="openSubtopicsModal(this)">
-              <div class="unit-title flex justify-between items-center text-xl md:text-2xl font-semibold text-blue-700 border-b border-dotted border-gray-300 pb-2 mb-2">
-                <span class="flex-grow min-w-0">14. කර්මාන්ත හා පරිසර දූෂණය</span>
-                <span class="text-green-600 text-base md:text-lg w-12 text-right flex-shrink-0">(1)</span>
-              </div>
-              <ul class="subtopics">
-                <li>කර්මාන්ත හා පරිසර දූෂණය</li>
+                <li>ඩෝල්ටන්ගේ පරමාණුක වාදය</li>
+                <li>රදෆෝඩ්ගේ පරමාණුක වාදය</li>
+                <li>බෝර්ගේ පරමාණුක වාදය</li>
+                <li>ක්වොන්ටම් යාන්ත්‍ර විද්‍යාව</li>
               </ul>
             </div>
         </div>
     </div>
 
-
-    <!-- Summary Section -->
-    <div class="summary mt-10 bg-green-50 border-l-8 border-green-500 p-4 md:p-6 text-base md:text-xl rounded-lg text-green-800">
-      🔢 <strong class="font-bold">Total Units:</strong> <span id="total-units-display"></span><br>
-      ✅ <strong class="font-bold">Completed Units:</strong> <span id="completed-units-display"></span><br>
-      🟩 <strong class="font-bold">Total Subtopics:</strong> <span id="total-subtopics-display"></span><br>
-      🔵 <strong class="font-bold">Completed Subtopics:</strong> <span id="completed-subtopics-display"></span>
+    <div id="subtopicModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="bg-white rounded-lg p-6 w-full max-w-xl shadow-lg relative flex flex-col max-h-full">
+        <h3 id="modal-title" class="text-2xl font-bold mb-4 text-blue-800 border-b-2 pb-2"></h3>
+        <ul id="modal-subtopics-list" class="space-y-3 overflow-y-auto flex-grow pr-2 -mr-2"></ul>
+        <div id="reminderMessage"></div>
+        <button id="closeModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-3xl font-bold">&times;</button>
+      </div>
     </div>
 </div>
 
-<!-- Subtopic Modal Structure -->
-<div id="subtopicModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 hidden">
-  <div class="bg-gray-50 rounded-2xl shadow-2xl p-6 md:p-8 w-11/12 md:w-2/3 lg:w-1/2 relative border border-gray-200 ring-4 ring-blue-200 ring-opacity-50">
-    <button id="closeModal" class="absolute top-2 right-2 md:top-4 md:right-4 text-gray-700 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-full p-1 md:p-2 transition-colors duration-200 ease-in-out text-3xl md:text-4xl font-bold">&times;</button>
-    <h3 id="modalTitle" class="text-2xl md:text-3xl font-bold text-blue-800 mb-4"></h3>
-    <ul id="modalSubtopics" class="list-none text-gray-700 space-y-2 md:space-y-3 leading-relaxed text-sm md:text-base">
-      <!-- Subtopics will be dynamically added here -->
-    </ul>
-    <!-- Reminder Message Display - MOVED INSIDE MODAL CONTENT -->
-    <div id="reminderMessage"></div>
-  </div>
-</div>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
 <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-  // Your web app's Firebase configuration (provided by the user)
+  // Firebase configuration and initialization (from subj.html)
   const firebaseConfig = {
-    apiKey: "AIzaSyApLfVQ6hv0IAAN5ZkFlOQ-y5KXK-x1Q_M",
-    authDomain: "reminderapp-d84e9.firebaseapp.com",
-    databaseURL: "https://reminderapp-d84e9-default-rtdb.firebaseio.com",
-    projectId: "reminderapp-d84e9",
-    storageBucket: "reminderapp-d84e9.firebasestorage.app",
-    messagingSenderId: "312145339940",
-    appId: "1:312145339940:web:ade59de4d6de6cec221ab1"
+    apiKey: "YOUR_API_KEY", // Replace with your actual API Key
+    authDomain: "YOUR_AUTH_DOMAIN", // Replace with your actual Auth Domain
+    projectId: "YOUR_PROJECT_ID", // Replace with your actual Project ID
+    storageBucket: "YOUR_STORAGE_BUCKET", // Replace with your actual Storage Bucket
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // Replace with your actual Messaging Sender ID
+    appId: "YOUR_APP_ID" // Replace with your actual App ID
   };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-  // Global variables
-  let userId = null;
-  const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-  // Updated structure for completedSubtopicsState to support multiple subjects
-  let completedSubtopicsState = {}; // Stores { "SubjectName": { "Unit Title": { total: N, subtopics: { "Subtopic Text": true/false, ... } } } }
-  let unsubscribeSnapshot = null; // To store the unsubscribe function for Firestore listener
-  let isAuthReady = false; // New flag to indicate if auth and initial data load are complete
-  let currentSubject = "Biology"; // Default subject
-
-  // UI Elements
-  const authSection = document.getElementById('auth-section');
-  const mainContent = document.getElementById('main-content');
-  const authErrorDiv = document.getElementById('auth-error');
-  const emailInput = document.getElementById('email-input');
-  const passwordInput = document.getElementById('password-input');
-  const signInEmailBtn = document.getElementById('signin-email-btn');
-  const signUpEmailBtn = document.getElementById('signup-email-btn');
-  const signInGoogleBtn = document.getElementById('signin-google-btn');
-  const logoutBtn = document.getElementById('logout-btn');
-  const userIdDisplay = document.getElementById('user-id-display');
+  // DOM Elements (updated for new login and existing main content)
   const loadingSpinner = document.getElementById('loading-spinner');
-  const unitsContainer = document.getElementById('units-container');
-  const totalUnitsDisplay = document.getElementById('total-units-display');
-  const totalSubtopicsDisplay = document.getElementById('total-subtopics-display');
+  const newLoginSection = document.getElementById('new-login-section');
+  const mainContent = document.getElementById('main-content');
+  const userIdDisplay = document.getElementById('user-id-display');
+  const logoutBtn = document.getElementById('logout-btn');
 
-  // New UI Elements for subject buttons
-  const biologyBtn = document.getElementById('biology-btn');
-  const physicsBtn = document.getElementById('physics-btn');
-  const chemistryBtn = document.getElementById('chemistry-btn');
+  // New Login Form Elements (from login.html)
+  const loginForm = document.getElementById('loginForm');
+  const signupForm = document.getElementById('signupForm');
+  const toggleFormBtn = document.getElementById('toggleFormBtn');
+  const formTitle = document.getElementById('formTitle');
+  const formDescription = document.getElementById('formDescription');
+  const toggleText = document.getElementById('toggleText');
+  const authSuccessMessage = document.getElementById('authSuccessMessage');
+  const googleSignInBtn = document.getElementById('google-signin-btn'); // New: Google Sign-in button
 
-  // New UI Elements for summary counts
-  const completedUnitsDisplay = document.getElementById('completed-units-display');
-  const completedSubtopicsDisplay = document.getElementById('completed-subtopics-display');
+  const loginEmailInput = document.getElementById('loginEmail');
+  const loginPasswordInput = document.getElementById('loginPassword');
+  const signupEmailInput = document.getElementById('signupEmail');
+  const signupPasswordInput = document.getElementById('signupPassword');
 
+  const loginEmailError = document.getElementById('loginEmailError');
+  const loginPasswordError = document.getElementById('loginPasswordError');
+  const signupEmailError = document.getElementById('signupEmailError');
+  const signupPasswordError = document.getElementById('signupPasswordError');
 
-  // Data for each subject
-  const subjectData = {
-    "Biology": {
-      totalUnits: 10,
-      totalSubtopics: 85,
-      unitsHtmlId: 'biology-units'
-    },
-    "Physics": {
-      totalUnits: 11, // Updated total units for Physics
-      totalSubtopics: 62, // Updated total subtopics for Physics
-      unitsHtmlId: 'physics-units'
-    },
-    "Chemistry": {
-      totalUnits: 14, // Updated total units for Chemistry
-      totalSubtopics: 14, // Updated total subtopics for Chemistry (each unit is one subtopic)
-      unitsHtmlId: 'chemistry-units'
-    }
-  };
+  const toggleLoginPassword = document.getElementById('toggleLoginPassword');
+  const toggleSignupPassword = document.getElementById('toggleSignupPassword');
 
 
-  // Function to display authentication errors
-  function showAuthError(message) {
-    authErrorDiv.textContent = message;
-    authErrorDiv.classList.remove('hidden');
-  }
+  // Current active subject and user ID
+  let currentSubject = 'biology';
+  let currentUserId = null;
+  let unsubscribeSnapshot = null; // To store the Firestore snapshot unsubscriber
 
-  // Function to hide authentication errors
-  function hideAuthError() {
-    authErrorDiv.classList.add('hidden');
-    authErrorDiv.textContent = '';
-  }
+  // Auth state ready flag
+  let isAuthReady = false;
 
-  // Function to show the reminder message with a delay
-  function showReminderMessage(message) {
-    console.log("showReminderMessage function called with message:", message); // Debugging log
-    reminderMessageDiv.textContent = message;
-    // Add a small delay before showing the message
-    setTimeout(() => {
-      reminderMessageDiv.classList.add('show');
-    }, 300); // 300ms delay
-  }
+  // Helper function to show/hide sections
+  function showSection(sectionToShow) {
+    loadingSpinner.classList.add('hidden');
+    newLoginSection.classList.add('hidden');
+    mainContent.classList.add('hidden');
 
-  // Handle Google Sign-In
-  signInGoogleBtn.addEventListener('click', async () => {
-    hideAuthError();
-    try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
-    } catch (error) {
-      console.error("Google Sign-In Error:", error);
-      showAuthError(error.message);
-    }
-  });
-
-  // Handle Email/Password Sign-Up
-  signUpEmailBtn.addEventListener('click', async () => {
-    hideAuthError();
-    const email = emailInput.value;
-    const password = passwordInput.value;
-    if (!email || !password) {
-      showAuthError("Please enter both email and password.");
-      return;
-    }
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-      console.error("Email Sign-Up Error:", error);
-      showAuthError(error.message);
-    }
-  });
-
-  // Handle Email/Password Sign-In
-  signInEmailBtn.addEventListener('click', async () => {
-    hideAuthError();
-    const email = emailInput.value;
-    const password = passwordInput.value; // Corrected variable name
-    if (!email || !password) {
-      showAuthError("Please enter both email and password.");
-      return;
-    }
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-      console.error("Email Sign-In Error:", error);
-      showAuthError(error.message);
-    }
-  });
-
-  // Handle Logout
-  logoutBtn.addEventListener('click', async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error("Logout Error:", error);
-      showAuthError("Failed to log out."); // Display error if logout fails
-    }
-  });
-
-  // Function to update the count on the main unit button
-  function updateUnitCompletionDisplay(unitElement) {
-    const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
-    const totalSubtopicsSpan = unitElement.querySelector('.unit-title span:last-child');
-
-    let completedCount = 0;
-    const unitData = completedSubtopicsState[currentSubject] && completedSubtopicsState[currentSubject][unitTitleText];
-
-    if (unitData && unitData.subtopics) {
-      for (const subtopicText in unitData.subtopics) {
-        if (unitData.subtopics[subtopicText]) {
-          completedCount++;
-        }
-      }
-      // Use the stored total from unitData
-      totalSubtopicsSpan.textContent = `(${completedCount}/${unitData.total})`;
-    } else {
-      // Fallback if data is not yet initialized for some reason
-      totalSubtopicsSpan.textContent = `(0/${parseInt(totalSubtopicsSpan.textContent.replace(/[()]/g, '')) || 0})`;
+    if (sectionToShow === 'login') {
+      newLoginSection.classList.remove('hidden');
+      document.body.className = 'flex min-h-screen bg-gray-50 relative'; // Apply login body styles
+    } else if (sectionToShow === 'main') {
+      mainContent.classList.remove('hidden');
+      // Revert to main content body styles if needed, or keep the login body style for full-screen.
+      // Keeping login body style for consistency with the new full-screen login layout.
+      document.body.className = 'bg-gray-100 p-4 md:p-8 max-w-4xl mx-auto text-gray-800 rounded-lg shadow-lg';
     }
   }
 
-  // Function to initialize unit completion displays for the current subject
-  function initializeUnitDisplaysForCurrentSubject() {
-    let currentTotalUnits = 0;
-    let currentTotalSubtopics = 0;
-    let currentCompletedUnits = 0; // New counter for completed units
-    let currentCompletedSubtopics = 0; // New counter for completed subtopics
 
-    // Hide all subject unit containers first
-    document.querySelectorAll('.subject-units').forEach(container => {
-      container.classList.add('hidden');
-    });
+  // Function to display errors (from login.html)
+  function displayError(element, message) {
+      element.textContent = message;
+      element.style.display = 'block';
+      setTimeout(() => { // Auto-hide errors after a few seconds
+          hideError(element);
+      }, 5000);
+  }
 
-    // Show the container for the current subject
-    const currentSubjectUnitsContainer = document.getElementById(subjectData[currentSubject].unitsHtmlId);
-    if (currentSubjectUnitsContainer) {
-      currentSubjectUnitsContainer.classList.remove('hidden');
-    }
+  // Function to hide errors (from login.html)
+  function hideError(element) {
+      element.textContent = '';
+      element.style.display = 'none';
+  }
 
-    document.querySelectorAll(`#${subjectData[currentSubject].unitsHtmlId} .unit`).forEach(unitElement => {
-      currentTotalUnits++;
-      const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
-      const subtopicsList = unitElement.querySelector('.subtopics');
-      const totalSubtopicsSpan = unitElement.querySelector('.unit-title span:last-child');
-      const initialTotalSubtopics = parseInt(totalSubtopicsSpan.textContent.replace(/[()]/g, ''));
+  // Function to display success message (from login.html)
+  function displaySuccess(message) {
+      authSuccessMessage.textContent = message;
+      authSuccessMessage.style.display = 'block';
+      setTimeout(() => {
+          authSuccessMessage.style.display = 'none';
+          authSuccessMessage.textContent = '';
+      }, 3000); // Hide after 3 seconds
+  }
 
-      currentTotalSubtopics += initialTotalSubtopics;
-
-      // Ensure the subject and unit entries exist in completedSubtopicsState
-      if (!completedSubtopicsState[currentSubject]) {
-        completedSubtopicsState[currentSubject] = {};
-      }
-      if (!completedSubtopicsState[currentSubject][unitTitleText]) {
-        completedSubtopicsState[currentSubject][unitTitleText] = {
-          total: initialTotalSubtopics,
-          subtopics: {}
-        };
-      } else if (typeof completedSubtopicsState[currentSubject][unitTitleText].total === 'undefined' || isNaN(completedSubtopicsState[currentSubject][unitTitleText].total)) {
-        completedSubtopicsState[currentSubject][unitTitleText].total = initialTotalSubtopics;
-      }
-
-      // Initialize subtopics within the state if they don't exist
-      Array.from(subtopicsList.children).forEach(subtopic => {
-        const subtopicText = subtopic.textContent;
-        if (typeof completedSubtopicsState[currentSubject][unitTitleText].subtopics[subtopicText] === 'undefined') {
-          completedSubtopicsState[currentSubject][unitTitleText].subtopics[subtopicText] = false;
-        }
-      });
-
-      // Calculate completed subtopics for this unit and overall
-      let unitCompletedSubtopicsCount = 0;
-      if (completedSubtopicsState[currentSubject][unitTitleText] && completedSubtopicsState[currentSubject][unitTitleText].subtopics) {
-          for (const subtopicText in completedSubtopicsState[currentSubject][unitTitleText].subtopics) {
-              if (completedSubtopicsState[currentSubject][unitTitleText].subtopics[subtopicText]) {
-                  unitCompletedSubtopicsCount++;
-                  currentCompletedSubtopics++; // Increment overall completed subtopics
-              }
+  // Password visibility toggle (from login.html)
+  function setupPasswordToggle(toggleBtn, passwordInput) {
+      toggleBtn.addEventListener('click', () => {
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordInput.setAttribute('type', type);
+          // Toggle eye icon (assuming simple SVG toggle, you'd need two SVGs or change fill/stroke)
+          // For simplicity, this example assumes the SVG changes based on password type.
+          // In a real scenario, you'd swap SVGs or use CSS classes.
+          if (type === 'password') {
+            toggleBtn.innerHTML = `<svg fill="#000000" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;" class="w-5 h-5"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <rect id="Icons" x="-960" y="-256" width="1280" height="800" style="fill:none;"></rect> <g id="Icons1" serif:id="Icons"> <g id="Strike"> </g> <g id="H1"> </g> <g id="H2"> </g> <g id="H3"> </g> <g id="list-ul"> </g> <g id="hamburger-1"> </g> <g id="hamburger-2"> </g> <g id="list-ol"> </g> <g id="list-task"> </g> <g id="trash"> </g> <g id="vertical-menu"> </g> <g id="horizontal-menu"> </g> <g id="sidebar-2"> </g> <g id="Pen"> </g> <g id="Pen1" serif:id="Pen"> </g> <g id="clock"> </g> <g id="external-link"> </g> <g id="hr"> </g> <g id="info"> </g> <g id="warning"> </g> <g id="plus-circle"> </g> <g id="minus-circle"> </g> <g id="vue"> </g> <g id="cog"> </g> <g id="logo"> </g> <g id="radio-check"> </g> <g id="eye-slash"> <path d="M13.673,10.345l-3.097,3.096l39.853,39.854l3.097,-3.097l-39.853,-39.853Z"></path> <path d="M17.119,19.984l2.915,2.915c-3.191,2.717 -5.732,6.099 -7.374,9.058l-0.005,0.01c4.573,7.646 11.829,14.872 20.987,13.776c2.472,-0.296 4.778,-1.141 6.885,-2.35l2.951,2.95c-4.107,2.636 -8.815,4.032 -13.916,3.342c-9.198,-1.244 -16.719,-8.788 -21.46,-17.648c2.226,-4.479 5.271,-8.764 9.017,-12.053Zm6.63,-4.32c2.572,-1.146 5.355,-1.82 8.327,-1.868c0.165,-0.001 2.124,0.092 3.012,0.238c0.557,0.092 1.112,0.207 1.659,0.35c8.725,2.273 15.189,10.054 19.253,17.653c-1.705,3.443 -3.938,6.398 -6.601,9.277l-2.827,-2.827c1.967,-2.12 3.622,-4.161 4.885,-6.45c0,0 -1.285,-2.361 -2.248,-3.643c-0.619,-0.824 -1.27,-1.624 -1.954,-2.395c-0.54,-0.608 -2.637,-2.673 -3.136,-3.103c-3.348,-2.879 -7.279,-5.138 -11.994,-5.1c-1.826,0.029 -3.582,0.389 -5.249,0.995l-3.127,-3.127Z" style="fill-rule:nonzero;"></path> <path d="M25.054,27.92l2.399,2.398c-0.157,0.477 -0.243,0.987 -0.243,1.516c0,2.672 2.169,4.841 4.841,4.841c0.529,0 1.039,-0.085 1.516,-0.243l2.399,2.399c-1.158,0.65 -2.494,1.02 -3.915,1.02c-4.425,0 -8.017,-3.592 -8.017,-8.017c0,-1.421 0.371,-2.756 1.02,-3.914Zm6.849,-4.101c0.049,-0.001 0.099,-0.002 0.148,-0.002c4.425,0 8.017,3.593 8.017,8.017c0,0.05 0,0.099 -0.001,0.148l-8.164,-8.163Z"></path> </g> <g id="eye"> </g> <g id="toggle-off"> </g> <g id="shredder"> </g> <g id="spinner--loading--dots-" serif:id="spinner [loading, dots]"> </g> <g id="react"> </g> <g id="check-selected"> </g> <g id="turn-off"> </g> <g id="code-block"> </g> <g id="user"> </g> <g id="coffee-bean"> </g> <g id="coffee-beans"> <g id="coffee-bean1" serif:id="coffee-bean"> </g> </g> <g id="coffee-bean-filled"> </g> <g id="coffee-beans-filled"> <g id="coffee-bean2" serif:id="coffee-bean"> </g> </g> <g id="clipboard"> </g> <g id="clipboard-paste"> </g> <g id="clipboard-copy"> </g> <g id="Layer1"> </g> </g> </g></svg>`; // Eye-slash (closed)
+          } else {
+            toggleBtn.innerHTML = `<svg fill="#000000" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;" class="w-5 h-5"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <rect id="Icons" x="-960" y="-256" width="1280" height="800" style="fill:none;"></rect> <g id="Icons1" serif:id="Icons"> <g id="Strike"> </g> <g id="H1"> </g> <g id="H2"> </g> <g id="H3"> </g> <g id="list-ul"> </g> <g id="hamburger-1"> </g> <g id="hamburger-2"> </g> <g id="list-ol"> </g> <g id="list-task"> </g> <g id="trash"> </g> <g id="vertical-menu"> </g> <g id="horizontal-menu"> </g> <g id="sidebar-2"> </g> <g id="Pen"> </g> <g id="Pen1" serif:id="Pen"> </g> <g id="clock"> </g> <g id="external-link"> </g> <g id="hr"> </g> <g id="info"> </g> <g id="warning"> </g> <g id="plus-circle"> </g> <g id="minus-circle"> </g> <g id="vue"> </g> <g id="cog"> </g> <g id="logo"> </g> <g id="radio-check"> </g> <g id="eye"> <path d="M32,15.75c-10.428,0 -19.497,8.22 -23.011,16.25c3.514,8.03 12.583,16.25 23.011,16.25c10.429,0 19.498,-8.22 23.011,-16.25c-3.513,-8.03 -12.582,-16.25 -23.011,-16.25Zm0,7.917c4.502,0 8.167,3.664 8.167,8.166c0,4.503 -3.665,8.167 -8.167,8.167c-4.502,0 -8.167,-3.664 -8.167,-8.167c0,-4.502 3.665,-8.166 8.167,-8.166Zm0,3.333c2.628,0 4.834,2.206 4.834,4.833c0,2.628 -2.206,4.834 -4.834,4.834c-2.627,0 -4.833,-2.206 -4.833,-4.834c0,-2.627 2.206,-4.833 4.833,-4.833Z"></path> </g> <g id="toggle-off"> </g> <g id="shredder"> </g> <g id="spinner--loading--dots-" serif:id="spinner [loading, dots]"> </g> <g id="react"> </g> <g id="check-selected"> </g> <g id="turn-off"> </g> <g id="code-block"> </g> <g id="user"> </g> <g id="coffee-bean"> </g> <g id="coffee-beans"> <g id="coffee-bean1" serif:id="coffee-bean"> </g> </g> <g id="coffee-bean-filled"> </g> <g id="coffee-beans-filled"> <g id="coffee-bean2" serif:id="coffee-bean"> </g> </g> <g id="clipboard"> </g> <g id="clipboard-paste"> </g> <g id="clipboard-copy"> </g> <g id="Layer1"> </g> </g> </g></svg>`; // Eye (open)
           }
-      }
-
-      // Check if the unit is completed (all its subtopics are completed)
-      if (unitCompletedSubtopicsCount === initialTotalSubtopics && initialTotalSubtopics > 0) {
-          currentCompletedUnits++;
-      }
-
-      // Update display to reflect current state or (0/Total)
-      updateUnitCompletionDisplay(unitElement);
-    });
-
-    // Update the summary section totals
-    totalUnitsDisplay.textContent = currentTotalUnits;
-    totalSubtopicsDisplay.textContent = currentTotalSubtopics;
-    completedUnitsDisplay.textContent = currentCompletedUnits; // Update completed units display
-    completedSubtopicsDisplay.textContent = currentCompletedSubtopics; // Update completed subtopics display
-
-    // Update active button styling
-    document.querySelectorAll('.subject-button').forEach(button => {
-        if (button.id === `${currentSubject.toLowerCase()}-btn`) {
-            button.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-            button.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
-        } else {
-            button.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700');
-            button.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-        }
-    });
+      });
   }
 
+  setupPasswordToggle(toggleLoginPassword, loginPasswordInput);
+  setupPasswordToggle(toggleSignupPassword, signupPasswordInput);
 
-  // Function to open the subtopics modal
-  window.openSubtopicsModal = async (unitElement) => { // Added 'async' here as it calls async functions
-    console.log("openSubtopicsModal called. isAuthReady:", isAuthReady); // Debugging log
-    // Prevent modal from opening if authentication and data loading are not ready
-    if (!isAuthReady) {
-      showAuthError("Please wait, loading your data or sign in to track your progress.");
-      return;
-    }
-    hideAuthError(); // Hide any previous auth errors
-
-    const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
-    const subtopicsList = unitElement.querySelector('.subtopics');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalSubtopics = document.getElementById('modalSubtopics');
-    const subtopicModal = document.getElementById('subtopicModal');
-    const reminderMessageDiv = document.getElementById('reminderMessage');
-
-    console.log("Subtopics list children count:", subtopicsList.children.length); // Debugging log
-
-    // Set modal title
-    modalTitle.textContent = unitTitleText;
-
-    // Clear previous subtopics
-    modalSubtopics.innerHTML = '';
-
-    const unitData = completedSubtopicsState[currentSubject] && completedSubtopicsState[currentSubject][unitTitleText];
-
-    // Populate modal with subtopics and add tick circles
-    Array.from(subtopicsList.children).forEach(subtopic => {
-      const li = document.createElement('li');
-      li.classList.add('flex', 'items-center', 'gap-3');
-
-      const tickCircle = document.createElement('span');
-      tickCircle.classList.add('tick-circle');
-
-      const subtopicTextContent = subtopic.textContent;
-
-      // Set initial state of tick circle from global state
-      if (unitData && unitData.subtopics && unitData.subtopics[subtopicTextContent]) {
-        tickCircle.classList.add('checked');
-        tickCircle.innerHTML = '&#10003;';
+  // Toggle between login and signup forms (from login.html)
+  toggleFormBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (loginForm.classList.contains('hidden')) {
+          loginForm.classList.remove('hidden');
+          signupForm.classList.add('hidden');
+          formTitle.textContent = 'Welcome back';
+          formDescription.textContent = 'Log in to add and manage your reminders effortlessly.';
+          toggleText.textContent = "Don't have an account?";
+          toggleFormBtn.textContent = 'Sign Up';
       } else {
-        tickCircle.innerHTML = '';
+          loginForm.classList.add('hidden');
+          signupForm.classList.remove('hidden');
+          formTitle.textContent = 'Join Us';
+          formDescription.textContent = 'Create your account to start managing your subjects.';
+          toggleText.textContent = 'Already have an account?';
+          toggleFormBtn.textContent = 'Log In';
+      }
+      // Clear any previous errors or success messages
+      hideError(loginEmailError);
+      hideError(loginPasswordError);
+      hideError(signupEmailError);
+      hideError(signupPasswordError);
+      authSuccessMessage.style.display = 'none';
+  });
+
+  // Handle Login Form Submission
+  loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = loginEmailInput.value;
+      const password = loginPasswordInput.value;
+
+      hideError(loginEmailError);
+      hideError(loginPasswordError);
+      authSuccessMessage.style.display = 'none';
+      loadingSpinner.classList.remove('hidden'); // Show spinner
+
+      try {
+          await auth.signInWithEmailAndPassword(email, password);
+          displaySuccess('Login successful!');
+      } catch (error) {
+          console.error("Login failed:", error);
+          if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+              displayError(loginPasswordError, 'Invalid email or password.');
+          } else if (error.code === 'auth/invalid-email') {
+              displayError(loginEmailError, 'Please enter a valid email address.');
+          } else {
+              displayError(loginPasswordError, error.message);
+          }
+      } finally {
+          loadingSpinner.classList.add('hidden'); // Hide spinner
+      }
+  });
+
+  // Handle Sign Up Form Submission
+  signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = signupEmailInput.value;
+      const password = signupPasswordInput.value;
+
+      hideError(signupEmailError);
+      hideError(signupPasswordError);
+      authSuccessMessage.style.display = 'none';
+      loadingSpinner.classList.remove('hidden'); // Show spinner
+
+      try {
+          await auth.createUserWithEmailAndPassword(email, password);
+          displaySuccess('Sign up successful! You are now logged in.');
+      } catch (error) {
+          console.error("Sign up failed:", error);
+          if (error.code === 'auth/email-already-in-use') {
+              displayError(signupEmailError, 'This email is already in use.');
+          } else if (error.code === 'auth/weak-password') {
+              displayError(signupPasswordError, 'Password should be at least 6 characters.');
+          } else if (error.code === 'auth/invalid-email') {
+              displayError(signupEmailError, 'Please enter a valid email address.');
+          } else {
+              displayError(signupPasswordError, error.message);
+          }
+      } finally {
+          loadingSpinner.classList.add('hidden'); // Hide spinner
+      }
+  });
+
+  // Firebase Google Auth Provider
+  const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+  // Handle Google Sign-in (New)
+  googleSignInBtn.addEventListener('click', async () => {
+      loadingSpinner.classList.remove('hidden'); // Show spinner
+      hideError(authSuccessMessage); // Clear previous messages
+      try {
+          await auth.signInWithPopup(googleProvider);
+          displaySuccess('Google sign-in successful!');
+      } catch (error) {
+          console.error("Google sign-in failed:", error);
+          if (error.code === 'auth/popup-closed-by-user') {
+              displayError(authSuccessMessage, 'Google sign-in cancelled.');
+          } else if (error.code === 'auth/cancelled-popup-request') {
+              displayError(authSuccessMessage, 'Popup already opened. Please complete the sign-in.');
+          } else {
+              displayError(authSuccessMessage, `Google sign-in error: ${error.message}`);
+          }
+      } finally {
+          loadingSpinner.classList.add('hidden'); // Hide spinner
+      }
+  });
+
+
+  // Firebase Auth State Change Listener (from subj.html, adapted)
+  auth.onAuthStateChanged(async (user) => {
+    console.log("Auth state changed. User:", user); // Debugging log
+
+    if (user) {
+      currentUserId = user.uid;
+      userIdDisplay.textContent = `Logged in as: ${user.email || 'Anonymous'}`;
+      showSection('main');
+
+      // Unsubscribe from previous snapshot listener if exists
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot();
       }
 
-      // Add click event listener to toggle checked state
-      tickCircle.addEventListener('click', async () => {
-        tickCircle.classList.toggle('checked');
-        const isChecked = tickCircle.classList.contains('checked');
-        tickCircle.innerHTML = isChecked ? '&#10003;' : '';
-
-        // Update global state
-        if (!completedSubtopicsState[currentSubject]) {
-            completedSubtopicsState[currentSubject] = {};
-        }
-        if (!completedSubtopicsState[currentSubject][unitTitleText]) {
-            completedSubtopicsState[currentSubject][unitTitleText] = { total: 0, subtopics: {} };
-        }
-        if (!completedSubtopicsState[currentSubject][unitTitleText].subtopics) {
-            completedSubtopicsState[currentSubject][unitTitleText].subtopics = {};
-        }
-        completedSubtopicsState[currentSubject][unitTitleText].subtopics[subtopicTextContent] = isChecked;
-
-        // Update the count on the main unit button
-        updateUnitCompletionDisplay(unitElement);
-        // Re-initialize displays to update the overall summary counts
-        initializeUnitDisplaysForCurrentSubject();
-
-
-        // Save to Firestore
-        if (userId) {
-          try {
-            const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData/${currentSubject}`);
-            // Save the entire completedSubtopicsState object for the current subject
-            await setDoc(userDocRef, { data: JSON.stringify(completedSubtopicsState[currentSubject]) }, { merge: true });
-            console.log("Subtopic state saved to Firestore for", currentSubject);
-          } catch (e) {
-            console.error("Error saving document: ", e);
-            showAuthError("Error saving progress. Please try again.");
-          }
-        }
-
-        // Show reminder message if ticked
-        if (isChecked) {
-          console.log("Subtopic ticked. Attempting to show reminder message."); // Debugging log
-          showReminderMessage(`[${subtopicTextContent}] සඳහා මතක් කිරීමක් එක් කරන්න`);
+      // Set up real-time listener for user data in Firestore
+      const userDocRef = db.collection('users').doc(currentUserId);
+      unsubscribeSnapshot = userDocRef.onSnapshot(async (doc) => {
+        if (doc.exists) {
+          const userData = doc.data();
+          // Update UI based on user's saved subject progress
+          updateSubjectButtons(userData.subjects || {});
+          updateUnitCompletionCounts(userData.subjects || {});
         } else {
-          // If unticked, hide the reminder message if it's currently showing for this subtopic
-          if (reminderMessageDiv.textContent.includes(subtopicTextContent)) {
-            hideReminderMessage();
-          }
+          // If user document doesn't exist, create it with default data
+          await userDocRef.set({ subjects: {} });
+          updateSubjectButtons({});
+          updateUnitCompletionCounts({});
         }
+        isAuthReady = true; // Mark auth as ready after data is loaded
+        loadingSpinner.classList.add('hidden'); // Hide spinner after content is loaded
+        console.log("isAuthReady set to true after data load."); // Debugging log
+      }, (error) => {
+        console.error("Error fetching user data:", error);
+        isAuthReady = true; // Mark ready even on error to unblock UI
+        loadingSpinner.classList.add('hidden');
       });
 
-      const subtopicDisplay = document.createElement('span');
-      subtopicDisplay.textContent = subtopicTextContent;
-      subtopicDisplay.classList.add('flex-grow');
-
-      li.appendChild(tickCircle);
-      li.appendChild(subtopicDisplay);
-      modalSubtopics.appendChild(li);
-    });
-
-    console.log("Removing hidden class from modal."); // Debugging log
-    // Show the modal overlay
-    subtopicModal.classList.remove('hidden');
-
-    // Force a reflow to ensure the 'display' change is rendered before applying 'is-active'
-    subtopicModal.offsetWidth;
-
-    console.log("Adding is-active class to modal."); // Debugging log
-    // Add 'is-active' class to trigger the pop-in animation
-    subtopicModal.classList.add('is-active');
-    subtopicModal.classList.remove('is-closing'); // Ensure closing animation class is removed
-  }; // End of window.openSubtopicsModal definition
-
-  // Get modal elements (these are global for the modal)
-  const subtopicModal = document.getElementById('subtopicModal');
-  const closeModalButton = document.getElementById('closeModal');
-  const reminderMessageDiv = document.getElementById('reminderMessage');
-
-  // Add event listener to the reminder message div to open the URL
-  reminderMessageDiv.addEventListener('click', () => {
-    window.open('https://alstudy063.github.io/my-reminder-app/Unsaved%20Document%202.html', '_blank');
-  });
-
-  // Function to hide the reminder message
-  function hideReminderMessage() {
-    reminderMessageDiv.classList.remove('show');
-  }
-
-  // Function to close the modal with animation
-  function closeSubtopicModal() {
-    // Add 'is-closing' class to trigger the pop-out animation
-    subtopicModal.classList.add('is-closing');
-    subtopicModal.classList.remove('is-active'); // Remove active class for overlay fade
-
-    hideReminderMessage(); // Hide reminder when modal closes
-
-    // Hide the modal completely after the animation ends
-    subtopicModal.querySelector('div').addEventListener('animationend', function handler() {
-      subtopicModal.classList.add('hidden');
-      subtopicModal.classList.remove('is-closing'); // Clean up the closing class
-      this.removeEventListener('animationend', handler); // Remove listener
-    }, { once: true }); // Ensure the listener is called only once
-  }
-
-  // Close modal when close button is clicked
-  closeModalButton.addEventListener('click', closeSubtopicModal);
-
-  // Close modal when clicking outside the modal content
-  subtopicModal.addEventListener('click', (event) => {
-    if (event.target === subtopicModal) {
-      closeSubtopicModal();
-    }
-  });
-
-  // Function to load data for the selected subject
-  async function loadSubjectData(subject) {
-    return new Promise((resolve, reject) => {
-        if (!userId) {
-            console.warn("User not logged in, cannot load subject data.");
-            // If no user, initialize with default 0s and resolve immediately.
-            isAuthReady = true;
-            initializeUnitDisplaysForCurrentSubject();
-            resolve();
-            return;
-        }
-
-        if (unsubscribeSnapshot) {
-            unsubscribeSnapshot();
-            unsubscribeSnapshot = null;
-        }
-
-        const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData/${subject}`);
-        unsubscribeSnapshot = onSnapshot(userDocRef, (docSnap) => {
-            const tempSubjectState = {};
-            document.querySelectorAll(`#${subjectData[subject].unitsHtmlId} .unit`).forEach(unitElement => {
-                const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent;
-                const totalSubtopicsSpan = unitElement.querySelector('.unit-title span:last-child');
-                const initialTotalSubtopics = parseInt(totalSubtopicsSpan.textContent.replace(/[()]/g, ''));
-                const subtopicsList = unitElement.querySelector('.subtopics');
-
-                tempSubjectState[unitTitleText] = {
-                    total: initialTotalSubtopics,
-                    subtopics: {}
-                };
-                Array.from(subtopicsList.children).forEach(subtopic => {
-                    tempSubjectState[unitTitleText].subtopics[subtopic.textContent] = false;
-                });
-            });
-
-            if (docSnap.exists() && docSnap.data().data) {
-                try {
-                    const loadedData = JSON.parse(docSnap.data().data);
-                    for (const unitTitle in tempSubjectState) {
-                        if (loadedData[unitTitle] && loadedData[unitTitle].subtopics) {
-                            for (const subtopicText in tempSubjectState[unitTitle].subtopics) {
-                                if (typeof loadedData[unitTitle].subtopics[subtopicText] !== 'undefined') {
-                                    tempSubjectState[unitTitle].subtopics[subtopicText] = loadedData[unitTitle].subtopics[subtopicText];
-                                }
-                            }
-                        }
-                    }
-                    completedSubtopicsState[subject] = tempSubjectState;
-                    console.log("Loaded and merged completed subtopics for", subject, ":", completedSubtopicsState[subject]);
-                } catch (e) {
-                    console.error("Error parsing Firestore data for", subject, ":", e);
-                    completedSubtopicsState[subject] = tempSubjectState;
-                }
-            } else {
-                console.log("No completed subtopics found for", subject, ", initializing empty state from HTML.");
-                completedSubtopicsState[subject] = tempSubjectState;
-            }
-            // IMPORTANT: Only update UI and resolve AFTER data is loaded/merged
-            initializeUnitDisplaysForCurrentSubject();
-            isAuthReady = true;
-            console.log("isAuthReady set to true after data load for", subject);
-            resolve();
-        }, (error) => {
-            console.error("Error listening to Firestore for", subject, ":", error);
-            showAuthError("Error loading user data for " + subject);
-            isAuthReady = true; // Still set to true to allow interaction, even if data load failed
-            reject(error);
-        });
-    });
-  }
-
-  // Event listeners for subject buttons
-  biologyBtn.addEventListener('click', async () => {
-    if (currentSubject === "Biology") return;
-    currentSubject = "Biology";
-    console.log("Subject changed to:", currentSubject);
-    mainContent.classList.add('hidden'); // Hide content immediately
-    loadingSpinner.classList.remove('hidden'); // Show spinner
-    await loadSubjectData(currentSubject); // Wait for data to load
-    mainContent.classList.remove('hidden'); // Show content after data is ready
-    loadingSpinner.classList.add('hidden'); // Hide spinner
-  });
-
-  physicsBtn.addEventListener('click', async () => {
-    if (currentSubject === "Physics") return;
-    currentSubject = "Physics";
-    console.log("Subject changed to:", currentSubject);
-    mainContent.classList.add('hidden');
-    loadingSpinner.classList.remove('hidden');
-    await loadSubjectData(currentSubject);
-    mainContent.classList.remove('hidden');
-    loadingSpinner.classList.add('hidden');
-  });
-
-  chemistryBtn.addEventListener('click', async () => {
-    if (currentSubject === "Chemistry") return;
-    currentSubject = "Chemistry";
-    console.log("Subject changed to:", currentSubject);
-    mainContent.classList.add('hidden');
-    loadingSpinner.classList.remove('hidden');
-    await loadSubjectData(currentSubject);
-    mainContent.classList.remove('hidden');
-    loadingSpinner.classList.add('hidden');
-  });
-
-
-  // Firebase Auth State Listener
-  onAuthStateChanged(auth, async (user) => {
-    // Spinner is already shown by DOMContentLoaded.
-    // We will hide it only after data is loaded and main content is displayed.
-    if (user) {
-      // User is signed in
-      userId = user.uid;
-      userIdDisplay.textContent = `User ID: ${userId}`;
-      authSection.classList.add('hidden');
-      hideAuthError(); // Hide any auth errors once logged in
-
-      // Load data for the current subject (default or last selected)
-      await loadSubjectData(currentSubject); // Wait for initial data load
-      mainContent.classList.remove('hidden'); // Show main content only after data is loaded
-      loadingSpinner.classList.add('hidden'); // Hide spinner
-
     } else {
-      // User is signed out
-      userId = null;
+      currentUserId = null;
       userIdDisplay.textContent = '';
-      authSection.classList.remove('hidden'); // Show auth section
-      mainContent.classList.add('hidden'); // Ensure main content is hidden
-      completedSubtopicsState = {}; // Clear state on logout
-      initializeUnitDisplaysForCurrentSubject(); // Reset UI counts to 0 for current subject
+      showSection('login');
+      // Reset subject completion counts to 0 for current subject
       isAuthReady = false; // Reset flag when logged out
       console.log("isAuthReady set to false after logout."); // Debugging log
 
@@ -1314,25 +784,226 @@
     }
   });
 
-  // Initial anonymous sign-in or custom token sign-in
+  // Initial anonymous sign-in or custom token sign-in (from subj.html)
   document.addEventListener('DOMContentLoaded', async () => {
     loadingSpinner.classList.remove('hidden'); // Show spinner immediately on DOMContentLoaded
     // The onAuthStateChanged listener will handle hiding the spinner and showing content
-    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-        // Firebase automatically handles custom token sign-in.
-        // onAuthStateChanged will reflect the result.
-    } else {
-        // If no initial token, attempt anonymous sign-in.
-        try {
-            await signInAnonymously(auth);
-            console.log("Attempted anonymous sign-in on DOMContentLoaded.");
-        } catch (error) {
-            console.error("Anonymous sign-in failed on DOMContentLoaded:", error);
-            // If anonymous sign-in fails, onAuthStateChanged will still handle showing auth section
-            // In this case, the spinner will be hidden by onAuthStateChanged after it processes the null user.
-        }
+    // Note: If you have custom authentication, ensure __initial_auth_token is provided.
+    // For standard Firebase email/password or Google sign-in, signInAnonymously might not be needed
+    // if you always want users to explicitly sign in. Keeping it for compatibility if you used it before.
+    try {
+        await auth.signInAnonymously();
+        console.log("Attempted anonymous sign-in on DOMContentLoaded.");
+    } catch (error) {
+        console.error("Anonymous sign-in failed on DOMContentLoaded:", error);
     }
   });
+
+
+  // Logout functionality (from subj.html)
+  logoutBtn.addEventListener('click', async () => {
+    try {
+      await auth.signOut();
+      console.log("User signed out.");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  });
+
+
+  // Subject selection logic (from subj.html)
+  document.querySelectorAll('.subject-button').forEach(button => {
+    button.addEventListener('click', () => {
+      // Remove active styles from all buttons
+      document.querySelectorAll('.subject-button').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white');
+        btn.classList.add('bg-gray-200', 'text-gray-700');
+      });
+
+      // Add active styles to the clicked button
+      button.classList.add('bg-blue-600', 'text-white');
+      button.classList.remove('bg-gray-200', 'text-gray-700');
+
+      // Hide all subject units containers
+      document.querySelectorAll('.subject-units').forEach(container => {
+        container.classList.add('hidden');
+      });
+
+      // Show the selected subject's units
+      const subjectId = button.id.replace('-btn', '-units');
+      document.getElementById(subjectId).classList.remove('hidden');
+      currentSubject = button.id.replace('-btn', ''); // Update current subject
+
+      // Recalculate and update completion counts for the newly selected subject
+      updateUnitCompletionCounts(userProgressData); // Assuming userProgressData is globally accessible or passed
+    });
+  });
+
+  // Modal related elements (from subj.html)
+  const subtopicModal = document.getElementById('subtopicModal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalSubtopicsList = document.getElementById('modal-subtopics-list');
+  const closeModalBtn = document.getElementById('closeModal');
+  const reminderMessage = document.getElementById('reminderMessage');
+
+  let currentUnitElement = null; // Store the currently opened unit DOM element
+  let userProgressData = {}; // Global variable to store fetched user progress
+
+  // Open subtopics modal (from subj.html)
+  window.openSubtopicsModal = (unitElement) => {
+    if (!isAuthReady) {
+      console.log("Auth not ready, cannot open modal.");
+      return;
+    }
+
+    currentUnitElement = unitElement;
+    const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent.trim();
+    modalTitle.textContent = unitTitleText;
+    modalSubtopicsList.innerHTML = ''; // Clear previous subtopics
+
+    const subtopics = Array.from(unitElement.querySelectorAll('.subtopics li')).map(li => li.textContent.trim());
+
+    // Get the unit's ID to store progress (e.g., "biology-unit-01")
+    const unitIndex = Array.from(document.querySelectorAll('.subject-units .unit')).indexOf(unitElement) + 1;
+    const unitId = `${currentSubject}-unit-${String(unitIndex).padStart(2, '0')}`;
+
+    // Retrieve the user's progress for this unit
+    const unitProgress = (userProgressData.subjects && userProgressData.subjects[currentSubject] && userProgressData.subjects[currentSubject][unitId]) || {};
+
+    subtopics.forEach((subtopic, index) => {
+      const li = document.createElement('li');
+      li.className = 'flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50';
+      li.innerHTML = `
+        <div class="tick-circle flex-shrink-0">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <span class="flex-grow text-gray-800 text-lg">${subtopic}</span>
+      `;
+
+      const tickCircle = li.querySelector('.tick-circle');
+      const subtopicKey = `subtopic-${index}`; // Unique key for subtopic
+
+      if (unitProgress[subtopicKey]) {
+        tickCircle.classList.add('checked');
+      }
+
+      tickCircle.addEventListener('click', () => {
+        if (!currentUserId) {
+          showReminderMessage("Please sign in to save your progress.");
+          return;
+        }
+
+        tickCircle.classList.toggle('checked');
+        const isChecked = tickCircle.classList.contains('checked');
+
+        // Update Firestore
+        const userDocRef = db.collection('users').doc(currentUserId);
+        userDocRef.update({
+          [`subjects.${currentSubject}.${unitId}.${subtopicKey}`]: isChecked
+        })
+        .then(() => {
+          console.log("Progress updated successfully!");
+          // Locally update userProgressData and then the UI
+          if (!userProgressData.subjects) userProgressData.subjects = {};
+          if (!userProgressData.subjects[currentSubject]) userProgressData.subjects[currentSubject] = {};
+          if (!userProgressData.subjects[currentSubject][unitId]) userProgressData.subjects[currentSubject][unitId] = {};
+          userProgressData.subjects[currentSubject][unitId][subtopicKey] = isChecked;
+          updateUnitCompletionCounts(userProgressData.subjects || {});
+        })
+        .catch(error => {
+          console.error("Error updating progress:", error);
+          showReminderMessage("Failed to save progress. Please try again.");
+          // Revert UI if update fails
+          tickCircle.classList.toggle('checked');
+        });
+      });
+      modalSubtopicsList.appendChild(li);
+    });
+
+    subtopicModal.classList.add('is-active');
+    subtopicModal.classList.remove('hidden');
+    // For smooth animation, force reflow after adding 'is-active'
+    void subtopicModal.offsetWidth;
+  };
+
+  // Close modal functionality (from subj.html)
+  closeModalBtn.addEventListener('click', () => {
+    subtopicModal.classList.add('is-closing'); // Trigger pop-out animation
+    subtopicModal.addEventListener('animationend', function handler() {
+      subtopicModal.classList.remove('is-active', 'is-closing');
+      subtopicModal.classList.add('hidden');
+      subtopicModal.removeEventListener('animationend', handler);
+      reminderMessage.classList.remove('show'); // Hide reminder message when modal closes
+    });
+  });
+
+  // Hide modal if clicked outside (from subj.html)
+  subtopicModal.addEventListener('click', (e) => {
+    if (e.target === subtopicModal) {
+      closeModalBtn.click(); // Use the close button's click handler
+    }
+  });
+
+  // Show reminder message (from subj.html)
+  function showReminderMessage(message) {
+    reminderMessage.textContent = message;
+    reminderMessage.classList.add('show');
+    setTimeout(() => {
+      reminderMessage.classList.remove('show');
+    }, 3000); // Hide after 3 seconds
+  }
+
+  // Update subject buttons (from subj.html)
+  function updateSubjectButtons(subjectsProgress) {
+    userProgressData.subjects = subjectsProgress; // Update global progress data
+    document.querySelectorAll('.subject-button').forEach(button => {
+      const subjectName = button.id.replace('-btn', '');
+      if (subjectName === currentSubject) {
+        button.classList.add('bg-blue-600', 'text-white');
+        button.classList.remove('bg-gray-200', 'text-gray-700');
+        // Also show the correct units container
+        document.getElementById(`${subjectName}-units`).classList.remove('hidden');
+      } else {
+        button.classList.add('bg-gray-200', 'text-gray-700');
+        button.classList.remove('bg-blue-600', 'text-white');
+        document.getElementById(`${subjectName}-units`).classList.add('hidden');
+      }
+    });
+  }
+
+  // Function to update completion counts displayed on each unit (from subj.html)
+  function updateUnitCompletionCounts(subjectsProgress) {
+    document.querySelectorAll('.unit').forEach(unitElement => {
+      const unitTitleText = unitElement.querySelector('.unit-title span:first-child').textContent.trim();
+      const subtopics = Array.from(unitElement.querySelectorAll('.subtopics li')).map(li => li.textContent.trim());
+      const totalSubtopics = subtopics.length;
+
+      const unitIndex = Array.from(document.querySelectorAll('.subject-units .unit')).indexOf(unitElement) + 1;
+      const unitId = `${currentSubject}-unit-${String(unitIndex).padStart(2, '0')}`;
+
+      const unitProgress = (subjectsProgress[currentSubject] && subjectsProgress[currentSubject][unitId]) || {};
+      let completedSubtopics = 0;
+      for (let i = 0; i < totalSubtopics; i++) {
+        const subtopicKey = `subtopic-${i}`;
+        if (unitProgress[subtopicKey]) {
+          completedSubtopics++;
+        }
+      }
+      const completionSpan = unitElement.querySelector('.unit-title span:last-child');
+      completionSpan.textContent = `(${completedSubtopics}/${totalSubtopics})`;
+
+      // Change color based on completion status
+      if (completedSubtopics === totalSubtopics && totalSubtopics > 0) {
+        completionSpan.classList.remove('text-green-600');
+        completionSpan.classList.add('text-blue-600'); // Completed units are blue
+      } else {
+        completionSpan.classList.remove('text-blue-600');
+        completionSpan.classList.add('text-green-600'); // In-progress units are green
+      }
+    });
+  }
 </script>
 
 </body>
