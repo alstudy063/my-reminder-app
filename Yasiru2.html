@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Screen Biology Definitions App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome CDN for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script type="module">
+        // Firebase modules import for Realtime Database and Authentication
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getDatabase, ref, push, set, update, remove, onValue, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        // Global variables for Firebase instances and data
+        let app;
+        let db;
+        let auth;
+        let userId;
+        let definitions = []; // Array to store all definitions
+        let lessons = [];     // Array to store all lessons
+
+        // Your web app's Firebase configuration (provided by user)
+        const firebaseConfig = {
+            apiKey: "AIzaSyApLfVQ6hv0IAAN5ZkFlOQ-y5KXK-x1Q_M",
+            authDomain: "reminderapp-d84e9.firebaseapp.com",
+            databaseURL: "https://reminderapp-d84e9-default-rtdb.firebaseio.com",
+            projectId: "reminderapp-d84e9",
+            storageBucket: "reminderapp-d84e9.firebasestorage.app",
+            messagingSenderId: "312145339940",
+            appId: "1:312145339940:web:ade59de4d6de6cec221ab1"
+        };
+
+        // The __app_id is provided by the Canvas environment.
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+
+        /**
+         * Helper function to convert Realtime Database snapshot object to an array.
+         * Realtime Database returns data as an object of objects, where keys are the IDs.
+         * @param {object} snapshotValue - The value retrieved from a Realtime Database snapshot.
+         * @returns {Array} An array of objects, each including its Firebase key as 'id'.
+         */
+        function snapshotToArray(snapshotValue) {
+            const arr = [];
+            if (snapshotValue) {
+                for (const key in snapshotValue) {
+                    if (Object.hasOwnProperty.call(snapshotValue, key)) {
+                        arr.push({ id: key, ...snapshotValue[key] });
+                    }
+                }
+            }
+            return arr;
+        }
+
+        /**
+         * Initializes the Firebase app and handles user authentication.
+         * Sets up real-time data listeners upon successful authentication.
+         */
+        window.onload = async () => {
+            try {
+                // Initialize Firebase app
+                app = initializeApp(firebaseConfig);
+                db = getDatabase(app); // Use getDatabase for Realtime Database
+                auth = getAuth(app);
+
+                // Listen for authentication state changes
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        // User is signed in
+                        userId = user.uid;
+                        document.getElementById('user-id-display').textContent = `User ID: ${userId}`;
+                        document.getElementById('google-sign-in-button').classList.add('hidden');
+                        document.getElementById('sign-out-button').classList.remove('hidden');
+                        console.log("Firebase initialized and user authenticated:", userId);
+                        // Setup real-time listeners for lessons and definitions
+                        setupRealtimeListeners();
+                        // Fetch daily suggestions
+                        fetchDailySuggestions();
+                    } else {
+                        // User is signed out
+                        userId = null;
+                        document.getElementById('user-id-display').textContent = 'User ID: Not signed in';
+                        document.getElementById('google-sign-in-button').classList.remove('hidden');
+                        document.getElementById('sign-out-button').classList.add('hidden');
+                        console.log("No user signed in.");
+                        // Clear displayed data if no user is signed in
+                        document.getElementById('definitions-display').innerHTML = '<p class="text-gray-500 text-center mt-8">Please sign in to view your definitions.</p>';
+                        document.getElementById('daily-suggestions').innerHTML = '<p class="text-gray-500">Sign in to get daily suggestions.</p>';
+                        // Clear dropdowns
+                        document.getElementById('add-definition-lesson').innerHTML = '<option value="">Select a Lesson</option>';
+                        document.getElementById('filter-lesson').innerHTML = '<option value="">All Lessons</option>';
+                        // If no user, try anonymous sign-in for initial setup (if not already done)
+                        if (!auth.currentUser) {
+                           await signInAnonymously(auth);
+                        }
+                    }
+                });
+
+                // Setup scroll listener for floating buttons
+                setupFloatingButtons();
+
+            } catch (error) {
+                console.error("Error initializing Firebase or signing in:", error);
+                showModal('Error', 'An error occurred while initializing Firebase or signing in. Please try again.');
+            }
+        };
+
+        /**
+         * Initiates Google Sign-In using a popup.
+         */
+        window.signInWithGoogle = async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+                showModal('Success', 'Successfully signed in with Google!');
+            } catch (error) {
+                console.error("Error during Google Sign-In:", error);
+                showModal('Sign-In Error', `Failed to sign in with Google: ${error.message}`);
+            }
+        };
+
+        /**
+         * Signs out the current user.
+         */
+        window.signOutUser = async () => {
+            try {
+                await signOut(auth);
+                showModal('Signed Out', 'You have been successfully signed out.');
+            } catch (error) {
+                console.error("Error during sign out:", error);
+                showModal('Sign-Out Error', `Failed to sign out: ${error.message}`);
+            }
+        };
+
+        /**
+         * Sets up real-time listeners for the 'lessons' and 'definitions' collections in Realtime Database.
+         * Updates global arrays and re-renders UI upon data changes.
+         */
+        function setupRealtimeListeners() {
+            if (!db || !userId) {
+                console.warn("Realtime Database or User ID not available for listeners. Skipping listener setup.");
+                return;
+            }
+
+            // Listener for 'lessons' collection
+            const lessonsRef = ref(db, `users/${userId}/lessons`);
+            onValue(lessonsRef, (snapshot) => {
+                lessons = snapshotToArray(snapshot.val());
+                populateLessonDropdowns();
+                displayLessonsAndDefinitions(); // Re-render definitions as lessons might have changed
+                console.log("Lessons updated:", lessons);
+            }, (error) => {
+                console.error("Error fetching lessons:", error);
+                showModal('Error', 'An error occurred while fetching lessons.');
+            });
+
+            // Listener for 'definitions' collection
+            const definitionsRef = ref(db, `users/${userId}/definitions`);
+            onValue(definitionsRef, (snapshot) => {
+                definitions = snapshotToArray(snapshot.val());
+                displayLessonsAndDefinitions(); // Re-render definitions
+                fetchDailySuggestions(); // Re-fetch suggestions as definitions might have changed
+                console.log("Definitions updated:", definitions);
+            }, (error) => {
+                console.error("Error fetching definitions:", error);
+                showModal('Error', 'An error occurred while fetching definitions.');
+            });
+        }
+
+        /**
+         * Populates the lesson dropdowns for adding definitions and filtering.
+         */
+        function populateLessonDropdowns() {
+            const addDefinitionLessonSelect = document.getElementById('add-definition-lesson');
+            const filterLessonSelect = document.getElementById('filter-lesson');
+
+            // Clear existing options
+            addDefinitionLessonSelect.innerHTML = '<option value="">Select a Lesson</option>';
+            filterLessonSelect.innerHTML = '<option value="">All Lessons</option>';
+
+            lessons.forEach(lesson => {
+                const option1 = document.createElement('option');
+                option1.value = lesson.id;
+                option1.textContent = lesson.name;
+                addDefinitionLessonSelect.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = lesson.id;
+                option2.textContent = lesson.name;
+                filterLessonSelect.appendChild(option2);
+            });
+        }
+
+        /**
+         * Displays lessons and their associated definitions in the UI.
+         * Can filter definitions by a specific lesson ID.
+         * @param {string|null} filterLessonId - The ID of the lesson to filter by, or null for all lessons.
+         */
+        function displayLessonsAndDefinitions(filterLessonId = null) {
+            const definitionsDisplay = document.getElementById('definitions-display');
+            definitionsDisplay.innerHTML = ''; // Clear content, no explicit loading message
+
+            if (lessons.length === 0 && definitions.length === 0) {
+                definitionsDisplay.innerHTML = '<p class="text-gray-500 text-center mt-8">No lessons or definitions added yet. Start by adding a new lesson!</p>';
+                return;
+            }
+
+            // Filter definitions based on the selected lesson
+            const filteredDefinitions = filterLessonId
+                ? definitions.filter(def => def.lessonId === filterLessonId)
+                : definitions;
+
+            if (lessons.length === 0 && filteredDefinitions.length > 0) {
+                 // This case should ideally not happen if data integrity is maintained (definitions always linked to lessons)
+                 // But as a fallback, display definitions without lesson grouping if lessons are missing.
+                 const noLessonDiv = document.createElement('div');
+                 noLessonDiv.className = 'bg-gray-100 p-4 rounded-lg shadow-md mb-6';
+                 noLessonDiv.innerHTML = `
+                     <h3 class="text-xl font-semibold text-gray-800 mb-4">Definitions (No Lesson Assigned)</h3>
+                     <div id="definitions-for-lesson-unassigned" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                 `;
+                 definitionsDisplay.appendChild(noLessonDiv);
+                 const definitionsForUnassignedDiv = document.getElementById(`definitions-for-lesson-unassigned`);
+                 filteredDefinitions.forEach(definition => {
+                     definitionsForUnassignedDiv.appendChild(createDefinitionCard(definition));
+                 });
+                 return;
+            }
+
+            // Group definitions by lesson
+            lessons.forEach(lesson => {
+                const lessonDefinitions = filteredDefinitions.filter(def => def.lessonId === lesson.id);
+
+                if (lessonDefinitions.length > 0 || filterLessonId === null) { // Show lesson even if no definitions, if not filtering
+                    const lessonDiv = document.createElement('div');
+                    lessonDiv.className = 'bg-gray-100 p-4 rounded-lg shadow-md mb-6';
+                    lessonDiv.innerHTML = `
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4 flex justify-between items-center">
+                            ${lesson.name}
+                            <button onclick="deleteLesson('${lesson.id}', '${lesson.name}')" class="ml-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition duration-200 ease-in-out transform hover:scale-105">
+                                <i class="fas fa-trash-alt mr-1"></i> Delete Lesson
+                            </button>
+                        </h3>
+                        <div id="definitions-for-lesson-${lesson.id}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    `;
+                    definitionsDisplay.appendChild(lessonDiv);
+
+                    const definitionsForThisLessonDiv = document.getElementById(`definitions-for-lesson-${lesson.id}`);
+                    lessonDefinitions.forEach(definition => {
+                        definitionsForThisLessonDiv.appendChild(createDefinitionCard(definition));
+                    });
+                }
+            });
+
+            if (definitionsDisplay.innerHTML === '') {
+                definitionsDisplay.innerHTML = '<p class="text-gray-500 text-center mt-8">No definitions found for the selected lesson.</p>';
+            }
+        }
+
+        /**
+         * Creates an HTML card element for a single definition.
+         * @param {object} definition - The definition object.
+         * @returns {HTMLElement} The created definition card element.
+         */
+        function createDefinitionCard(definition) {
+            const defCard = document.createElement('div');
+            defCard.className = 'bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition duration-200 ease-in-out';
+            defCard.innerHTML = `
+                <h4 class="text-lg font-medium text-gray-700 mb-2">${definition.topic}</h4>
+                <p class="definition-text text-gray-600 mb-3" id="def-text-${definition.id}">${definition.definition}</p>
+                <div class="flex justify-between items-center mt-3">
+                    <button onclick="toggleDefinitionVisibility('def-text-${definition.id}')" class="toggle-def-btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                        <i class="fas fa-eye mr-1"></i> Show Definition
+                    </button>
+                    <div>
+                        <button onclick="editDefinition('${definition.id}', '${definition.topic}', '${definition.definition}', '${definition.lessonId}')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md text-sm mr-2 shadow-md transition duration-220 ease-in-out transform hover:scale-105">
+                            <i class="fas fa-edit mr-1"></i> Edit
+                        </button>
+                        <button onclick="deleteDefinition('${definition.id}', '${definition.topic}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm shadow-md transition duration-220 ease-in-out transform hover:scale-105">
+                            <i class="fas fa-trash-alt mr-1"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+            return defCard;
+        }
+
+        /**
+         * Toggles the visibility of a definition's text with a smooth transition.
+         * This function is generic and works for any definition card by using the element's full ID.
+         * @param {string} elementId - The full ID of the definition's text element.
+         */
+        window.toggleDefinitionVisibility = (elementId) => {
+            const defText = document.getElementById(elementId);
+            if (!defText) {
+                console.error(`Element with ID ${elementId} not found for toggling.`);
+                return;
+            }
+            const buttonContainer = defText.nextElementSibling;
+            if (!buttonContainer) return;
+            const button = buttonContainer.querySelector('.toggle-def-btn');
+            if (!button) return;
+
+            if (defText.classList.contains('active')) {
+                // Hide definition
+                defText.style.maxHeight = '0';
+                defText.style.opacity = '0';
+                defText.style.marginBottom = '0';
+                defText.classList.remove('active');
+                button.innerHTML = '<i class="fas fa-eye mr-1"></i> Show Definition';
+                button.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+                // Restore original button color based on its section
+                if (elementId.startsWith('daily')) {
+                    button.classList.add('bg-purple-500', 'hover:bg-purple-600');
+                } else {
+                    button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                }
+            } else {
+                // Show definition
+                defText.style.maxHeight = defText.scrollHeight + 'px';
+                defText.style.opacity = '1';
+                defText.style.marginBottom = '0.75rem'; /* Tailwind mb-3 */
+                defText.classList.add('active');
+                button.innerHTML = '<i class="fas fa-eye-slash mr-1"></i> Hide Definition';
+                // Remove all possible colors before adding the 'hide' color
+                button.classList.remove('bg-blue-500', 'hover:bg-blue-600', 'bg-purple-500', 'hover:bg-purple-600');
+                button.classList.add('bg-gray-500', 'hover:bg-gray-600');
+            }
+        };
+
+
+        /**
+         * Handles the submission of the "Add New Lesson" form.
+         */
+        document.getElementById('add-lesson-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const lessonName = document.getElementById('new-lesson-name').value.trim();
+
+            if (!lessonName) {
+                showModal('Validation Error', 'Please enter a lesson name.');
+                return;
+            }
+            if (!userId) {
+                showModal('Authentication Error', 'User not signed in. Please try again.');
+                return;
+            }
+
+            try {
+                // Add a new document to the 'lessons' collection in Realtime Database
+                await push(ref(db, `users/${userId}/lessons`), {
+                    name: lessonName,
+                    createdAt: new Date().toISOString() // Store creation date as ISO string
+                });
+                document.getElementById('new-lesson-name').value = ''; // Clear input
+                showModal('Success', `Lesson "${lessonName}" added successfully.`);
+            } catch (e) {
+                console.error("Error adding lesson: ", e);
+                showModal('Error', 'An error occurred while adding the lesson. Please check console for details.');
+            }
+        });
+
+        /**
+         * Handles the submission of the "Add New Definition" form.
+         */
+        document.getElementById('add-definition-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const lessonId = document.getElementById('add-definition-lesson').value;
+            const topic = document.getElementById('new-definition-topic').value.trim();
+            const definition = document.getElementById('new-definition-text').value.trim();
+
+            if (!lessonId || !topic || !definition) {
+                showModal('Validation Error', 'Please fill in all fields.');
+                return;
+            }
+            if (!userId) {
+                showModal('Authentication Error', 'User not signed in. Please try again.');
+                return;
+            }
+
+            try {
+                // Add a new document to the 'definitions' collection in Realtime Database
+                await push(ref(db, `users/${userId}/definitions`), {
+                    lessonId: lessonId,
+                    topic: topic,
+                    definition: definition,
+                    createdAt: new Date().toISOString() // Store creation date as ISO string
+                });
+                // Clear form fields
+                document.getElementById('new-definition-topic').value = '';
+                document.getElementById('new-definition-text').value = '';
+                document.getElementById('add-definition-lesson').value = ''; // Reset dropdown
+                showModal('Success', `Definition for "${topic}" added successfully.`);
+            } catch (e) {
+                console.error("Error adding definition: ", e);
+                showModal('Error', 'An error occurred while adding the definition. Please check console for details.');
+            }
+        });
+
+        /**
+         * Filters the displayed definitions based on the selected lesson.
+         */
+        document.getElementById('filter-lesson').addEventListener('change', (e) => {
+            const selectedLessonId = e.target.value;
+            displayLessonsAndDefinitions(selectedLessonId === "" ? null : selectedLessonId);
+        });
+
+        /**
+         * Opens the modal for editing a definition, pre-populating its fields.
+         * @param {string} id - The ID of the definition to edit.
+         * @param {string} topic - The current topic of the definition.
+         * @param {string} definition - The current definition text.
+         * @param {string} lessonId - The ID of the lesson associated with the definition.
+         */
+        window.editDefinition = (id, topic, definition, lessonId) => {
+            document.getElementById('edit-definition-id').value = id;
+            document.getElementById('edit-definition-topic').value = topic;
+            document.getElementById('edit-definition-text').value = definition;
+
+            const editLessonSelect = document.getElementById('edit-definition-lesson');
+            editLessonSelect.innerHTML = ''; // Clear existing options
+            lessons.forEach(lesson => {
+                const option = document.createElement('option');
+                option.value = lesson.id;
+                option.textContent = lesson.name;
+                if (lesson.id === lessonId) {
+                    option.selected = true; // Select the current lesson
+                }
+                editLessonSelect.appendChild(option);
+            });
+            document.getElementById('editDefinitionModal').classList.remove('hidden');
+        };
+
+        /**
+         * Handles the submission of the "Edit Definition" form.
+         */
+        document.getElementById('edit-definition-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-definition-id').value;
+            const newTopic = document.getElementById('edit-definition-topic').value.trim();
+            const newDefinition = document.getElementById('edit-definition-text').value.trim();
+            const newLessonId = document.getElementById('edit-definition-lesson').value;
+
+            if (!newTopic || !newDefinition || !newLessonId) {
+                showModal('Validation Error', 'Please fill in all fields.');
+                return;
+            }
+            if (!userId) {
+                showModal('Authentication Error', 'User not signed in. Please try again.');
+                return;
+            }
+
+            try {
+                // Update the definition document in Realtime Database
+                await update(ref(db, `users/${userId}/definitions/${id}`), {
+                    topic: newTopic,
+                    definition: newDefinition,
+                    lessonId: newLessonId
+                });
+                document.getElementById('editDefinitionModal').classList.add('hidden'); // Close modal
+                showModal('Success', `Definition for "${newTopic}" updated successfully.`);
+            } catch (e) {
+                console.error("Error updating definition: ", e);
+                showModal('Error', 'An error occurred while updating the definition. Please check console for details.');
+            }
+        });
+
+        /**
+         * Prompts the user for confirmation before deleting a definition.
+         * @param {string} id - The ID of the definition to delete.
+         * @param {string} topic - The topic of the definition (for display in confirmation).
+         */
+        window.deleteDefinition = async (id, topic) => {
+            showConfirmModal(`Are you sure you want to delete the definition for "${topic}"? This action cannot be undone.`, async () => {
+                if (!userId) {
+                    showModal('Authentication Error', 'User not signed in. Please try again.');
+                    return;
+                }
+                try {
+                    // Delete the definition document from Realtime Database
+                    await remove(ref(db, `users/${userId}/definitions/${id}`));
+                    showModal('Success', `Definition for "${topic}" deleted successfully.`);
+                } catch (e) {
+                    console.error("Error deleting definition: ", e);
+                    showModal('Error', 'An error occurred while deleting the definition. Please check console for details.');
+                }
+            });
+        };
+
+        /**
+         * Prompts the user for confirmation before deleting a lesson and its associated definitions.
+         * @param {string} id - The ID of the lesson to delete.
+         * @param {string} name - The name of the lesson (for display in confirmation).
+         */
+        window.deleteLesson = async (id, name) => {
+            showConfirmModal(`Are you sure you want to delete the lesson "${name}" and ALL its associated definitions? This action cannot be undone.`, async () => {
+                if (!userId) {
+                    showModal('Authentication Error', 'User not signed in. Please try again.');
+                    return;
+                }
+                try {
+                    // Query for all definitions associated with this lesson
+                    const definitionsQuery = query(
+                        ref(db, `users/${userId}/definitions`),
+                        orderByChild('lessonId'),
+                        equalTo(id)
+                    );
+
+                    // Fetch definitions once to avoid multiple triggers during deletion
+                    const snapshot = await new Promise(resolve => onValue(definitionsQuery, resolve, { onlyOnce: true }));
+                    const definitionsToDelete = snapshotToArray(snapshot.val());
+
+                    const deletePromises = [];
+                    // Collect promises for deleting each associated definition
+                    definitionsToDelete.forEach((def) => {
+                        deletePromises.push(remove(ref(db, `users/${userId}/definitions/${def.id}`)));
+                    });
+                    await Promise.all(deletePromises); // Wait for all definitions to be deleted
+
+                    // Delete the lesson document
+                    await remove(ref(db, `users/${userId}/lessons/${id}`));
+                    showModal('Success', `Lesson "${name}" and its associated definitions deleted successfully.`);
+                } catch (e) {
+                    console.error("Error deleting lesson and its definitions: ", e);
+                    showModal('Error', 'An error occurred while deleting the lesson and definitions. Please check console for details.');
+                }
+            });
+        };
+
+        /**
+         * Fetches and displays daily definition suggestions with a notification.
+         * Picks up to 10 random definitions from the user's existing ones.
+         */
+        async function fetchDailySuggestions() {
+            const dailySuggestionsDiv = document.getElementById('daily-suggestions');
+            // Clear previous content and rebuild the section
+            dailySuggestionsDiv.innerHTML = `
+                <h2 class="text-2xl font-semibold text-purple-800 mb-4 flex items-center">
+                    <i class="fas fa-bell mr-2 text-purple-600"></i> Today's Reminders
+                </h2>
+            `;
+
+            if (!userId) {
+                 dailySuggestionsDiv.innerHTML += '<p class="text-gray-500">Sign in to get daily reminders.</p>';
+                 return;
+            }
+
+            if (definitions.length === 0) {
+                dailySuggestionsDiv.innerHTML += '<p class="text-gray-500">No definitions available. Add some to get daily reminders!</p>';
+                return;
+            }
+
+            // Select up to 10 random definitions from the existing ones
+            const shuffled = [...definitions].sort(() => 0.5 - Math.random());
+            const selectedSuggestions = shuffled.slice(0, 10);
+
+            // Add a notification about today's definitions
+            const notificationDiv = document.createElement('div');
+            notificationDiv.className = 'bg-purple-100 border-l-4 border-purple-500 text-purple-700 p-4 rounded-md shadow-sm mb-6';
+            notificationDiv.setAttribute('role', 'alert');
+
+            if (selectedSuggestions.length > 0) {
+                notificationDiv.innerHTML = `
+                    <p class="font-bold">Heads up!</p>
+                    <p>You have <span class="font-bold">${selectedSuggestions.length}</span> definitions to review today. Good luck!</p>
+                `;
+            } else {
+                notificationDiv.innerHTML = `
+                    <p class="font-bold">All clear for today!</p>
+                    <p>No definitions were selected for review. Add more definitions to get daily reminders.</p>
+                `;
+            }
+            dailySuggestionsDiv.appendChild(notificationDiv);
+
+            if (selectedSuggestions.length === 0) {
+                return; // Stop if there are no suggestions to display
+            }
+
+            // Display the selected suggestion cards
+            selectedSuggestions.forEach(def => {
+                const suggestionCard = document.createElement('div');
+                suggestionCard.className = 'bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-2 hover:shadow-md transition duration-200 ease-in-out';
+                suggestionCard.innerHTML = `
+                    <h4 class="text-lg font-medium text-gray-700 mb-2">${def.topic}</h4>
+                    <p class="definition-text text-gray-600 mb-3" id="daily-def-text-${def.id}">${def.definition}</p>
+                    <div class="flex justify-between items-center mt-3">
+                        <button onclick="toggleDefinitionVisibility('daily-def-text-${def.id}')" class="toggle-def-btn bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md text-sm shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                            <i class="fas fa-eye mr-1"></i> Show Definition
+                        </button>
+                    </div>
+                `;
+                dailySuggestionsDiv.appendChild(suggestionCard);
+            });
+        }
+
+        /**
+         * Displays a generic information modal to the user.
+         * @param {string} title - The title of the modal.
+         * @param {string} message - The message content of the modal.
+         */
+        function showModal(title, message) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            document.getElementById('infoModal').classList.remove('hidden');
+        }
+
+        /**
+         * Closes the information modal.
+         */
+        document.getElementById('close-info-modal').addEventListener('click', () => {
+            document.getElementById('infoModal').classList.add('hidden');
+        });
+
+        // Global callback for confirm modal action
+        let confirmActionCallback = null;
+
+        /**
+         * Displays a confirmation modal to the user.
+         * @param {string} message - The confirmation message.
+         * @param {function} callback - The function to execute if the user confirms.
+         */
+        function showConfirmModal(message, callback) {
+            document.getElementById('confirm-message').textContent = message;
+            document.getElementById('confirmModal').classList.remove('hidden');
+            confirmActionCallback = callback;
+        }
+
+        /**
+         * Handles the cancellation of the confirmation modal.
+         */
+        document.getElementById('cancel-confirm-modal').addEventListener('click', () => {
+            document.getElementById('confirmModal').classList.add('hidden');
+            confirmActionCallback = null; // Clear callback
+        });
+
+        /**
+         * Handles the confirmation action from the confirmation modal.
+         */
+        document.getElementById('confirm-action').addEventListener('click', () => {
+            if (confirmActionCallback) {
+                confirmActionCallback(); // Execute the stored callback
+            }
+            document.getElementById('confirmModal').classList.add('hidden');
+            confirmActionCallback = null; // Clear callback
+        });
+
+        /**
+         * Closes modals when clicking outside of their content.
+         */
+        window.addEventListener('click', (event) => {
+            if (event.target === document.getElementById('infoModal')) {
+                document.getElementById('infoModal').classList.add('hidden');
+            }
+            if (event.target === document.getElementById('confirmModal')) {
+                document.getElementById('confirmModal').classList.add('hidden');
+            }
+            if (event.target === document.getElementById('editDefinitionModal')) {
+                document.getElementById('editDefinitionModal').classList.add('hidden');
+            }
+        });
+
+        /**
+         * Closes the edit definition modal.
+         */
+        document.getElementById('close-edit-modal').addEventListener('click', () => {
+            document.getElementById('editDefinitionModal').classList.add('hidden');
+        });
+
+        /**
+         * Sets up the scroll listener to show/hide floating action buttons.
+         */
+        function setupFloatingButtons() {
+            const fabContainer = document.getElementById('fab-container');
+            const scrollThreshold = 200; // Pixels scrolled down before showing FABs
+
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > scrollThreshold) {
+                    fabContainer.classList.add('show-fab');
+                } else {
+                    fabContainer.classList.remove('show-fab');
+                }
+            });
+
+            // Smooth scroll to sections when FABs are clicked
+            document.getElementById('fab-add-lesson').addEventListener('click', () => {
+                document.getElementById('add-lesson-section').scrollIntoView({ behavior: 'smooth' });
+            });
+
+            document.getElementById('fab-add-definition').addEventListener('click', () => {
+                document.getElementById('add-definition-section').scrollIntoView({ behavior: 'smooth' });
+            });
+        }
+
+    </script>
+    <style>
+        /* Custom styles for body and modal transitions */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to right bottom, #e0f2f7, #c8e6c9); /* Soft gradient background */
+            min-height: 100vh; /* Ensure full viewport height */
+            display: flex; /* Use flexbox for body */
+            flex-direction: column; /* Arrange children vertically */
+            align-items: center; /* Center horizontally */
+            /* Tailwind classes p-4 md:p-8 lg:p-12 handle padding */
+        }
+        .modal {
+            background-color: rgba(0, 0, 0, 0.6); /* Darker overlay */
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0;
+            pointer-events: none; /* Allows clicks through when hidden */
+        }
+        .modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .modal:not(.hidden) {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            border-radius: 0.75rem; /* rounded-lg */
+            padding: 2rem; /* p-8 */
+            max-width: 90%;
+            width: 450px; /* Slightly wider modal */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Stronger shadow */
+            transform: translateY(-20px); /* Initial position for animation */
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        .modal:not(.hidden) .modal-content {
+            transform: translateY(0); /* Final position */
+        }
+        /* Custom button styles for gradients and shadows */
+        .btn-primary {
+            background: linear-gradient(to right, #3b82f6, #2563eb); /* Blue gradient */
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to right, #2563eb, #1d4ed8);
+            box-shadow: 0 6px 8px rgba(37, 99, 235, 0.4);
+        }
+        .btn-success {
+            background: linear-gradient(to right, #22c55e, #16a34a); /* Green gradient */
+            box-shadow: 0 4px 6px rgba(34, 197, 94, 0.3);
+        }
+        .btn-success:hover {
+            background: linear-gradient(to right, #16a34a, #0f766e);
+            box-shadow: 0 6px 8px rgba(22, 163, 74, 0.4);
+        }
+        .btn-warning {
+            background: linear-gradient(to right, #f59e0b, #d97706); /* Yellow/Orange gradient */
+            box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);
+        }
+        .btn-warning:hover {
+            background: linear-gradient(to right, #d97706, #b45309);
+            box-shadow: 0 6px 8px rgba(217, 119, 6, 0.4);
+        }
+        .btn-danger {
+            background: linear-gradient(to right, #ef4444, #dc2626); /* Red gradient */
+            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
+        }
+        .btn-danger:hover {
+            background: linear-gradient(to right, #dc2626, #b91c1c);
+            box-shadow: 0 6px 8px rgba(220, 38, 38, 0.4);
+        }
+        .btn-info {
+            background: linear-gradient(to right, #a855f7, #9333ea); /* Purple gradient */
+            box-shadow: 0 4px 6px rgba(168, 85, 247, 0.3);
+        }
+        .btn-info:hover {
+            background: linear-gradient(to right, #9333ea, #7e22ce);
+            box-shadow: 0 6px 8px rgba(147, 51, 234, 0.4);
+        }
+        /* Input focus styles */
+        input:focus, textarea:focus, select:focus {
+            border-color: #3b82f6; /* Blue border on focus */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* Blue ring on focus */
+        }
+
+        /* Smooth transition for definition text */
+        .definition-text {
+            max-height: 0; /* Start hidden */
+            overflow: hidden;
+            opacity: 0;
+            margin-bottom: 0; /* Remove margin when hidden */
+            transition: max-height 0.5s ease-out, opacity 0.5s ease-out, margin-bottom 0.5s ease-out;
+        }
+        /* When active, set to auto height and full opacity */
+        .definition-text.active {
+            /* max-height will be set by JS to scrollHeight */
+            opacity: 1;
+            margin-bottom: 0.75rem; /* Tailwind mb-3 */
+        }
+
+        /* Floating Action Buttons (FABs) styles */
+        #fab-container {
+            position: fixed;
+            bottom: 2rem; /* Distance from bottom */
+            right: 2rem; /* Distance from right */
+            z-index: 1000; /* Ensure it's on top */
+            display: flex;
+            flex-direction: column;
+            gap: 1rem; /* Space between buttons */
+            opacity: 0;
+            transform: translateY(100px); /* Start off-screen */
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+            pointer-events: none; /* Allow clicks through when hidden */
+        }
+
+        #fab-container.show-fab {
+            opacity: 1;
+            transform: translateY(0); /* Slide into view */
+            pointer-events: auto; /* Enable clicks when visible */
+        }
+
+        .fab-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px; /* Standard FAB size */
+            height: 56px;
+            border-radius: 50%; /* Circular */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            /* color: white; - Removed from here, applied directly to <i> for consistency */
+            /* font-size: 1.5rem; - Removed from here, applied directly to <i> for consistency */
+            transition: background 0.2s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .fab-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 md:p-8 lg:p-12">
+    <!-- Main content container -->
+    <div class="w-full flex-grow bg-white rounded-xl shadow-2xl px-4 py-8 border border-gray-100 md:p-10 lg:p-12">
+        <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-6 leading-tight">
+            <i class="fas fa-book-open text-blue-500 mr-3"></i> A/L Biology Definitions Memory App
+        </h1>
+        <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-6">
+            <p id="user-id-display" class="text-sm text-gray-600"></p>
+            <button id="google-sign-in-button" onclick="signInWithGoogle()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center hidden">
+                <i class="fab fa-google mr-2"></i> Sign in with Google
+            </button>
+            <button id="sign-out-button" onclick="signOutUser()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center hidden">
+                <i class="fas fa-sign-out-alt mr-2"></i> Sign Out
+            </button>
+        </div>
+
+
+        <!-- Add New Lesson Section -->
+        <div id="add-lesson-section" class="mb-8 p-6 bg-blue-50 rounded-lg shadow-md border border-blue-200">
+            <h2 class="text-2xl font-semibold text-blue-800 mb-4 flex items-center">
+                <i class="fas fa-plus-circle mr-2 text-blue-600"></i> Add New Lesson
+            </h2>
+            <form id="add-lesson-form" class="flex flex-col md:flex-row gap-4">
+                <input type="text" id="new-lesson-name" placeholder="Enter Lesson Name (e.g., Photosynthesis)" class="flex-grow p-3 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
+                <button type="submit" class="btn-primary text-white font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out transform hover:scale-105">
+                    <i class="fas fa-folder-plus mr-2"></i> Add Lesson
+                </button>
+            </form>
+        </div>
+
+        <!-- Add New Definition Section -->
+        <div id="add-definition-section" class="mb-8 p-6 bg-green-50 rounded-lg shadow-md border border-green-200">
+            <h2 class="text-2xl font-semibold text-green-800 mb-4 flex items-center">
+                <i class="fas fa-file-circle-plus mr-2 text-green-600"></i> Add New Definition
+            </h2>
+            <form id="add-definition-form" class="flex flex-col gap-4">
+                <select id="add-definition-lesson" class="p-3 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200" required>
+                    <option value="">Select a Lesson</option>
+                    <!-- Lessons populated by JavaScript -->
+                </select>
+                <input type="text" id="new-definition-topic" placeholder="Topic (e.g., Cellular Respiration)" class="p-3 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200" required>
+                <textarea id="new-definition-text" placeholder="Definition (e.g., The metabolic process in which organisms obtain energy by oxidizing organic molecules.)" rows="4" class="p-3 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200" required></textarea>
+                <button type="submit" class="btn-success text-white font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out transform hover:scale-105">
+                    <i class="fas fa-plus mr-2"></i> Add Definition
+                </button>
+            </form>
+        </div>
+
+        <!-- Filter Definitions Section -->
+        <div class="mb-8 p-6 bg-yellow-50 rounded-lg shadow-md border border-yellow-200">
+            <h2 class="text-2xl font-semibold text-yellow-800 mb-4 flex items-center">
+                <i class="fas fa-filter mr-2 text-yellow-600"></i> Filter Definitions
+            </h2>
+            <select id="filter-lesson" class="w-full p-3 border border-yellow-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-200">
+                <option value="">All Lessons</option>
+                <!-- Lessons populated by JavaScript -->
+            </select>
+        </div>
+
+        <!-- Daily Reminders Section -->
+        <div id="daily-suggestions" class="mb-8 p-6 bg-purple-50 rounded-lg shadow-md border border-purple-200">
+            <h2 class="text-2xl font-semibold text-purple-800 mb-4 flex items-center">
+                <i class="fas fa-bell mr-2 text-purple-600"></i> Today's Reminders
+            </h2>
+            <p class="text-gray-500">Loading today's reminders...</p>
+        </div>
+
+        <!-- All Definitions Display Section -->
+        <div class="p-6 bg-white rounded-lg shadow-md border border-gray-200">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-list-alt mr-2 text-gray-600"></i> All Definitions
+            </h2>
+            <div id="definitions-display">
+                <!-- No explicit loading message here -->
+                <p class="text-gray-500 text-center">No lessons or definitions added yet. Start by adding a new lesson!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Buttons Container -->
+    <div id="fab-container" class="fixed bottom-4 right-4 z-50 flex flex-col space-y-4">
+        <button id="fab-add-lesson" class="fab-button bg-blue-600 hover:bg-blue-700">
+            <i class="fas fa-folder-plus text-white text-2xl"></i>
+        </button>
+        <button id="fab-add-definition" class="fab-button bg-green-600 hover:bg-green-700">
+            <i class="fas fa-file-circle-plus text-white text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="infoModal" class="modal fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="modal-content text-center">
+            <h3 id="modal-title" class="text-xl font-bold mb-4 text-gray-800"></h3>
+            <p id="modal-message" class="mb-6 text-gray-700"></p>
+            <button id="close-info-modal" class="btn-primary text-white px-6 py-2 rounded-md transition duration-300 ease-in-out transform hover:scale-105">OK</button>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="modal fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="modal-content text-center">
+            <h3 class="text-xl font-bold mb-4 text-gray-800">Confirm Action</h3>
+            <p id="confirm-message" class="mb-6 text-gray-700"></p>
+            <div class="flex justify-center gap-4">
+                <button id="cancel-confirm-modal" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105">Cancel</button>
+                <button id="confirm-action" class="btn-danger text-white px-6 py-2 rounded-md transition duration-300 ease-in-out transform hover:scale-105">Yes, Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Definition Modal -->
+    <div id="editDefinitionModal" class="modal fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                <i class="fas fa-edit mr-2 text-yellow-600"></i> Edit Definition
+            </h3>
+            <form id="edit-definition-form" class="flex flex-col gap-4">
+                <input type="hidden" id="edit-definition-id">
+                <select id="edit-definition-lesson" class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
+                    <!-- Lessons populated by JavaScript -->
+                </select>
+                <input type="text" id="edit-definition-topic" placeholder="Topic" class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
+                <textarea id="edit-definition-text" placeholder="Definition" rows="4" class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required></textarea>
+                <div class="flex justify-end gap-4 mt-4">
+                    <button type="button" id="close-edit-modal" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105">Cancel</button>
+                    <button type="submit" class="btn-primary text-white font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out transform hover:scale-105">
+                        <i class="fas fa-save mr-2"></i> Update
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
