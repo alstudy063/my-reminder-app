@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Screen Biology Definitions App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome CDN for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Custom styles for body and modal transitions */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to right bottom, #e0f2f7, #c8e6c9); /* Soft gradient background */
+            min-height: 100vh; /* Ensure full viewport height */
+            display: flex; /* Use flexbox for body */
+            flex-direction: column; /* Arrange children vertically */
+            align-items: center; /* Center horizontally */
+        }
+        .modal {
+            background-color: rgba(0, 0, 0, 0.6); /* Darker overlay */
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0;
+            pointer-events: none; /* Allows clicks through when hidden */
+        }
+        .modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .modal:not(.hidden) {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            border-radius: 0.75rem; /* rounded-lg */
+            padding: 2rem; /* p-8 */
+            max-width: 90%;
+            width: 450px; /* Slightly wider modal */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Stronger shadow */
+            transform: translateY(-20px); /* Initial position for animation */
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        .modal:not(.hidden) .modal-content {
+            transform: translateY(0); /* Final position */
+        }
+        /* Custom button styles for gradients and shadows */
+        .btn-primary {
+            background: linear-gradient(to right, #3b82f6, #2563eb); /* Blue gradient */
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to right, #2563eb, #1d4ed8);
+            box-shadow: 0 6px 8px rgba(37, 99, 235, 0.4);
+        }
+        .btn-success {
+            background: linear-gradient(to right, #22c55e, #16a34a); /* Green gradient */
+            box-shadow: 0 4px 6px rgba(34, 197, 94, 0.3);
+        }
+        .btn-success:hover {
+            background: linear-gradient(to right, #16a34a, #0f766e);
+            box-shadow: 0 6px 8px rgba(22, 163, 74, 0.4);
+        }
+        .btn-warning {
+            background: linear-gradient(to right, #f59e0b, #d97706); /* Yellow/Orange gradient */
+            box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);
+        }
+        .btn-warning:hover {
+            background: linear-gradient(to right, #d97706, #b45309);
+            box-shadow: 0 6px 8px rgba(217, 119, 6, 0.4);
+        }
+        .btn-danger {
+            background: linear-gradient(to right, #ef4444, #dc2626); /* Red gradient */
+            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
+        }
+        .btn-danger:hover {
+            background: linear-gradient(to right, #dc2626, #b91c1c);
+            box-shadow: 0 6px 8px rgba(220, 38, 38, 0.4);
+        }
+        .btn-info {
+            background: linear-gradient(to right, #a855f7, #9333ea); /* Purple gradient */
+            box-shadow: 0 4px 6px rgba(168, 85, 247, 0.3);
+        }
+        .btn-info:hover {
+            background: linear-gradient(to right, #9333ea, #7e22ce);
+            box-shadow: 0 6px 8px rgba(147, 51, 234, 0.4);
+        }
+        /* Input focus styles */
+        input:focus, textarea:focus, select:focus {
+            border-color: #3b82f6; /* Blue border on focus */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* Blue ring on focus */
+        }
+
+        /* Smooth transition for definition text */
+        .definition-text {
+            max-height: 0; /* Start hidden */
+            overflow: hidden;
+            opacity: 0;
+            margin-bottom: 0; /* Remove margin when hidden */
+            transition: max-height 0.5s ease-out, opacity 0.5s ease-out, margin-bottom 0.5s ease-out;
+        }
+        /* When active, set to auto height and full opacity */
+        .definition-text.active {
+            opacity: 1;
+            margin-bottom: 0.75rem; /* Tailwind mb-3 */
+        }
+
+        /* Floating Action Buttons (FABs) styles */
+        #fab-container {
+            position: fixed;
+            bottom: 2rem; /* Distance from bottom */
+            right: 2rem; /* Distance from right */
+            z-index: 1000; /* Ensure it's on top */
+            display: flex;
+            flex-direction: column;
+            gap: 1rem; /* Space between buttons */
+            opacity: 0;
+            transform: translateY(100px); /* Start off-screen */
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+            pointer-events: none; /* Allow clicks through when hidden */
+        }
+
+        #fab-container.show-fab {
+            opacity: 1;
+            transform: translateY(0); /* Slide into view */
+            pointer-events: auto; /* Enable clicks when visible */
+        }
+
+        .fab-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px; /* Standard FAB size */
+            height: 56px;
+            border-radius: 50%; /* Circular */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: background 0.2s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .fab-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 md:p-8 lg:p-12">
+    <!-- Main content container -->
+    <div class="w-full flex-grow bg-white rounded-xl shadow-2xl px-4 py-8 border border-gray-100 md:p-10 lg:p-12">
+        <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-6 leading-tight">
+            <i class="fas fa-book-open text-blue-500 mr-3"></i> A/L Biology Definitions Memory App
+        </h1>
+        
+        <!-- Add New Lesson Section -->
+        <div id="add-lesson-section" class="mb-8 p-6 bg-blue-50 rounded-lg shadow-md border border-blue-200">
+            <h2 class="text-2xl font-semibold text-blue-800 mb-4 flex items-center">
+                <i class="fas fa-plus-circle mr-2 text-blue-600"></i> Add New Lesson
+            </h2>
+            <form id="add-lesson-form" class="flex flex-col md:flex-row gap-4">
+                <input type="text" id="new-lesson-name" placeholder="Enter Lesson Name (e.g., Photosynthesis)" class="flex-grow p-3 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
+                <button type="submit" class="btn-primary text-white font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out transform hover:scale-105">
+                    <i class="fas fa-folder-plus mr-2"></i> Add Lesson
+                </button>
+            </form>
+        </div>
+
+        <!-- Add New Definition Section -->
+        <div id="add-definition-section" class="mb-8 p-6 bg-green-50 rounded-lg shadow-md border border-green-200">
+            <h2 class="text-2xl font-semibold text-green-800 mb-4 flex items-center">
+                <i class="fas fa-file-circle-plus mr-2 text-green-600"></i> Add New Definition
+            </h2>
+            <form id="add-definition-form" class="flex flex-col gap-4">
+                <select id="add-definition-lesson" class="p-3 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200" required>
+                    <option value="">Select a Lesson</option>
+                </select>
+                <input type="text" id="new-definition-topic" placeholder="Topic (e.g., Cellular Respiration)" class="p-3 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200" required>
+                <textarea id="new-definition-text" placeholder="Definition (e.g., The metabolic process...)" rows="4" class="p-3 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200" required></textarea>
+                <button type="submit" class="btn-success text-white font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out transform hover:scale-105">
+                    <i class="fas fa-plus mr-2"></i> Add Definition
+                </button>
+            </form>
+        </div>
+
+        <!-- Filter Definitions Section -->
+        <div class="mb-8 p-6 bg-yellow-50 rounded-lg shadow-md border border-yellow-200">
+            <h2 class="text-2xl font-semibold text-yellow-800 mb-4 flex items-center">
+                <i class="fas fa-filter mr-2 text-yellow-600"></i> Filter Definitions
+            </h2>
+            <select id="filter-lesson" class="w-full p-3 border border-yellow-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-200">
+                <option value="">All Lessons</option>
+            </select>
+        </div>
+
+        <!-- Daily Definition Suggestions Section -->
+        <div id="daily-suggestions" class="mb-8 p-6 bg-purple-50 rounded-lg shadow-md border border-purple-200">
+            <h2 class="text-2xl font-semibold text-purple-800 mb-4 flex items-center">
+                <i class="fas fa-lightbulb mr-2 text-purple-600"></i> Daily Definition Suggestions
+            </h2>
+            <p class="text-gray-500">No definitions available for daily suggestions. Please add some definitions first!</p>
+        </div>
+
+        <!-- All Definitions Display Section -->
+        <div class="p-6 bg-white rounded-lg shadow-md border border-gray-200">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-list-alt mr-2 text-gray-600"></i> All Definitions
+            </h2>
+            <div id="definitions-display">
+                <p class="text-gray-500 text-center">No lessons or definitions added yet. Start by adding a new lesson!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Buttons Container -->
+    <div id="fab-container" class="fixed bottom-4 right-4 z-50 flex flex-col space-y-4">
+        <button id="fab-add-lesson" class="fab-button bg-blue-600 hover:bg-blue-700">
+            <i class="fas fa-folder-plus text-white text-2xl"></i>
+        </button>
+        <button id="fab-add-definition" class="fab-button bg-green-600 hover:bg-green-700">
+            <i class="fas fa-file-circle-plus text-white text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="infoModal" class="modal fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="modal-content text-center">
+            <h3 id="modal-title" class="text-xl font-bold mb-4 text-gray-800"></h3>
+            <p id="modal-message" class="mb-6 text-gray-700"></p>
+            <button id="close-info-modal" class="btn-primary text-white px-6 py-2 rounded-md transition duration-300 ease-in-out transform hover:scale-105">OK</button>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="modal fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="modal-content text-center">
+            <h3 class="text-xl font-bold mb-4 text-gray-800">Confirm Action</h3>
+            <p id="confirm-message" class="mb-6 text-gray-700"></p>
+            <div class="flex justify-center gap-4">
+                <button id="cancel-confirm-modal" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105">Cancel</button>
+                <button id="confirm-action" class="btn-danger text-white px-6 py-2 rounded-md transition duration-300 ease-in-out transform hover:scale-105">Yes, Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Definition Modal -->
+    <div id="editDefinitionModal" class="modal fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                <i class="fas fa-edit mr-2 text-yellow-600"></i> Edit Definition
+            </h3>
+            <form id="edit-definition-form" class="flex flex-col gap-4">
+                <input type="hidden" id="edit-definition-id">
+                <select id="edit-definition-lesson" class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required></select>
+                <input type="text" id="edit-definition-topic" placeholder="Topic" class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
+                <textarea id="edit-definition-text" placeholder="Definition" rows="4" class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required></textarea>
+                <div class="flex justify-end gap-4 mt-4">
+                    <button type="button" id="close-edit-modal" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105">Cancel</button>
+                    <button type="submit" class="btn-primary text-white font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out transform hover:scale-105">
+                        <i class="fas fa-save mr-2"></i> Update
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global variables for local data
+        let definitions = [];
+        let lessons = [];
+
+        /**
+         * Saves the current state of lessons and definitions to the browser's local storage.
+         */
+        function saveDataToLocalStorage() {
+            localStorage.setItem('biologyLessons', JSON.stringify(lessons));
+            localStorage.setItem('biologyDefinitions', JSON.stringify(definitions));
+        }
+
+        /**
+         * Loads lessons and definitions from local storage when the app starts.
+         */
+        function loadDataFromLocalStorage() {
+            const storedLessons = localStorage.getItem('biologyLessons');
+            const storedDefinitions = localStorage.getItem('biologyDefinitions');
+            if (storedLessons) {
+                lessons = JSON.parse(storedLessons);
+            }
+            if (storedDefinitions) {
+                definitions = JSON.parse(storedDefinitions);
+            }
+        }
+        
+        /**
+         * Initializes the application on window load.
+         */
+        window.onload = () => {
+            loadDataFromLocalStorage();
+            populateLessonDropdowns();
+            displayLessonsAndDefinitions();
+            fetchDailySuggestions();
+            setupFloatingButtons();
+            console.log("App initialized with local storage.");
+        };
+
+        /**
+         * Populates the lesson dropdowns for adding definitions and filtering.
+         */
+        function populateLessonDropdowns() {
+            const addDefinitionLessonSelect = document.getElementById('add-definition-lesson');
+            const filterLessonSelect = document.getElementById('filter-lesson');
+
+            addDefinitionLessonSelect.innerHTML = '<option value="">Select a Lesson</option>';
+            filterLessonSelect.innerHTML = '<option value="">All Lessons</option>';
+
+            lessons.forEach(lesson => {
+                const option1 = document.createElement('option');
+                option1.value = lesson.id;
+                option1.textContent = lesson.name;
+                addDefinitionLessonSelect.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = lesson.id;
+                option2.textContent = lesson.name;
+                filterLessonSelect.appendChild(option2);
+            });
+        }
+
+        /**
+         * Displays lessons and their associated definitions in the UI.
+         */
+        function displayLessonsAndDefinitions(filterLessonId = null) {
+            const definitionsDisplay = document.getElementById('definitions-display');
+            definitionsDisplay.innerHTML = '';
+
+            if (lessons.length === 0 && definitions.length === 0) {
+                definitionsDisplay.innerHTML = '<p class="text-gray-500 text-center mt-8">No lessons or definitions added yet. Start by adding a new lesson!</p>';
+                return;
+            }
+
+            const filteredDefinitions = filterLessonId
+                ? definitions.filter(def => def.lessonId === filterLessonId)
+                : definitions;
+
+            lessons.forEach(lesson => {
+                const lessonDefinitions = filteredDefinitions.filter(def => def.lessonId === lesson.id);
+
+                if (lessonDefinitions.length > 0 || !filterLessonId) {
+                    const lessonDiv = document.createElement('div');
+                    lessonDiv.className = 'bg-gray-100 p-4 rounded-lg shadow-md mb-6';
+                    lessonDiv.innerHTML = `
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4 flex justify-between items-center">
+                            ${lesson.name}
+                            <button onclick="deleteLesson('${lesson.id}', '${lesson.name}')" class="ml-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition duration-200 ease-in-out transform hover:scale-105">
+                                <i class="fas fa-trash-alt mr-1"></i> Delete Lesson
+                            </button>
+                        </h3>
+                        <div id="definitions-for-lesson-${lesson.id}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    `;
+                    definitionsDisplay.appendChild(lessonDiv);
+
+                    const definitionsForThisLessonDiv = document.getElementById(`definitions-for-lesson-${lesson.id}`);
+                    lessonDefinitions.forEach(definition => {
+                        definitionsForThisLessonDiv.appendChild(createDefinitionCard(definition));
+                    });
+                }
+            });
+
+            if (definitionsDisplay.innerHTML === '') {
+                definitionsDisplay.innerHTML = '<p class="text-gray-500 text-center mt-8">No definitions found for the selected lesson.</p>';
+            }
+        }
+
+        /**
+         * Creates an HTML card element for a single definition.
+         */
+        function createDefinitionCard(definition) {
+            const defCard = document.createElement('div');
+            defCard.className = 'bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition duration-200 ease-in-out';
+            defCard.innerHTML = `
+                <h4 class="text-lg font-medium text-gray-700 mb-2">${definition.topic}</h4>
+                <p class="definition-text text-gray-600 mb-3" id="def-text-${definition.id}">${definition.definition}</p>
+                <div class="flex justify-between items-center mt-3">
+                    <button onclick="toggleDefinition('${definition.id}')" class="toggle-def-btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                        <i class="fas fa-eye mr-1"></i> Show Definition
+                    </button>
+                    <div>
+                        <button onclick="editDefinition('${definition.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md text-sm mr-2 shadow-md transition duration-220 ease-in-out transform hover:scale-105">
+                            <i class="fas fa-edit mr-1"></i> Edit
+                        </button>
+                        <button onclick="deleteDefinition('${definition.id}', '${definition.topic}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm shadow-md transition duration-220 ease-in-out transform hover:scale-105">
+                            <i class="fas fa-trash-alt mr-1"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+            return defCard;
+        }
+
+        /**
+         * Toggles the visibility of a definition's text.
+         */
+        window.toggleDefinition = (id) => {
+            const defText = document.getElementById(`def-text-${id}`);
+            const button = defText.closest('.bg-white').querySelector('.toggle-def-btn');
+
+            if (defText.classList.contains('active')) {
+                defText.style.maxHeight = '0';
+                defText.classList.remove('active');
+                button.innerHTML = '<i class="fas fa-eye mr-1"></i> Show Definition';
+            } else {
+                defText.style.maxHeight = defText.scrollHeight + 'px';
+                defText.classList.add('active');
+                button.innerHTML = '<i class="fas fa-eye-slash mr-1"></i> Hide Definition';
+            }
+        };
+
+        /**
+         * Handles adding a new lesson.
+         */
+        document.getElementById('add-lesson-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const lessonName = document.getElementById('new-lesson-name').value.trim();
+            if (!lessonName) {
+                showModal('Validation Error', 'Please enter a lesson name.');
+                return;
+            }
+            const newLesson = {
+                id: Date.now().toString(),
+                name: lessonName,
+                createdAt: new Date().toISOString()
+            };
+            lessons.push(newLesson);
+            saveDataToLocalStorage();
+            populateLessonDropdowns();
+            displayLessonsAndDefinitions();
+            document.getElementById('new-lesson-name').value = '';
+            showModal('Success', `Lesson "${lessonName}" added successfully.`);
+        });
+
+        /**
+         * Handles adding a new definition.
+         */
+        document.getElementById('add-definition-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const lessonId = document.getElementById('add-definition-lesson').value;
+            const topic = document.getElementById('new-definition-topic').value.trim();
+            const definition = document.getElementById('new-definition-text').value.trim();
+
+            if (!lessonId || !topic || !definition) {
+                showModal('Validation Error', 'Please fill in all fields.');
+                return;
+            }
+            const newDefinition = {
+                id: Date.now().toString(),
+                lessonId: lessonId,
+                topic: topic,
+                definition: definition,
+                createdAt: new Date().toISOString()
+            };
+            definitions.push(newDefinition);
+            saveDataToLocalStorage();
+            displayLessonsAndDefinitions();
+            fetchDailySuggestions();
+            document.getElementById('add-definition-form').reset();
+            showModal('Success', `Definition for "${topic}" added successfully.`);
+        });
+
+        /**
+         * Filters definitions by the selected lesson.
+         */
+        document.getElementById('filter-lesson').addEventListener('change', (e) => {
+            const selectedLessonId = e.target.value;
+            displayLessonsAndDefinitions(selectedLessonId === "" ? null : selectedLessonId);
+        });
+
+        /**
+         * Opens the edit modal for a definition.
+         */
+        window.editDefinition = (id) => {
+            const definition = definitions.find(def => def.id === id);
+            if (!definition) return;
+            
+            document.getElementById('edit-definition-id').value = id;
+            document.getElementById('edit-definition-topic').value = definition.topic;
+            document.getElementById('edit-definition-text').value = definition.definition;
+
+            const editLessonSelect = document.getElementById('edit-definition-lesson');
+            editLessonSelect.innerHTML = '';
+            lessons.forEach(lesson => {
+                const option = document.createElement('option');
+                option.value = lesson.id;
+                option.textContent = lesson.name;
+                if (lesson.id === definition.lessonId) {
+                    option.selected = true;
+                }
+                editLessonSelect.appendChild(option);
+            });
+            document.getElementById('editDefinitionModal').classList.remove('hidden');
+        };
+
+        /**
+         * Handles updating a definition.
+         */
+        document.getElementById('edit-definition-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-definition-id').value;
+            const newTopic = document.getElementById('edit-definition-topic').value.trim();
+            const newDefinition = document.getElementById('edit-definition-text').value.trim();
+            const newLessonId = document.getElementById('edit-definition-lesson').value;
+
+            if (!newTopic || !newDefinition || !newLessonId) {
+                showModal('Validation Error', 'Please fill in all fields.');
+                return;
+            }
+
+            const definitionIndex = definitions.findIndex(def => def.id === id);
+            if (definitionIndex > -1) {
+                definitions[definitionIndex] = { ...definitions[definitionIndex], topic: newTopic, definition: newDefinition, lessonId: newLessonId };
+                saveDataToLocalStorage();
+                displayLessonsAndDefinitions();
+                fetchDailySuggestions();
+                document.getElementById('editDefinitionModal').classList.add('hidden');
+                showModal('Success', `Definition for "${newTopic}" updated successfully.`);
+            }
+        });
+
+        /**
+         * Deletes a definition after confirmation.
+         */
+        window.deleteDefinition = (id, topic) => {
+            showConfirmModal(`Are you sure you want to delete the definition for "${topic}"?`, () => {
+                definitions = definitions.filter(def => def.id !== id);
+                saveDataToLocalStorage();
+                displayLessonsAndDefinitions();
+                fetchDailySuggestions();
+                showModal('Success', `Definition for "${topic}" deleted successfully.`);
+            });
+        };
+
+        /**
+         * Deletes a lesson and all its definitions after confirmation.
+         */
+        window.deleteLesson = (id, name) => {
+            showConfirmModal(`Are you sure you want to delete the lesson "${name}" and ALL its definitions?`, () => {
+                lessons = lessons.filter(lesson => lesson.id !== id);
+                definitions = definitions.filter(def => def.lessonId !== id);
+                saveDataToLocalStorage();
+                populateLessonDropdowns();
+                displayLessonsAndDefinitions();
+                showModal('Success', `Lesson "${name}" and its definitions deleted successfully.`);
+            });
+        };
+
+        /**
+         * Fetches and displays daily definition suggestions.
+         */
+        function fetchDailySuggestions() {
+            const dailySuggestionsDiv = document.getElementById('daily-suggestions');
+            dailySuggestionsDiv.innerHTML = '';
+
+            if (definitions.length === 0) {
+                dailySuggestionsDiv.innerHTML = '<p class="text-gray-500">No definitions available for daily suggestions. Add some first!</p>';
+                return;
+            }
+
+            const shuffled = [...definitions].sort(() => 0.5 - Math.random());
+            const selectedSuggestions = shuffled.slice(0, 10);
+
+            dailySuggestionsDiv.innerHTML = '<h3 class="text-xl font-semibold text-purple-800 mb-4 flex items-center"><i class="fas fa-lightbulb mr-2 text-purple-600"></i> Daily Definition Suggestions</h3>';
+            selectedSuggestions.forEach(def => {
+                const suggestionCard = document.createElement('div');
+                suggestionCard.className = 'bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-2 hover:shadow-md transition duration-200 ease-in-out';
+                suggestionCard.innerHTML = `
+                    <h4 class="text-lg font-medium text-gray-700 mb-2">${def.topic}</h4>
+                    <p class="definition-text text-gray-600 mb-3" id="def-text-${def.id}">${def.definition}</p>
+                    <div class="flex justify-between items-center mt-3">
+                         <button onclick="toggleDefinition('${def.id}')" class="toggle-def-btn bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md text-sm shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                            <i class="fas fa-eye mr-1"></i> Show Definition
+                        </button>
+                    </div>
+                `;
+                dailySuggestionsDiv.appendChild(suggestionCard);
+            });
+        }
+
+        /**
+         * Displays a generic information modal.
+         */
+        function showModal(title, message) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            document.getElementById('infoModal').classList.remove('hidden');
+        }
+
+        document.getElementById('close-info-modal').addEventListener('click', () => {
+            document.getElementById('infoModal').classList.add('hidden');
+        });
+
+        let confirmActionCallback = null;
+        /**
+         * Displays a confirmation modal.
+         */
+        function showConfirmModal(message, callback) {
+            document.getElementById('confirm-message').textContent = message;
+            document.getElementById('confirmModal').classList.remove('hidden');
+            confirmActionCallback = callback;
+        }
+
+        document.getElementById('cancel-confirm-modal').addEventListener('click', () => {
+            document.getElementById('confirmModal').classList.add('hidden');
+            confirmActionCallback = null;
+        });
+
+        document.getElementById('confirm-action').addEventListener('click', () => {
+            if (confirmActionCallback) {
+                confirmActionCallback();
+            }
+            document.getElementById('confirmModal').classList.add('hidden');
+            confirmActionCallback = null;
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === document.getElementById('infoModal')) {
+                document.getElementById('infoModal').classList.add('hidden');
+            }
+            if (event.target === document.getElementById('confirmModal')) {
+                document.getElementById('confirmModal').classList.add('hidden');
+            }
+            if (event.target === document.getElementById('editDefinitionModal')) {
+                document.getElementById('editDefinitionModal').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('close-edit-modal').addEventListener('click', () => {
+            document.getElementById('editDefinitionModal').classList.add('hidden');
+        });
+
+        /**
+         * Sets up floating action buttons.
+         */
+        function setupFloatingButtons() {
+            const fabContainer = document.getElementById('fab-container');
+            const scrollThreshold = 200;
+
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > scrollThreshold) {
+                    fabContainer.classList.add('show-fab');
+                } else {
+                    fabContainer.classList.remove('show-fab');
+                }
+            });
+
+            document.getElementById('fab-add-lesson').addEventListener('click', () => {
+                document.getElementById('add-lesson-section').scrollIntoView({ behavior: 'smooth' });
+            });
+
+            document.getElementById('fab-add-definition').addEventListener('click', () => {
+                document.getElementById('add-definition-section').scrollIntoView({ behavior: 'smooth' });
+            });
+        }
+    </script>
+</body>
+</html>
