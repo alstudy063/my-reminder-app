@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Screen Biology Definitions App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome CDN for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Custom styles for body and modal transitions */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to right bottom, #e0f2f7, #c8e6c9); /* Soft gradient background */
+            min-height: 100vh; /* Ensure full viewport height */
+            display: flex; /* Use flexbox for body */
+            flex-direction: column; /* Arrange children vertically */
+            align-items: center; /* Center horizontally */
+        }
+        
+        /* Modal and Modal Content Animations */
+        .modal {
+            background-color: rgba(0, 0, 0, 0.6); /* Darker overlay */
+            opacity: 0;
+            pointer-events: none; /* Allows clicks through when hidden */
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .modal:not(.hidden) {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            border-radius: 0.75rem; /* rounded-lg */
+            padding: 2rem; /* p-8 */
+            max-width: 90%;
+            width: 450px; /* Slightly wider modal */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Stronger shadow */
+            transform: scale(0.9); /* Initial state for animation */
+            opacity: 0;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        
+        /* Fixed max-height and scrolling for specific modals */
+        #historyModal .modal-content, #allLessonsModal .modal-content, #lessonDefinitionsModal .modal-content, #editDefinitionModal .modal-content {
+            width: 95%; /* Make these modals wider for content */
+            max-width: 700px;
+            max-height: 90vh; /* Limit height */
+            overflow-y: auto; /* Enable scrolling */
+            padding: 1rem;
+        }
+        
+        /* Z-index management for correct modal layering */
+        .modal {
+            z-index: 40; /* Default z-index for main modals */
+        }
+        #infoModal, #confirmModal, #editDefinitionModal {
+            z-index: 50; /* Higher z-index for confirmation/info modals */
+        }
+        #lessonDefinitionsModal {
+            z-index: 60; /* Highest z-index for the definition overlay */
+        }
+
+        /* State for when the modal is fully open */
+        .modal.is-opening .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        /* State for when the modal is closing */
+        .modal.is-closing .modal-content {
+            transform: scale(0.9);
+            opacity: 0;
+        }
+        .modal.is-closing {
+            opacity: 0;
+        }
+
+        /* Custom button styles for gradients and shadows */
+        .btn-primary {
+            background: linear-gradient(to right, #3b82f6, #2563eb); /* Blue gradient */
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to right, #2563eb, #1d4ed8);
+            box-shadow: 0 6px 8px rgba(37, 99, 235, 0.4);
+        }
+        .btn-success {
+            background: linear-gradient(to right, #22c55e, #16a34a); /* Green gradient */
+            box-shadow: 0 4px 6px rgba(34, 197, 94, 0.3);
+        }
+        .btn-success:hover {
+            background: linear-gradient(to right, #16a34a, #0f766e);
+            box-shadow: 0 6px 8px rgba(22, 163, 74, 0.4);
+        }
+        .btn-warning {
+            background: linear-gradient(to right, #f59e0b, #d97706); /* Yellow/Orange gradient */
+            box-shadow: 0 4-6px rgba(245, 158, 11, 0.3);
+        }
+        .btn-warning:hover {
+            background: linear-gradient(to right, #d97706, #b45309);
+            box-shadow: 0 6px 8px rgba(217, 119, 6, 0.4);
+        }
+        .btn-danger {
+            background: linear-gradient(to right, #ef4444, #dc2626); /* Red gradient */
+            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
+        }
+        .btn-danger:hover {
+            background: linear-gradient(to right, #dc2626, #b91c1c);
+            box-shadow: 0 6px 8px rgba(220, 38, 38, 0.4);
+        }
+        .btn-info {
+            background: linear-gradient(to right, #a855f7, #9333ea); /* Purple gradient */
+            box-shadow: 0 4px 6px rgba(168, 85, 247, 0.3);
+        }
+        .btn-info:hover {
+            background: linear-gradient(to right, #9333ea, #7e22ce);
+            box-shadow: 6px 8px rgba(147, 51, 234, 0.4);
+        }
+        /* Input focus styles */
+        input:focus, textarea:focus, select:focus {
+            border-color: #3b82f6; /* Blue border on focus */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* Blue ring on focus */
+        }
+
+        /* Smooth transition for definition text */
+        .definition-text {
+            max-height: 0; /* Start hidden */
+            overflow: hidden;
+            opacity: 0;
+            margin-bottom: 0; /* Remove margin when hidden */
+            transition: max-height 0.5s ease-out, opacity 0.5s ease-out, margin-bottom 0.5s ease-out;
+        }
+        /* When active, set to auto height and full opacity */
+        .definition-text.active {
+            opacity: 1;
+            margin-bottom: 0.75rem; /* Tailwind mb-3 */
+        }
+        
+        .definition-text.expanded {
+            max-height: 500px; /* A large value to ensure content fits */
+            opacity: 1;
+        }
+
+        /* Floating Action Buttons (FABs) styles */
+        #fab-container {
+            position: fixed;
+            bottom: 2rem; /* Distance from bottom */
+            right: 2rem; /* Distance from right */
+            z-index: 1000; /* Ensure it's on top */
+            display: flex;
+            flex-direction: column;
+            gap: 1rem; /* Space between buttons */
+            opacity: 0;
+            transform: translateY(100px); /* Start off-screen */
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+            pointer-events: none; /* Allow clicks through when hidden */
+        }
+
+        #fab-container.show-fab {
+            opacity: 1;
+            transform: translateY(0); /* Slide into view */
+            pointer-events: auto; /* Enable clicks when visible */
+        }
+
+        .fab-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px; /* Standard FAB size */
+            height: 56px;
+            border-radius: 50%; /* Circular */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: background 0.2s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .fab-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Dropdown menu for settings and stats */
+        .dropdown-menu {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s 0.2s;
+        }
+        .dropdown-menu.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        /* Status card inside the menu */
+        .status-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .status-card:last-child {
+            margin-bottom: 0;
+        }
+
+        /* --- NEW STYLES FOR COLLAPSIBLE SECTIONS --- */
+        .collapsible-section {
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            overflow: hidden;
+        }
+        .collapsible-header {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            padding: 0 1.5rem; /* Horizontal padding remains */
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out, opacity 0.5s ease-in-out;
+        }
+        .collapsible-content.expanded {
+            max-height: 1000px; /* A large value to ensure all content fits */
+            padding-bottom: 1.5rem; /* Add bottom padding when expanded */
+            opacity: 1;
+        }
+        .toggle-section-btn svg {
+            transition: transform 0.3s ease-in-out;
+        }
+        .collapsible-content.expanded + .collapsible-header .toggle-section-btn svg {
+            transform: rotate(-180deg);
+        }
+        .pass-fail-buttons {
+            display: none; /* Hide by default */
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .pass-fail-buttons.active {
+            display: flex; /* Show when active */
+            opacity: 1;
+        }
+
+        .suggestion-card {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        .suggestion-card.hidden {
+            opacity: 0;
+            transform: translateX(-100%);
+        }
+        
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 md:p-8 lg:p-12">
+    <!-- Main content container -->
+    <div class="w-full flex-grow bg-white rounded-xl shadow-2xl px-4 py-8 border border-gray-100 md:p-10 lg:p-12">
+        <!-- Header section with title and settings menu -->
+        <div class="flex justify-between items-center mb-6 relative">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight flex-grow">
+                <i class="fas fa-book-open text-blue-500 mr-3"></i> A/L Biology Definitions Memory App
+            </h1>
+            <!-- Menu container for all icons -->
+            <div class="flex gap-4">
+                <!-- History Icon Container -->
+                <button id="history-button" class="p-2 rounded-full text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors duration-200" title="View History">
+                    <i class="fas fa-history text-xl"></i>
+                </button>
+                <!-- Stats Dropdown Container -->
+                <div id="stats-dropdown-container" class="relative">
+                    <button id="stats-button" class="p-2 rounded-full text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors duration-200" title="View Statistics">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M15.5 10.5L12.5 13.5L10.5 11.5L7.5 14.5" stroke="#33363F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M14 5H7.2C6.07989 5 5.51984 5 5.09202 5.21799C4.71569 5.40973 4.40973 5.71569 4.21799 6.09202C4 6.51984 4 7.07989 4 8.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.07989 20 7.2 20H15.8C16.9201 20 17.4802 20 17.908 19.782C18.2843 19.5903 18.5903 19.2843 18.782 18.908C19 18.4802 19 17.9201 19 16.8V10" stroke="#33363F" stroke-width="2" stroke-linecap="round"></path> <circle cx="19" cy="5" r="2" fill="#33363F"></circle> </g></svg>
+                    </button>
+                    <!-- Mini-menu for stats -->
+                    <div id="stats-menu" class="dropdown-menu absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-xl py-2 px-4 z-50 border border-gray-200">
+                        <div class="status-card bg-blue-100">
+                            <div class="flex items-center">
+                                <i class="fas fa-list-ol text-blue-600 text-xl mr-2"></i>
+                                <span class="text-gray-800 font-medium">Total Definitions</span>
+                            </div>
+                            <span id="total-definitions-count" class="text-2xl font-bold text-blue-800">0</span>
+                        </div>
+                        <div class="status-card bg-purple-100">
+                            <div class="flex items-center">
+                                <i class="fas fa-bullseye text-purple-600 text-xl mr-2"></i>
+                                <span class="text-gray-800 font-medium">Suggested Definitions</span>
+                            </div>
+                            <span id="suggested-definitions-count" class="text-2xl font-bold text-purple-800">0</span>
+                        </div>
+                        <div class="status-card bg-green-100">
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-green-600 text-xl mr-2"></i>
+                                <span class="text-gray-800 font-medium">Total Passed</span>
+                            </div>
+                            <span id="total-passed-count" class="text-2xl font-bold text-green-800">0</span>
+                        </div>
+                        <div class="status-card bg-red-100">
+                            <div class="flex items-center">
+                                <i class="fas fa-times text-red-600 text-xl mr-2"></i>
+                                <span class="text-gray-800 font-medium">Total Failed</span>
+                            </div>
+                            <span id="total-failed-count" class="text-2xl font-bold text-red-800">0</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Settings Dropdown Container -->
+                <div id="settings-dropdown-container" class="relative">
+                    <button id="settings-button" class="p-2 rounded-full text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors duration-200" title="Settings">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/24/24/svg">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="#4b5563" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                                <path d="M2 12.8799V11.1199C2 10.0799 2.85 9.21994 3.9 9.21994C5.71 9.21994 6.45 7.93994 5.54 6.36994C5.02 5.46994 5.33 4.29994 6.24 3.77994L7.97 2.78994C8.76 2.31994 9.78 2.59994 10.25 3.38994L10.36 3.57994C11.26 5.14994 12.74 5.14994 13.65 3.57994L13.76 3.38994C14.23 2.59994 15.25 2.31994 16.04 2.78994L17.77 3.77994C18.68 4.29994 18.99 5.46994 18.47 6.36994C17.56 7.93994 18.3 9.21994 20.11 9.21994C21.15 9.21994 22.01 10.0699 22.01 11.1199V12.8799C22.01 13.9199 21.16 14.7799 20.11 14.7799C18.3 14.7799 17.56 16.0599 18.47 17.6299C18.99 18.5399 18.68 19.6999 17.77 20.2199L16.04 21.2099C15.25 21.6799 14.23 21.3999 13.76 20.6099L13.65 20.4199C12.75 18.8499 11.27 18.8499 10.36 20.4199L10.25 20.6099C9.78 21.3999 8.76 21.6799 7.97 21.2099L6.24 20.2199C5.33 19.6999 5.02 18.5299 5.54 17.6299C6.45 16.0599 5.71 14.7799 3.9 14.7799C2.85 14.7799 2 13.9199 2 12.8799Z" stroke="#4b5563" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </g>
+                        </svg>
+                    </button>
+                    <!-- Mini-menu for settings -->
+                    <div id="settings-menu" class="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-200">
+                        <button id="export-data" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center transition-colors duration-150">
+                            <i class="fas fa-file-export mr-2 text-blue-500"></i> Export Data
+                        </button>
+                        <button id="import-data" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center transition-colors duration-150">
+                            <i class="fas fa-file-import mr-2 text-green-500"></i> Import Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add New Lesson Section -->
+        <div id="add-lesson-section" class="collapsible-section mb-8 bg-blue-50 border border-blue-200">
+            <div class="collapsible-header" data-target="add-lesson-content">
+                <h2 class="text-2xl font-semibold text-blue-800 flex items-center">
+                    <i class="fas fa-plus-circle mr-2 text-blue-600"></i> Add New Lesson
+                </h2>
+                <button id="toggle-add-lesson-btn" class="toggle-section-btn text-blue-600 hover:text-blue-800">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 10L12 15L17 10" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="add-lesson-content" class="collapsible-content">
+                <form id="add-lesson-form" class="flex flex-col md:flex-row gap-4">
+                    <input type="text" id="new-lesson-name" placeholder="Enter Lesson Name (e.g., Photosynthesis)" class="flex-grow p-3 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
+                    <button type="submit" class="btn-primary text-white font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out transform hover:scale-105">
+                        <i class="fas fa-folder-plus mr-2"></i> Add Lesson
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add New Definition Section -->
+        <div id="add-definition-section" class="collapsible-section mb-8 bg-green-50 border border-green-200">
+            <div class="collapsible-header" data-target="add-definition-content">
+                <h2 class="text-2xl font-semibold text-green-800 flex items-center">
+                    <i class="fas fa-file-circle-plus mr-2 text-green-600"></i> Add New Definition
+                </h2>
+                <button id="toggle-add-def-btn" class="toggle-section-btn text-green-600 hover:text-green-800">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 10L12 15L17 10" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="add-definition-content" class="collapsible-content">
+                <form id="add-definition-form" class="flex flex-col gap-4">
+                    <select id="add-definition-lesson" class="p-3 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200" required>
+                        <option value="">Select a Lesson</option>
+                    </select>
+                    <input type="text" id="new-definition-topic" placeholder="Topic (e.g., Cellular Respiration)" class="p-3 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200" required>
+                    <textarea id="new-definition-text" placeholder="Definition (e.g., The metabolic process...)" rows="4" class="p-3 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200" required></textarea>
+                    <button type="submit" class="btn-success text-white font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out transform hover:scale-105">
+                        <i class="fas fa-plus mr-2"></i> Add Definition
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Filter Definitions Section -->
+        <div id="filter-definitions-section" class="mb-8 p-6 bg-yellow-50 rounded-lg shadow-md border border-yellow-200">
+            <h2 class="text-2xl font-semibold text-yellow-800 mb-4 flex items-center">
+                <i class="fas fa-filter mr-2 text-yellow-600"></i> Filter Definitions
+            </h2>
+            <select id="filter-lesson" class="w-full p-3 border border-yellow-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-200">
+                <option value="">All Lessons</option>
+            </select>
+        </div>
+
+        <!-- Daily Definition Suggestions Section -->
+        <div id="daily-suggestions" class="mb-8 p-6 bg-purple-50 rounded-lg shadow-md border border-purple-200">
+            <h2 class="text-2xl font-semibold text-purple-800 mb-4 flex items-center justify-between">
+                <span><i class="fas fa-lightbulb mr-2 text-purple-600"></i> Daily Definition Suggestions</span>
+            </h2>
+            <div id="suggestions-container">
+                <p class="text-gray-500">No definitions available for daily suggestions. Please add some definitions first!</p>
+            </div>
+        </div>
+
+        <!-- All Definitions Display Section -->
+        <div class="p-6 bg-white rounded-lg shadow-md border border-gray-200">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-list-alt mr-2 text-gray-600"></i> All Definitions
+            </h2>
+            <div id="definitions-display" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Buttons Container -->
+    <div id="fab-container" class="fixed bottom-4 right-4 z-1000 flex flex-col space-y-4">
+        <button id="fab-add-lesson" class="fab-button bg-blue-600 hover:bg-blue-700">
+            <i class="fas fa-folder-plus text-white text-2xl"></i>
+        </button>
+        <button id="fab-add-definition" class="fab-button bg-green-600 hover:bg-green-700">
+            <i class="fas fa-file-circle-plus text-white text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="infoModal" class="modal fixed inset-0 flex items-center justify-center hidden">
+        <div class="modal-content text-center">
+            <h3 id="modal-title" class="text-xl font-bold mb-4 text-gray-800"></h3>
+            <p id="modal-message" class="mb-6 text-gray-700"></p>
+            <button id="close-info-modal" class="btn-primary text-white px-6 py-2 rounded-md transition duration-300 ease-in-out transform hover:scale-105">OK</button>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="modal fixed inset-0 flex items-center justify-center hidden">
+        <div class="modal-content text-center">
+            <h3 class="text-xl font-bold mb-4 text-gray-800">Confirm Action</h3>
+            <p id="confirm-message" class="mb-6 text-gray-700"></p>
+            <div class="flex justify-center gap-4">
+                <button id="cancel-confirm-modal" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105">Cancel</button>
+                <button id="confirm-action" class="btn-danger text-white px-6 py-2 rounded-md transition duration-300 ease-in-out transform hover:scale-105">Yes, Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Definition Modal -->
+    <div id="editDefinitionModal" class="modal fixed inset-0 flex items-center justify-center hidden">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-edit mr-2 text-yellow-600"></i> Edit Definition
+                </h3>
+                 <button id="close-edit-modal-btn" class="text-gray-500 hover:text-gray-800 text-3xl leading-none transition-colors duration-200">&times;</button>
+            </div>
+            <form id="edit-definition-form" class="flex flex-col gap-4">
+                <input type="hidden" id="edit-definition-id">
+                <select id="edit-definition-lesson" class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required></select>
+                <input type="text" id="edit-definition-topic" placeholder="Topic" class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required>
+                <textarea id="edit-definition-text" placeholder="Definition" rows="4" class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required></textarea>
+                <div class="flex justify-end gap-4 mt-4">
+                    <button type="submit" class="btn-primary text-white font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out transform hover:scale-105">
+                        <i class="fas fa-save mr-2"></i> Update
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- New Modal to Display a Lesson's Definitions -->
+    <div id="lessonDefinitionsModal" class="modal fixed inset-0 flex items-center justify-center hidden">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="lesson-definitions-modal-title" class="text-2xl font-bold text-gray-800"></h3>
+                <button id="close-lesson-definitions-modal" class="text-gray-500 hover:text-gray-800 text-3xl leading-none transition-colors duration-200">
+                    &times;
+                </button>
+            </div>
+            <div id="lesson-definitions-container" class="grid grid-cols-1 gap-4">
+                <!-- Definition cards will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Modal for Suggestions History -->
+    <div id="historyModal" class="modal fixed inset-0 flex items-center justify-center hidden">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-gray-800">Suggestions History</h3>
+                <button id="close-history-modal" class="text-gray-500 hover:text-gray-800 text-3xl leading-none transition-colors duration-200">
+                    &times;
+                </button>
+            </div>
+            <div id="history-container" class="flex flex-col gap-4">
+                <!-- History items will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- New Modal to show ALL lessons -->
+    <div id="allLessonsModal" class="modal fixed inset-0 flex items-center justify-center hidden">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-gray-800 flex items-center"><i class="fas fa-list-alt mr-2 text-gray-600"></i> All Lessons</h3>
+                <button id="close-all-lessons-modal" class="text-gray-500 hover:text-gray-800 text-3xl leading-none transition-colors duration-200">
+                    &times;
+                </button>
+            </div>
+            <div id="all-lessons-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Lesson cards will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables for local data
+        let definitions = [];
+        let lessons = [];
+        let currentDailySuggestions = []; // Array to hold the unique suggestions for the current session.
+        let suggestionsHistory = []; // New array to store past daily suggestions.
+
+        /**
+         * Saves the current state of lessons and definitions to the browser's local storage.
+         */
+        function saveDataToLocalStorage() {
+            localStorage.setItem('biologyLessons', JSON.stringify(lessons));
+            localStorage.setItem('biologyDefinitions', JSON.stringify(definitions));
+            localStorage.setItem('suggestionsHistory', JSON.stringify(suggestionsHistory));
+            updateStatusCounters();
+        }
+
+        /**
+         * Loads lessons and definitions from local storage when the app starts.
+         */
+        function loadDataFromLocalStorage() {
+            const storedLessons = localStorage.getItem('biologyLessons');
+            const storedDefinitions = localStorage.getItem('biologyDefinitions');
+            const storedHistory = localStorage.getItem('suggestionsHistory');
+            
+            if (storedLessons) {
+                lessons = JSON.parse(storedLessons);
+            }
+            if (storedDefinitions) {
+                definitions = JSON.parse(storedDefinitions);
+                // Ensure all definitions have `count`, `passCount`, and `failCount` properties
+                definitions.forEach(def => {
+                    if (typeof def.count === 'undefined') {
+                        def.count = 0;
+                    }
+                    if (typeof def.passCount === 'undefined') {
+                        def.passCount = 0;
+                    }
+                    if (typeof def.failCount === 'undefined') {
+                        def.failCount = 0;
+                    }
+                });
+            }
+            if (storedHistory) {
+                suggestionsHistory = JSON.parse(storedHistory);
+            }
+        }
+        
+        /**
+         * Updates the status counters in the UI.
+         */
+        function updateStatusCounters() {
+            const totalDefinitionsCount = document.getElementById('total-definitions-count');
+            const suggestedDefinitionsCount = document.getElementById('suggested-definitions-count');
+            const totalPassedCount = document.getElementById('total-passed-count');
+            const totalFailedCount = document.getElementById('total-failed-count');
+
+            const totalCount = definitions.length;
+            const passedCount = definitions.reduce((sum, def) => sum + def.passCount, 0);
+            const failedCount = definitions.reduce((sum, def) => sum + def.failCount, 0);
+
+            totalDefinitionsCount.textContent = totalCount;
+            suggestedDefinitionsCount.textContent = currentDailySuggestions.length;
+            totalPassedCount.textContent = passedCount;
+            totalFailedCount.textContent = failedCount;
+        }
+
+        /**
+         * Initializes the application on window load.
+         */
+        window.onload = () => {
+            loadDataFromLocalStorage();
+            populateLessonDropdowns();
+            displayLessons();
+            // Call fetchDailySuggestions only once on page load
+            fetchDailySuggestions(); 
+            setupFloatingButtons();
+            setupImportExportButtons();
+            setupCollapsibleSections();
+            updateStatusCounters();
+            setupDynamicButtonEvents();
+            console.log("App initialized with local storage.");
+        };
+        
+        /**
+         * Sets up event listeners for all dynamic buttons using event delegation.
+         */
+        function setupDynamicButtonEvents() {
+            // Listener for the Definitions Display section
+            document.getElementById('definitions-display').addEventListener('click', (e) => {
+                const target = e.target.closest('button');
+                const lessonCard = e.target.closest('.lesson-card');
+                
+                if (lessons.length > 1 && lessonCard) {
+                    // This handles the "see all" case
+                    showAllLessonsModal();
+                } else if (lessonCard) {
+                    // This handles the single lesson card case
+                    const lessonId = lessonCard.getAttribute('data-id');
+                    showLessonDefinitionsModal(lessonId);
+                } else if (target && target.classList.contains('delete-lesson-btn')) {
+                    const lessonId = target.getAttribute('data-id');
+                    const lessonName = target.getAttribute('data-name');
+                    deleteLesson(lessonId, lessonName);
+                } else if (lessons.length > 1 && !target) {
+                     // Click on the container itself in collapsed view
+                    showAllLessonsModal();
+                }
+            });
+
+            // Listener for the Daily Suggestions and All Definitions modal
+            const containers = [
+                document.getElementById('suggestions-container'),
+                document.getElementById('lesson-definitions-container'),
+                document.getElementById('history-container'),
+                document.getElementById('all-lessons-container')
+            ];
+
+            containers.forEach(container => {
+                container.addEventListener('click', (e) => {
+                    const target = e.target.closest('button');
+                    const defCard = e.target.closest('.suggestion-card');
+                    const lessonCard = e.target.closest('.lesson-card');
+                    
+                    if (target) {
+                        const defId = target.getAttribute('data-id');
+                        
+                        if (target.classList.contains('toggle-def-btn')) {
+                            toggleDefinition(defId, container.id === 'suggestions-container');
+                        } else if (target.classList.contains('edit-def-btn')) {
+                            editDefinition(defId);
+                        } else if (target.classList.contains('delete-def-btn')) {
+                            const topic = target.getAttribute('data-topic');
+                            deleteDefinition(defId, topic);
+                        } else if (target.classList.contains('pass-def-btn')) {
+                            markDefinitionAsPassed(defId);
+                        } else if (target.classList.contains('fail-def-btn')) {
+                            markDefinitionAsFailed(defId);
+                        } else if (target.classList.contains('delete-lesson-btn')) {
+                            const lessonId = target.getAttribute('data-id');
+                            const lessonName = target.getAttribute('data-name');
+                            deleteLesson(lessonId, lessonName);
+                        }
+                    } else if (lessonCard) {
+                        const lessonId = lessonCard.getAttribute('data-id');
+                        showLessonDefinitionsModal(lessonId);
+                    }
+                });
+            });
+
+            // Listener for history modal collapsible headers
+            document.getElementById('history-container').addEventListener('click', (e) => {
+                const header = e.target.closest('.collapsible-header');
+                if (header) {
+                    const contentId = header.getAttribute('data-target');
+                    const content = document.getElementById(contentId);
+                    if (content) {
+                        toggleCollapsibleContent(content);
+                    }
+                }
+            });
+        }
+
+
+        /**
+         * Populates the lesson dropdowns for adding definitions and filtering.
+         */
+        function populateLessonDropdowns() {
+            const addDefinitionLessonSelect = document.getElementById('add-definition-lesson');
+            const filterLessonSelect = document.getElementById('filter-lesson');
+            const editDefinitionLessonSelect = document.getElementById('edit-definition-lesson');
+
+            const dropdowns = [addDefinitionLessonSelect, filterLessonSelect, editDefinitionLessonSelect];
+
+            dropdowns.forEach(dropdown => {
+                if(dropdown) {
+                    dropdown.innerHTML = dropdown.id === 'filter-lesson' ? '<option value="">All Lessons</option>' : '<option value="">Select a Lesson</option>';
+                    lessons.forEach(lesson => {
+                        const option = document.createElement('option');
+                        option.value = lesson.id;
+                        option.textContent = lesson.name;
+                        dropdown.appendChild(option);
+                    });
+                }
+            });
+        }
+
+        /**
+         * Displays lessons in the main section based on filter.
+         * Now handles the new collapsed view logic.
+         */
+        function displayLessons(filterLessonId = null) {
+            const definitionsDisplay = document.getElementById('definitions-display');
+            definitionsDisplay.innerHTML = '';
+            
+            const lessonsToDisplay = filterLessonId
+                ? lessons.filter(lesson => definitions.some(def => def.lessonId === lesson.id && def.lessonId === filterLessonId))
+                : lessons;
+
+            if (lessonsToDisplay.length === 0) {
+                definitionsDisplay.innerHTML = '<p class="text-gray-500 text-center col-span-full mt-8">No lessons or definitions added yet. Start by adding a new lesson!</p>';
+                return;
+            }
+
+            if (lessonsToDisplay.length === 1) {
+                const lessonCard = createLessonCard(lessonsToDisplay[0]);
+                definitionsDisplay.appendChild(lessonCard);
+            } else {
+                // Collapsed view: show only the first lesson with a "see more" button
+                const firstLesson = lessonsToDisplay[0];
+                const collapsedCard = document.createElement('div');
+                collapsedCard.className = 'bg-gray-100 p-8 rounded-lg shadow-md border border-gray-200 cursor-pointer hover:bg-gray-200 transition duration-200 ease-in-out transform hover:scale-105 col-span-full';
+                collapsedCard.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-2xl font-semibold text-gray-800">${firstLesson.name}</h3>
+                        <span class="text-gray-600">(${definitions.filter(def => def.lessonId === firstLesson.id).length} definitions)</span>
+                    </div>
+                    <div class="flex items-center justify-center text-blue-600 font-medium">
+                         <i class="fas fa-ellipsis-h mr-2"></i>
+                         <span>See all lessons...</span>
+                    </div>
+                `;
+                collapsedCard.setAttribute('data-id', firstLesson.id);
+                collapsedCard.classList.add('lesson-card'); // Use the same class to identify it
+                definitionsDisplay.appendChild(collapsedCard);
+            }
+        }
+        
+        /**
+         * Creates an HTML card element for a single lesson.
+         * @param {object} lesson The lesson object
+         * @param {boolean} isModal If the card is for a modal, to change the delete button's behavior.
+         */
+        function createLessonCard(lesson, isModal = false) {
+            const lessonCard = document.createElement('div');
+            lessonCard.className = 'bg-gray-100 p-6 rounded-lg shadow-md border border-gray-200 cursor-pointer hover:bg-gray-200 transition duration-200 ease-in-out transform hover:scale-105';
+            lessonCard.setAttribute('data-id', lesson.id);
+            lessonCard.classList.add('lesson-card');
+            
+            const numDefinitions = definitions.filter(def => def.lessonId === lesson.id).length;
+            
+            lessonCard.innerHTML = `
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-xl font-semibold text-gray-800">${lesson.name}</h3>
+                    <span class="text-gray-500 text-sm">${numDefinitions} definitions</span>
+                </div>
+                <div class="flex justify-end">
+                    <button class="delete-lesson-btn bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition duration-200 ease-in-out transform hover:scale-105" data-id="${lesson.id}" data-name="${lesson.name}">
+                        <i class="fas fa-trash-alt mr-1"></i> Delete
+                    </button>
+                </div>
+            `;
+            // If it's for a modal, we don't want the card to be clickable to open a new modal
+            if (isModal) {
+                 lessonCard.addEventListener('click', (e) => {
+                     if (!e.target.closest('.delete-lesson-btn')) {
+                        showLessonDefinitionsModal(lesson.id);
+                    }
+                 });
+            }
+            return lessonCard;
+        }
+
+        /**
+         * Creates an HTML card element for a single definition.
+         */
+        function createDefinitionCard(definition) {
+            const defCard = document.createElement('div');
+            defCard.className = 'bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition duration-200 ease-in-out relative';
+            defCard.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <h4 class="text-lg font-medium text-gray-700 mb-2">${definition.topic}</h4>
+                    <span id="def-count-${definition.id}" class="text-sm font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-full">Repeated: ${definition.count}</span>
+                </div>
+                <p class="definition-text text-gray-600 mb-3" id="def-text-${definition.id}">${definition.definition}</p>
+                <div class="flex justify-between items-center mt-3">
+                    <button class="toggle-def-btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm shadow-md transition duration-200 ease-in-out transform hover:scale-105" data-id="${definition.id}">
+                        <i class="fas fa-eye mr-1"></i> Show Definition
+                    </button>
+                    <div>
+                        <button class="edit-def-btn bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md text-sm mr-2 shadow-md transition duration-220 ease-in-out transform hover:scale-105" data-id="${definition.id}">
+                            <i class="fas fa-edit mr-1"></i> Edit
+                        </button>
+                        <button class="delete-def-btn bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm shadow-md transition duration-220 ease-in-out transform hover:scale-105" data-id="${definition.id}" data-topic="${definition.topic}">
+                            <i class="fas fa-trash-alt mr-1"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+            return defCard;
+        }
+
+        /**
+         * Creates a specialized HTML card element for a daily suggestion.
+         */
+        function createSuggestionCard(definition, isHistory = false) {
+             const defCard = document.createElement('div');
+             defCard.className = 'suggestion-card bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-2 hover:shadow-md transition duration-200 ease-in-out';
+             defCard.setAttribute('data-id', definition.id);
+             defCard.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <h4 class="text-lg font-medium text-gray-700">${definition.topic}</h4>
+                    <span id="def-count-${definition.id}" class="text-sm font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-full">Repeated: ${definition.count}</span>
+                </div>
+                <p class="definition-text text-gray-600 mb-3" id="def-text-${definition.id}">${definition.definition}</p>
+                <div class="flex justify-between items-center mt-3">
+                    <button class="toggle-def-btn bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md text-sm shadow-md transition duration-200 ease-in-out transform hover:scale-105" data-id="${definition.id}">
+                        <i class="fas fa-eye mr-1"></i> Show Definition
+                    </button>
+                    <div id="pass-fail-buttons-${definition.id}" class="pass-fail-buttons flex gap-2">
+                         <button class="pass-def-btn bg-green-500 hover:bg-green-600 text-white p-3 rounded-full text-sm shadow-md transition duration-220 ease-in-out transform hover:scale-105" data-id="${definition.id}" title="Pass">
+                            <i class="fas fa-check"></i>
+                        </button>
+                         <button class="fail-def-btn bg-red-500 hover:bg-red-600 text-white p-3 rounded-full text-sm shadow-md transition duration-220 ease-in-out transform hover:scale-105" data-id="${definition.id}" title="Fail">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // If it's a history card, hide the pass/fail buttons
+            if (isHistory) {
+                const passFailButtons = defCard.querySelector(`#pass-fail-buttons-${definition.id}`);
+                if (passFailButtons) {
+                    passFailButtons.remove();
+                }
+            }
+
+            return defCard;
+        }
+
+
+        /**
+         * Shows the modal with definitions for a specific lesson.
+         */
+        window.showLessonDefinitionsModal = (lessonId) => {
+            const lesson = lessons.find(l => l.id === lessonId);
+            if (!lesson) return;
+
+            const lessonDefinitions = definitions.filter(def => def.lessonId === lessonId);
+            const modalTitle = document.getElementById('lesson-definitions-modal-title');
+            const definitionsContainer = document.getElementById('lesson-definitions-container');
+
+            modalTitle.textContent = lesson.name;
+            definitionsContainer.innerHTML = '';
+
+            if (lessonDefinitions.length === 0) {
+                definitionsContainer.innerHTML = '<p class="text-gray-500 text-center col-span-full">No definitions found for this lesson.</p>';
+            } else {
+                lessonDefinitions.forEach(def => {
+                    definitionsContainer.appendChild(createDefinitionCard(def));
+                });
+            }
+            openModal('lessonDefinitionsModal', true); // Open as an overlay without closing 'All Lessons'
+        };
+
+        /**
+         * Toggles the visibility of a definition's text and updates the counter.
+         */
+        window.toggleDefinition = (id, isSuggestion = false) => {
+            const defText = document.getElementById(`def-text-${id}`);
+            if (!defText) return;
+            
+            const card = defText.closest('.bg-white');
+            const button = card.querySelector('.toggle-def-btn');
+            const passFailButtons = document.getElementById(`pass-fail-buttons-${id}`);
+            
+            if (defText.classList.contains('active')) {
+                defText.style.maxHeight = '0';
+                defText.classList.remove('active');
+                button.innerHTML = '<i class="fas fa-eye mr-1"></i> Show Definition';
+                if(isSuggestion && passFailButtons) {
+                     passFailButtons.classList.remove('active');
+                }
+            } else {
+                defText.style.maxHeight = defText.scrollHeight + 'px';
+                defText.classList.add('active');
+                button.innerHTML = '<i class="fas fa-eye-slash mr-1"></i> Hide Definition';
+
+                if(isSuggestion && passFailButtons) {
+                    passFailButtons.classList.add('active');
+                }
+
+                // Increment the counter and save data
+                const definition = definitions.find(def => def.id === id);
+                if (definition) {
+                    definition.count++;
+                    saveDataToLocalStorage();
+                    updateDefinitionCounterDisplay(id, definition.count);
+                }
+            }
+        };
+
+        /**
+         * Updates the repetition counter display for a specific card.
+         */
+        function updateDefinitionCounterDisplay(id, newCount) {
+            const defCountSpans = document.querySelectorAll(`#def-count-${id}`);
+            if (defCountSpans) {
+                defCountSpans.forEach(span => span.textContent = `Repeated: ${newCount}`);
+            }
+        }
+
+        /**
+         * Handles adding a new lesson.
+         */
+        document.getElementById('add-lesson-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const lessonName = document.getElementById('new-lesson-name').value.trim();
+            if (!lessonName) {
+                showModal('Validation Error', 'Please enter a lesson name.');
+                return;
+            }
+            const newLesson = {
+                id: Date.now().toString(),
+                name: lessonName,
+                createdAt: new Date().toISOString()
+            };
+            lessons.push(newLesson);
+            saveDataToLocalStorage();
+            populateLessonDropdowns();
+            displayLessons();
+            document.getElementById('new-lesson-name').value = '';
+            showModal('Success', `Lesson "${lessonName}" added successfully.`);
+        });
+
+        /**
+         * Handles adding a new definition.
+         */
+        document.getElementById('add-definition-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const lessonId = document.getElementById('add-definition-lesson').value;
+            const topic = document.getElementById('new-definition-topic').value.trim();
+            const definition = document.getElementById('new-definition-text').value.trim();
+
+            if (!lessonId || !topic || !definition) {
+                showModal('Validation Error', 'Please fill in all fields.');
+                return;
+            }
+            const newDefinition = {
+                id: Date.now().toString(),
+                lessonId: lessonId,
+                topic: topic,
+                definition: definition,
+                count: 0, // Initialize repetition count
+                passCount: 0,
+                failCount: 0,
+                createdAt: new Date().toISOString()
+            };
+            definitions.push(newDefinition);
+            saveDataToLocalStorage();
+            displayLessons();
+            // Re-fetch suggestions when a new definition is added
+            fetchDailySuggestions(); 
+            document.getElementById('add-definition-form').reset();
+            showModal('Success', `Definition for "${topic}" added successfully.`);
+        });
+
+        /**
+         * Filters definitions by the selected lesson.
+         */
+        document.getElementById('filter-lesson').addEventListener('change', (e) => {
+            const selectedLessonId = e.target.value;
+            displayLessons(selectedLessonId === "" ? null : selectedLessonId);
+        });
+
+        /**
+         * Opens the edit modal for a definition.
+         */
+        window.editDefinition = (id) => {
+            const definition = definitions.find(def => def.id === id);
+            if (!definition) return;
+            
+            document.getElementById('edit-definition-id').value = id;
+            document.getElementById('edit-definition-topic').value = definition.topic;
+            document.getElementById('edit-definition-text').value = definition.definition;
+            
+            const editLessonSelect = document.getElementById('edit-definition-lesson');
+            editLessonSelect.value = definition.lessonId;
+            
+            openModal('editDefinitionModal');
+        };
+
+        /**
+         * Handles updating a definition.
+         */
+        document.getElementById('edit-definition-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-definition-id').value;
+            const newTopic = document.getElementById('edit-definition-topic').value.trim();
+            const newDefinition = document.getElementById('edit-definition-text').value.trim();
+            const newLessonId = document.getElementById('edit-definition-lesson').value;
+
+            if (!newTopic || !newDefinition || !newLessonId) {
+                showModal('Validation Error', 'Please fill in all fields.');
+                return;
+            }
+
+            const definitionIndex = definitions.findIndex(def => def.id === id);
+            if (definitionIndex > -1) {
+                definitions[definitionIndex] = { ...definitions[definitionIndex], topic: newTopic, definition: newDefinition, lessonId: newLessonId };
+                saveDataToLocalStorage();
+                displayLessons();
+                fetchDailySuggestions();
+                closeModal('editDefinitionModal');
+                closeModal('lessonDefinitionsModal');
+                showModal('Success', `Definition for "${newTopic}" updated successfully.`);
+            }
+        });
+
+        /**
+         * Deletes a definition after confirmation.
+         */
+        window.deleteDefinition = (id, topic) => {
+            showConfirmModal(`Are you sure you want to delete the definition for "${topic}"?`, () => {
+                definitions = definitions.filter(def => def.id !== id);
+                saveDataToLocalStorage();
+                displayLessons();
+                fetchDailySuggestions();
+                closeModal('lessonDefinitionsModal');
+                showModal('Success', `Definition for "${topic}" deleted successfully.`);
+            });
+        };
+
+        /**
+         * Deletes a lesson and all its definitions after confirmation.
+         */
+        window.deleteLesson = (id, name) => {
+            showConfirmModal(`Are you sure you want to delete the lesson "${name}" and ALL its definitions?`, () => {
+                lessons = lessons.filter(lesson => lesson.id !== id);
+                definitions = definitions.filter(def => def.lessonId !== id);
+                saveDataToLocalStorage();
+                populateLessonDropdowns();
+                displayLessons();
+                fetchDailySuggestions(); // Re-fetch to update suggestions if a definition was part of the lesson
+                showModal('Success', `Lesson "${name}" and its definitions deleted successfully.`);
+            });
+        };
+
+        /**
+         * Marks a definition as 'passed'.
+         */
+        function markDefinitionAsPassed(id) {
+            const definition = definitions.find(def => def.id === id);
+            if (definition) {
+                definition.passCount++;
+                definition.count++;
+                saveDataToLocalStorage();
+                // Remove the passed card from the UI and current suggestions
+                removeSuggestionCard(id);
+                updateStatusCounters();
+                showModal('Success', `Definition for "${definition.topic}" marked as Passed.`);
+            }
+        }
+
+        /**
+         * Marks a definition as 'failed'.
+         */
+        function markDefinitionAsFailed(id) {
+            const definition = definitions.find(def => def.id === id);
+            if (definition) {
+                definition.failCount++;
+                definition.count++;
+                saveDataToLocalStorage();
+                // Remove the failed card from the UI and current suggestions
+                removeSuggestionCard(id);
+                updateStatusCounters();
+                showModal('Success', `Definition for "${definition.topic}" marked as Failed.`);
+            }
+        }
+        
+        /**
+         * Removes a suggestion card from the UI and from the current session's list.
+         */
+        function removeSuggestionCard(id) {
+            const card = document.querySelector(`#suggestions-container .suggestion-card[data-id="${id}"]`);
+            if (card) {
+                // Animate out the card before removing it
+                card.classList.add('hidden');
+                card.addEventListener('transitionend', () => {
+                    card.remove();
+                    // Remove the definition from our session list
+                    currentDailySuggestions = currentDailySuggestions.filter(def => def.id !== id);
+                    updateStatusCounters();
+                    if(currentDailySuggestions.length === 0){
+                        const suggestionsContainer = document.getElementById('suggestions-container');
+                        suggestionsContainer.innerHTML = '<p class="text-gray-500">You\'ve completed today\'s definitions! Great job!</p>';
+                    }
+                }, { once: true });
+            }
+        }
+
+        /**
+         * Fetches and displays daily definition suggestions.
+         * This function is now only called on page load to create a fixed daily set.
+         */
+        function fetchDailySuggestions() {
+            const suggestionsContainer = document.getElementById('suggestions-container');
+            suggestionsContainer.innerHTML = '';
+            
+            // Get today's date in a simple, comparable format
+            const today = new Date().toISOString().slice(0, 10);
+            
+            // Check if we have a suggestion list for today
+            const dailyEntry = suggestionsHistory.find(entry => entry.date === today);
+
+            if (dailyEntry) {
+                console.log("Loading today's suggestions from history.");
+                currentDailySuggestions = dailyEntry.definitions;
+            } else {
+                console.log("Generating new suggestions for today.");
+                currentDailySuggestions = generateNewSuggestions();
+                // Add the new suggestions to the history
+                if (currentDailySuggestions.length > 0) {
+                    suggestionsHistory.unshift({ date: today, definitions: currentDailySuggestions });
+                    // Keep history to a reasonable size, e.g., last 30 days
+                    if (suggestionsHistory.length > 30) {
+                        suggestionsHistory.pop();
+                    }
+                }
+                saveDataToLocalStorage();
+            }
+
+            // Display the suggestions
+            if (currentDailySuggestions.length > 0) {
+                currentDailySuggestions.forEach(def => {
+                    const card = createSuggestionCard(def);
+                    card.setAttribute('data-id', def.id);
+                    suggestionsContainer.appendChild(card);
+                });
+            } else {
+                suggestionsContainer.innerHTML = '<p class="text-gray-500">No definitions available for daily suggestions. Add some first!</p>';
+            }
+            
+            updateStatusCounters();
+        }
+
+        /**
+         * Generates a unique set of up to 10 suggestions using weighted randomness.
+         * This ensures that definitions you have failed more are more likely to appear.
+         */
+        function generateNewSuggestions() {
+            if (definitions.length === 0) {
+                return [];
+            }
+            
+            // Create a weighted list of definitions based on performance
+            let weightedDefinitions = [];
+            definitions.forEach(def => {
+                let weight = 1; // Default weight for new definitions
+                if (def.failCount > def.passCount) {
+                    // Heavily prioritize definitions with more fails than passes.
+                    // We'll add it 4 times to significantly increase its chance of being picked.
+                    weight = 4;
+                } else if (def.passCount > 0 && def.failCount > 0) {
+                    // Give a medium priority to definitions with mixed results
+                    weight = 2;
+                } else if (def.passCount > 0 && def.failCount === 0) {
+                    // Lower priority for definitions that are passed a lot
+                    weight = 1;
+                }
+
+                // Add the definition to the weighted list according to its weight
+                for (let i = 0; i < weight; i++) {
+                    weightedDefinitions.push(def);
+                }
+            });
+
+            // If no definitions are in the weighted list, fall back to the original list
+            if (weightedDefinitions.length === 0) {
+                weightedDefinitions = [...definitions];
+            }
+
+            // Use a Set to ensure unique suggestions and take the top 10 after shuffling
+            const uniqueSuggestions = new Set();
+            let shuffled = weightedDefinitions.sort(() => 0.5 - Math.random());
+            for (const def of shuffled) {
+                if (uniqueSuggestions.size < 10) {
+                     uniqueSuggestions.add(def);
+                } else {
+                    break;
+                }
+            }
+            return Array.from(uniqueSuggestions);
+        }
+        
+        /**
+         * Closes all modals in a centralized way.
+         */
+        function closeAllModals() {
+            const modals = ['infoModal', 'confirmModal', 'editDefinitionModal', 'lessonDefinitionsModal', 'historyModal', 'allLessonsModal'];
+            modals.forEach(id => {
+                const modal = document.getElementById(id);
+                if (modal && !modal.classList.contains('hidden')) {
+                    modal.classList.remove('is-opening');
+                    modal.classList.add('is-closing');
+                }
+            });
+        }
+        
+        /**
+         * Opens a modal with an animation, optionally closing others first.
+         * @param {string} modalId The ID of the modal to open.
+         * @param {boolean} [isOverlay=false] If true, it opens as an overlay without closing other modals.
+         */
+        function openModal(modalId, isOverlay = false) {
+            // Close other modals if this is not an overlay
+            if (!isOverlay) {
+                closeAllModals();
+            }
+            
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('hidden');
+            // Use requestAnimationFrame to ensure the `hidden` class is removed and the initial
+            // state is rendered before we apply the `is-opening` class for the transition.
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    modal.classList.add('is-opening');
+                });
+            });
+        }
+
+        /**
+         * Closes a modal with animation.
+         */
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal && !modal.classList.contains('hidden')) {
+                modal.classList.remove('is-opening');
+                modal.classList.add('is-closing');
+            }
+        }
+        
+        /**
+         * Displays a generic information modal.
+         */
+        function showModal(title, message) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            openModal('infoModal');
+        }
+        
+        // Listen for the end of the transition to truly hide the modal
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('transitionend', (e) => {
+                if (e.target === modal && modal.classList.contains('is-closing')) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('is-closing');
+                }
+            });
+        });
+
+        document.getElementById('close-info-modal').addEventListener('click', () => {
+            closeModal('infoModal');
+        });
+
+        let confirmActionCallback = null;
+        /**
+         * Displays a confirmation modal.
+         */
+        function showConfirmModal(message, callback) {
+            document.getElementById('confirm-message').textContent = message;
+            openModal('confirmModal');
+            confirmActionCallback = callback;
+        }
+
+        document.getElementById('cancel-confirm-modal').addEventListener('click', () => {
+            closeModal('confirmModal');
+            confirmActionCallback = null;
+        });
+
+        document.getElementById('confirm-action').addEventListener('click', () => {
+            if (confirmActionCallback) {
+                confirmActionCallback();
+            }
+            closeModal('confirmModal');
+            confirmActionCallback = null;
+        });
+        
+        document.getElementById('close-lesson-definitions-modal').addEventListener('click', () => {
+             closeModal('lessonDefinitionsModal');
+        });
+        
+        document.getElementById('close-history-modal').addEventListener('click', () => {
+             closeModal('historyModal');
+        });
+        
+        document.getElementById('close-all-lessons-modal').addEventListener('click', () => {
+             closeModal('allLessonsModal');
+        });
+        
+        document.getElementById('close-edit-modal-btn').addEventListener('click', () => {
+            closeModal('editDefinitionModal');
+        });
+
+        // Close all modals and dropdowns if click is outside of them
+        window.addEventListener('click', (event) => {
+            const modals = ['infoModal', 'confirmModal', 'editDefinitionModal', 'lessonDefinitionsModal', 'historyModal', 'allLessonsModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    closeModal(modalId);
+                }
+            });
+
+            // Hide settings menu if click is outside of it
+            const settingsMenu = document.getElementById('settings-menu');
+            const settingsButton = document.getElementById('settings-button');
+            if (settingsMenu && !settingsButton.contains(event.target) && !settingsMenu.contains(event.target)) {
+                settingsMenu.classList.remove('visible');
+            }
+
+            // Hide stats menu if click is outside of it
+            const statsMenu = document.getElementById('stats-menu');
+            const statsButton = document.getElementById('stats-button');
+            if (statsMenu && !statsButton.contains(event.target) && !statsMenu.contains(event.target)) {
+                statsMenu.classList.remove('visible');
+            }
+        });
+        
+        document.getElementById('settings-button').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const settingsMenu = document.getElementById('settings-menu');
+            settingsMenu.classList.toggle('visible');
+            document.getElementById('stats-menu').classList.remove('visible');
+        });
+
+        document.getElementById('stats-button').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const statsMenu = document.getElementById('stats-menu');
+            statsMenu.classList.toggle('visible');
+            document.getElementById('settings-menu').classList.remove('visible');
+        });
+
+
+        /**
+         * Sets up floating action buttons.
+         */
+        function setupFloatingButtons() {
+            const fabContainer = document.getElementById('fab-container');
+            const scrollThreshold = 200;
+
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > scrollThreshold) {
+                    fabContainer.classList.add('show-fab');
+                } else {
+                    fabContainer.classList.remove('show-fab');
+                }
+            });
+
+            document.getElementById('fab-add-lesson').addEventListener('click', () => {
+                const content = document.getElementById('add-lesson-content');
+                if (content) {
+                    toggleCollapsibleContent(content);
+                }
+                document.getElementById('add-lesson-section').scrollIntoView({ behavior: 'smooth' });
+            });
+
+            document.getElementById('fab-add-definition').addEventListener('click', () => {
+                const content = document.getElementById('add-definition-content');
+                if (content) {
+                    toggleCollapsibleContent(content);
+                }
+                document.getElementById('add-definition-section').scrollIntoView({ behavior: 'smooth' });
+            });
+        }
+        
+        /**
+         * Generic function to toggle a collapsible content block.
+         */
+        function toggleCollapsibleContent(contentElement) {
+            if (contentElement) {
+                contentElement.classList.toggle('expanded');
+            }
+        }
+        
+        /**
+         * Sets up the collapsible behavior for the sections.
+         */
+        function setupCollapsibleSections() {
+            document.querySelectorAll('.collapsible-header').forEach(header => {
+                header.addEventListener('click', (e) => {
+                    const contentId = header.getAttribute('data-target');
+                    const content = document.getElementById(contentId);
+                    if (content) {
+                        toggleCollapsibleContent(content);
+                    }
+                });
+            });
+        }
+        
+        /**
+         * Sets up the import and export functionality.
+         */
+        function setupImportExportButtons() {
+            const exportButton = document.getElementById('export-data');
+            const importButton = document.getElementById('import-data');
+
+            // Export Data Functionality
+            exportButton.addEventListener('click', () => {
+                const data = { lessons, definitions, suggestionsHistory };
+                const dataStr = JSON.stringify(data, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'biology-data.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showModal('Export Complete', 'Your data has been successfully exported as "biology-data.json".');
+                document.getElementById('settings-menu').classList.remove('visible');
+            });
+
+            // Import Data Functionality
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'application/json';
+            fileInput.style.display = 'none';
+            document.body.appendChild(fileInput);
+
+            importButton.addEventListener('click', () => {
+                fileInput.click();
+                document.getElementById('settings-menu').classList.remove('visible');
+            });
+
+            fileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        if (importedData.lessons && importedData.definitions) {
+                            showConfirmModal('Are you sure you want to import this data? Existing definitions and lessons will be skipped.', () => {
+                                let newLessonsAdded = 0;
+                                let newDefinitionsAdded = 0;
+                                
+                                const existingLessonIds = new Set(lessons.map(l => l.id));
+                                const existingDefinitionIds = new Set(definitions.map(d => d.id));
+
+                                // Filter out duplicate lessons and add new ones
+                                const importedLessonsToAdd = importedData.lessons.filter(l => !existingLessonIds.has(l.id));
+                                lessons = lessons.concat(importedLessonsToAdd);
+                                newLessonsAdded = importedLessonsToAdd.length;
+
+                                // Filter out duplicate definitions and add new ones
+                                const importedDefinitionsToAdd = importedData.definitions.filter(d => !existingDefinitionIds.has(d.id));
+                                definitions = definitions.concat(importedDefinitionsToAdd);
+                                
+                                // Ensure new definitions have the pass/fail properties
+                                importedDefinitionsToAdd.forEach(def => {
+                                    if (typeof def.passCount === 'undefined') { def.passCount = 0; }
+                                    if (typeof def.failCount === 'undefined') { def.failCount = 0; }
+                                    if (typeof def.count === 'undefined') { def.count = 0; }
+                                });
+                                newDefinitionsAdded = importedDefinitionsToAdd.length;
+                                
+                                // Also handle history if present in the imported data
+                                if(importedData.suggestionsHistory) {
+                                    const existingHistoryDates = new Set(suggestionsHistory.map(h => h.date));
+                                    const importedHistoryToAdd = importedData.suggestionsHistory.filter(h => !existingHistoryDates.has(h.date));
+                                    suggestionsHistory = importedHistoryToAdd.concat(suggestionsHistory);
+                                    if(suggestionsHistory.length > 30) {
+                                        suggestionsHistory.length = 30;
+                                    }
+                                }
+
+                                // Update lesson dropdowns with the new lessons
+                                populateLessonDropdowns();
+
+                                saveDataToLocalStorage();
+                                displayLessons();
+                                fetchDailySuggestions();
+
+                                const skippedLessons = importedData.lessons.length - newLessonsAdded;
+                                const skippedDefinitions = importedData.definitions.length - newDefinitionsAdded;
+                                const message = `Import complete. Added ${newLessonsAdded} new lessons and ${newDefinitionsAdded} new definitions. ${skippedLessons} lessons and ${skippedDefinitions} definitions were skipped because they already exist.`;
+                                showModal('Import Summary', message);
+                            });
+                        } else {
+                            showModal('Import Error', 'Invalid file format. Please select a valid biology-data.json file.');
+                        }
+                    } catch (error) {
+                        console.error('Error parsing imported file:', error);
+                        showModal('Import Error', 'An error occurred while reading the file. Please ensure it is a valid JSON file.');
+                    }
+                };
+                reader.readAsText(file);
+            });
+        }
+        
+        /**
+         * Creates a collapsible card for a single day's history.
+         */
+        function createHistoryCard(entry) {
+            const historyCard = document.createElement('div');
+            historyCard.className = 'collapsible-section bg-gray-50 border border-gray-200';
+            
+            const date = new Date(entry.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const contentId = `history-content-${entry.date}`;
+            
+            historyCard.innerHTML = `
+                <div class="collapsible-header" data-target="${contentId}">
+                    <h4 class="text-lg font-semibold text-gray-800">${date}</h4>
+                    <button class="toggle-section-btn text-gray-600 hover:text-gray-800">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7 10L12 15L17 10" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="${contentId}" class="collapsible-content p-4 grid grid-cols-1 gap-2">
+                    <!-- Definitions will be inserted here -->
+                </div>
+            `;
+            const contentDiv = historyCard.querySelector(`#${contentId}`);
+            entry.definitions.forEach(def => {
+                const defCard = createSuggestionCard(def, true);
+                contentDiv.appendChild(defCard);
+            });
+            
+            return historyCard;
+        }
+
+        /**
+         * Shows the history modal.
+         */
+        function showHistoryModal() {
+            const historyContainer = document.getElementById('history-container');
+            historyContainer.innerHTML = '';
+            
+            console.log("Suggestions History:", suggestionsHistory);
+            
+            if (suggestionsHistory.length === 0) {
+                historyContainer.innerHTML = '<p class="text-gray-500 text-center">No history available yet. Complete some daily suggestions to see them here.</p>';
+            } else {
+                suggestionsHistory.forEach(entry => {
+                    historyContainer.appendChild(createHistoryCard(entry));
+                });
+            }
+            openModal('historyModal');
+        }
+        
+        /**
+         * Shows the all lessons modal.
+         */
+        function showAllLessonsModal() {
+            const allLessonsContainer = document.getElementById('all-lessons-container');
+            allLessonsContainer.innerHTML = '';
+            lessons.forEach(lesson => {
+                allLessonsContainer.appendChild(createLessonCard(lesson, true));
+            });
+            openModal('allLessonsModal');
+        }
+        
+        // Add listener for the new history button
+        document.getElementById('history-button').addEventListener('click', showHistoryModal);
+    </script>
+</body>
+</html>
