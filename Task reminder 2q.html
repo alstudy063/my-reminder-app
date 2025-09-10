@@ -1,4 +1,4 @@
-here<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -199,6 +199,13 @@ here<!DOCTYPE html>
         <img src="https://cdn.join.com/5eea34baf73eb4000176ff84/study-smarter-logo-l.png" alt="Study Smarter Logo" class="h-16 mx-auto mb-4">
         <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-6">Flashcard App</h1>
         
+        <!-- PWA Install Button -->
+        <div id="install-button-container" class="w-full flex justify-center mb-6 hidden">
+            <button id="install-button" class="generic-btn px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full font-bold shadow-md hover:from-blue-600 hover:to-blue-700 transition-all">
+                Install Flashcard App
+            </button>
+        </div>
+
         <!-- Main Content Sections -->
         
         <!-- Daily Suggestions Section -->
@@ -297,6 +304,7 @@ here<!DOCTYPE html>
             <h2 class="text-2xl font-bold text-gray-700 mb-6 text-center">Settings</h2>
             <div class="flex flex-col space-y-4">
                 <button id="backup-btn" class="generic-btn w-full px-6 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-full font-bold shadow-md hover:from-teal-600 hover:to-teal-700 transition-all">Backup Data</button>
+                <button id="secondary-install-btn" class="generic-btn w-full px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-full font-bold shadow-md hover:from-indigo-600 hover:to-indigo-700 transition-all hidden">Install Flashcard App</button>
                 
                 <div class="bg-gray-100 p-6 rounded-2xl shadow-inner">
                     <h3 class="text-xl font-bold text-gray-700 mb-4">Import Data</h3>
@@ -383,6 +391,10 @@ here<!DOCTYPE html>
         document.addEventListener('DOMContentLoaded', () => {
             const loadingScreen = document.getElementById('loading-screen');
             const mainContentWrapper = document.getElementById('main-content-wrapper');
+            const installButtonContainer = document.getElementById('install-button-container');
+            const installButton = document.getElementById('install-button');
+            const secondaryInstallBtn = document.getElementById('secondary-install-btn');
+            let deferredPrompt; // To store the installation event
 
             // Register service worker if supported
             if ('serviceWorker' in navigator) {
@@ -396,6 +408,53 @@ here<!DOCTYPE html>
                         console.log('Service Worker registration failed:', error);
                     });
             }
+
+            // PWA Installation Prompt Listener
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Prevent the mini-infobar from appearing on mobile
+                e.preventDefault();
+                // Stash the event so it can be triggered later.
+                deferredPrompt = e;
+                // Show our custom install buttons
+                installButtonContainer.classList.remove('hidden');
+                secondaryInstallBtn.classList.remove('hidden');
+            });
+
+            // Handle the install button click
+            installButton.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    // Show the install prompt
+                    deferredPrompt.prompt();
+                    // Wait for the user to respond to the prompt
+                    const { outcome } = await deferredPrompt.userChoice;
+                    // Log the result of the prompt
+                    console.log(`User response to the install prompt: ${outcome}`);
+                    // We no longer need the prompt. Clear it up.
+                    deferredPrompt = null;
+                    // Hide the install buttons again
+                    installButtonContainer.classList.add('hidden');
+                    secondaryInstallBtn.classList.add('hidden');
+                }
+            });
+            
+            // Handle the secondary install button click
+            secondaryInstallBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log(`User response from secondary button: ${outcome}`);
+                    deferredPrompt = null;
+                    installButtonContainer.classList.add('hidden');
+                    secondaryInstallBtn.classList.add('hidden');
+                }
+            });
+
+            // Handle if the app is already installed
+            window.addEventListener('appinstalled', () => {
+                // App was installed, hide the install buttons
+                installButtonContainer.classList.add('hidden');
+                secondaryInstallBtn.classList.add('hidden');
+            });
 
             // Simulate a loading delay for a smoother user experience
             setTimeout(() => {
