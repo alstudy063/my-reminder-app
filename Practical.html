@@ -3,10 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Physics Practical Tracker</title>
+    <title>Physics Practical and Equation Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         :root {
             --primary-color: #3b82f6;
@@ -90,6 +101,25 @@
             color: white;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
+        /* Modal specific styles for animation */
+        .modal {
+            display: none;
+            transition: all 0.3s ease-in-out;
+        }
+        .modal-content {
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal.active .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
@@ -98,7 +128,9 @@
         
         <!-- Header -->
         <header class="p-5 bg-white dark:bg-gray-800 sticky top-0 z-10 border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
-            <h1 id="header-title" class="text-xl font-bold text-center text-gray-800 dark:text-gray-200">Home</h1>
+            <div id="header-content" class="flex items-center justify-center relative">
+                <h1 id="header-title" class="text-xl font-bold text-center text-gray-800 dark:text-gray-200">Home</h1>
+            </div>
         </header>
 
         <!-- Main content with padding at the bottom for the fixed nav -->
@@ -122,6 +154,16 @@
                     <h3 class="font-bold text-lg mb-2">Up Next</h3>
                     <div id="up-next-practical" class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition">
                         <!-- Dynamic content here -->
+                    </div>
+                </div>
+                
+                <div class="mt-6 max-w-2xl mx-auto">
+                    <h3 class="font-bold text-lg mb-2">Tools</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="switchTab('equations')" class="flex flex-col items-center justify-center bg-blue-500 text-white p-5 rounded-xl shadow-xl hover:bg-blue-600 transition h-32 w-full">
+                            <i data-lucide="calculator" class="w-10 h-10 mb-2"></i>
+                            <span class="font-bold text-xl">සමීකරණ</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -171,6 +213,10 @@
                     </div>
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700">
                         <h3 class="font-bold mb-2">Data Management</h3>
+                        <button onclick="openLessonsModal()" class="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex items-center space-x-3">
+                           <i data-lucide="book-open-check"></i>
+                           <span>පාඩම් කළමනාකරණය (Manage Lessons)</span>
+                        </button>
                         <label for="import-data-file" class="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex items-center space-x-3 cursor-pointer">
                             <i data-lucide="upload"></i>
                             <span>දත්ත ආනයනය කරන්න (JSON)</span>
@@ -187,11 +233,27 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Equations Page -->
+            <div id="equations-page" class="page max-w-2xl mx-auto relative min-h-[500px]">
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-xl mb-6 border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-lg font-bold mb-2">සමීකරණ</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Add your equations and formulas here. You can use LaTeX for formatting.</p>
+                </div>
+                <div id="equations-list" class="space-y-4">
+                    <!-- Dynamic equation list will be injected here -->
+                </div>
+
+                <!-- Floating Action Button for Equations Page -->
+                <button onclick="openAddEquationModal()" class="fixed bottom-20 right-5 p-4 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition-colors z-20">
+                    <i data-lucide="plus" class="w-6 h-6"></i>
+                </button>
+            </div>
         </main>
     </div>
 
     <!-- Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 left-0 right-0 w-full bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex justify-around p-3 shadow-top rounded-t-xl transition-colors duration-300">
+    <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 w-full bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex justify-around p-3 shadow-top rounded-t-xl transition-colors duration-300">
         <button onclick="switchTab('home')" class="bottom-nav-btn active flex flex-col items-center text-gray-500 dark:text-gray-400 w-1/4">
             <i data-lucide="home" class="w-6 h-6"></i>
             <span class="text-xs mt-1 font-semibold">Home</span>
@@ -211,13 +273,15 @@
     </nav>
     
     <!-- Add/Edit Practical Modal -->
-    <div id="practical-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto transform scale-95 opacity-0 transition-all duration-300">
+    <div id="practical-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
             <h2 id="modal-title" class="text-lg font-bold mb-4"></h2>
             <form id="practical-form">
                 <div class="mb-4">
                     <label for="practical-unit" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Unit Name</label>
-                    <input type="text" id="practical-unit" name="unit" required class="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2" placeholder="e.g., යාන්ත්‍ර විද්‍යාව">
+                    <select id="practical-unit" name="unit" required class="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2">
+                        <!-- Options will be populated by JS -->
+                    </select>
                 </div>
                 <div class="mb-4">
                     <label for="practical-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Practical Name</label>
@@ -231,14 +295,77 @@
         </div>
     </div>
     
+    <!-- Add/Edit Equation Modal -->
+    <div id="equation-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
+            <h2 id="equation-modal-title" class="text-lg font-bold mb-4">Add New Equation</h2>
+            <form id="equation-form">
+                <div class="mb-4">
+                    <label for="equation-unit" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Lesson / Unit Name</label>
+                    <select id="equation-unit" name="unit" required class="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2">
+                        <!-- Options will be populated by JS -->
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="equation-subunit" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Subunit Name (Optional)</label>
+                    <input type="text" id="equation-subunit" name="subunit" class="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2" placeholder="e.g., ගුරුත්වජ ක්ෂේත්‍රය">
+                </div>
+                <div class="mb-4">
+                    <label for="equation-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Equation Name</label>
+                    <input type="text" id="equation-name" name="name" required class="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2" placeholder="e.g., ගුරුත්වජ ත්වරණය සෙවීම">
+                </div>
+                <div class="mb-4">
+                    <label for="equation-formula" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Equation (in LaTeX) (Optional)</label>
+                    <textarea id="equation-formula" name="formula" class="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2" rows="4" placeholder="e.g., $F = ma$"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('equation-modal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Cancel</button>
+                    <button id="equation-modal-submit-btn" type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">Add Equation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Lessons Modal -->
+    <div id="lessons-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
+            <h2 class="text-lg font-bold mb-4">පාඩම් කළමනාකරණය</h2>
+            <div id="lessons-list" class="space-y-2 mb-4">
+                <!-- Dynamic list of lessons will be injected here -->
+            </div>
+            <form id="add-lesson-form" class="flex space-x-2">
+                <input type="text" id="new-lesson-name" placeholder="නව පාඩම..." required class="flex-grow bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2">
+                <button type="submit" class="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                    <i data-lucide="plus" class="w-5 h-5"></i>
+                </button>
+            </form>
+            <div class="flex justify-end mt-4">
+                <button type="button" onclick="closeModal('lessons-modal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Close</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Custom Confirmation Modal -->
-    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto text-center transform scale-95 opacity-0 transition-all duration-300">
+    <div id="confirmation-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto text-center">
             <i data-lucide="alert-triangle" class="w-12 h-12 text-red-500 mx-auto mb-4"></i>
             <h3 id="confirmation-message" class="text-lg font-semibold mb-4"></h3>
             <div class="flex justify-center space-x-3">
                 <button id="cancel-confirm-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Cancel</button>
                 <button id="confirm-btn" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offline Modal -->
+    <div id="offline-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 text-center">
+            <i data-lucide="signal-exclamation" class="w-12 h-12 text-red-500 mx-auto mb-4"></i>
+            <h3 class="text-xl font-bold mb-2">Something went wrong</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">Please check your internet connection and try again.</p>
+            <div class="flex flex-row-reverse justify-center gap-4">
+                <button onclick="checkConnectionAndReload()" class="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition font-semibold shadow-md">Try again</button>
+                <button onclick="closeModal('offline-modal')" class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition font-semibold shadow-md">Close</button>
             </div>
         </div>
     </div>
@@ -284,62 +411,94 @@
         ];
 
         let practicalsData = [];
+        let equationsData = [];
+        let lessonsData = [];
         let editingPracticalId = null;
-
-        // App State
-        let currentTab = 'home';
+        let editingEquationId = null;
         let currentFilter = 'all';
-
-        // DOM Elements
-        const headerTitle = document.getElementById('header-title');
+        let currentTab = 'home';
+        
+        const headerContent = document.getElementById('header-content');
         const pages = document.querySelectorAll('.page');
         const navButtons = document.querySelectorAll('.bottom-nav-btn');
+        const bottomNav = document.getElementById('bottom-nav');
         const filterButtons = document.querySelectorAll('.filter-btn');
         const practicalsListContainer = document.getElementById('practicals-list');
         const practicalModal = document.getElementById('practical-modal');
+        const equationModal = document.getElementById('equation-modal');
+        const lessonsModal = document.getElementById('lessons-modal');
         const confirmationModal = document.getElementById('confirmation-modal');
+        const offlineModal = document.getElementById('offline-modal');
         const practicalForm = document.getElementById('practical-form');
+        const equationForm = document.getElementById('equation-form');
         const modalTitle = document.getElementById('modal-title');
         const modalSubmitBtn = document.getElementById('modal-submit-btn');
-        const practicalUnitInput = document.getElementById('practical-unit');
+        const practicalUnitSelect = document.getElementById('practical-unit');
         const practicalNameInput = document.getElementById('practical-name');
+        const equationUnitSelect = document.getElementById('equation-unit');
+        const equationSubunitInput = document.getElementById('equation-subunit');
+        const equationNameInput = document.getElementById('equation-name');
+        const equationFormulaInput = document.getElementById('equation-formula');
         const darkModeToggle = document.getElementById('dark-mode-toggle');
         const importDataFile = document.getElementById('import-data-file');
-        
+        const lessonsListContainer = document.getElementById('lessons-list');
+        const newLessonNameInput = document.getElementById('new-lesson-name');
+        const addLessonForm = document.getElementById('add-lesson-form');
+
+
+        // --- Data Persistence ---
         function saveData() {
             localStorage.setItem('physicsPracticals', JSON.stringify(practicalsData));
+            localStorage.setItem('physicsEquations', JSON.stringify(equationsData));
+            localStorage.setItem('physicsLessons', JSON.stringify(lessonsData));
         }
 
         function loadData() {
-            const savedData = localStorage.getItem('physicsPracticals');
-            if (savedData) {
-                practicalsData = JSON.parse(savedData);
+            const savedPracticals = localStorage.getItem('physicsPracticals');
+            if (savedPracticals) {
+                practicalsData = JSON.parse(savedPracticals);
             } else {
                 practicalsData = JSON.parse(JSON.stringify(initialPracticals)); // Deep copy
             }
+
+            const savedEquations = localStorage.getItem('physicsEquations');
+            if (savedEquations) {
+                equationsData = JSON.parse(savedEquations);
+            } else {
+                equationsData = [];
+            }
+            
+            const savedLessons = localStorage.getItem('physicsLessons');
+            if (savedLessons) {
+                lessonsData = JSON.parse(savedLessons);
+            } else {
+                 // Initialize lessons from initial practicals and new list
+                const initialLessonSet = new Set([
+                    ...initialPracticals.map(p => p.unit),
+                    "ගුරුත්වාකර්ෂණ ක්ෂේත්‍ර (Gravitational Fields)",
+                    "ස්ථිති විද්‍යුත් ක්ෂේත්‍ර (Electrostatic Fields)",
+                    "චුම්බක ක්ෂේත්‍ර (Magnetic Fields)",
+                    "ධාරා විද්‍යුතය (Current Electricity)",
+                    "ඉලෙක්ට්‍රොනික විද්‍යාව (Electronics)",
+                    "පදාර්ථයේ යාන්ත්‍රික ගුණ (Mechanical Properties of Matter)",
+                    "පදාර්ථය සහ විකිරණ (Matter and Radiation)",
+                ]);
+                lessonsData = Array.from(initialLessonSet).map((unit, index) => ({ id: index + 1, name: unit }));
+            }
         }
-        
+
         // --- Modal Control Functions ---
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
-                modal.style.display = 'flex';
-                // Trigger animation
-                setTimeout(() => {
-                    modal.querySelector('div').classList.remove('scale-95', 'opacity-0');
-                    modal.querySelector('div').classList.add('scale-100', 'opacity-100');
-                }, 10);
+                modal.classList.add('active');
             }
         }
         
         function closeModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
-                modal.querySelector('div').classList.remove('scale-100', 'opacity-100');
-                modal.querySelector('div').classList.add('scale-95', 'opacity-0');
-                setTimeout(() => {
-                     modal.style.display = 'none';
-                }, 300); // Match CSS transition duration
+                modal.classList.remove('active');
             }
         }
 
@@ -347,9 +506,37 @@
             editingPracticalId = null;
             modalTitle.textContent = "Add New Practical";
             modalSubmitBtn.textContent = "Add Practical";
-            practicalUnitInput.value = "";
+            practicalUnitSelect.value = lessonsData.length > 0 ? lessonsData[0].name : '';
             practicalNameInput.value = "";
+            populateLessonDropdowns();
             openModal('practical-modal');
+        }
+        
+        function openAddEquationModal(id = null) {
+            editingEquationId = id;
+            const modalTitle = document.getElementById('equation-modal-title');
+            const submitBtn = document.getElementById('equation-modal-submit-btn');
+            
+            if (id) {
+                const equation = equationsData.find(e => e.id === id);
+                if (equation) {
+                    modalTitle.textContent = "Edit Equation";
+                    submitBtn.textContent = "Save Changes";
+                    equationUnitSelect.value = equation.unit;
+                    equationSubunitInput.value = equation.subunit || "";
+                    equationNameInput.value = equation.name;
+                    equationFormulaInput.value = equation.formula;
+                }
+            } else {
+                modalTitle.textContent = "Add New Equation";
+                submitBtn.textContent = "Add Equation";
+                equationUnitSelect.value = lessonsData.length > 0 ? lessonsData[0].name : '';
+                equationSubunitInput.value = "";
+                equationNameInput.value = "";
+                equationFormulaInput.value = "";
+            }
+            populateLessonDropdowns();
+            openModal('equation-modal');
         }
 
         function openEditPracticalModal(id) {
@@ -358,32 +545,58 @@
                 editingPracticalId = id;
                 modalTitle.textContent = "Edit Practical";
                 modalSubmitBtn.textContent = "Save Changes";
-                practicalUnitInput.value = practical.unit;
+                practicalUnitSelect.value = practical.unit;
                 practicalNameInput.value = practical.name;
+                populateLessonDropdowns();
                 openModal('practical-modal');
             }
+        }
+        
+        function openLessonsModal() {
+            renderLessonsList();
+            openModal('lessons-modal');
         }
 
         function switchTab(tabName) {
             if (currentTab === tabName) return;
 
-            // Fade out the current page
             const currentPage = document.getElementById(`${currentTab}-page`);
             if (currentPage) {
                 currentPage.classList.remove('active');
             }
             
             currentTab = tabName;
-            headerTitle.textContent = tabName.charAt(0).toUpperCase() + tabName.slice(1);
-
-            // Fade in the new page
+            
+            const headerContentHtml = {
+                'home': `<h1 id="header-title" class="text-xl font-bold text-center text-gray-800 dark:text-gray-200">Home</h1>`,
+                'practicals': `<h1 id="header-title" class="text-xl font-bold text-center text-gray-800 dark:text-gray-200">Practicals</h1>`,
+                'progress': `<h1 id="header-title" class="text-xl font-bold text-center text-gray-800 dark:text-gray-200">Progress</h1>`,
+                'settings': `<h1 id="header-title" class="text-xl font-bold text-center text-gray-800 dark:text-gray-200">Settings</h1>`,
+                'equations': `
+                    <button onclick="switchTab('home')" class="absolute left-0 p-2 text-gray-500 dark:text-gray-400 hover:text-blue-500 transition">
+                        <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                    </button>
+                    <h1 id="header-title" class="text-xl font-bold text-center text-gray-800 dark:text-gray-200">සමීකරණ</h1>
+                `
+            };
+            headerContent.innerHTML = headerContentHtml[tabName];
+            lucide.createIcons();
             const newPage = document.getElementById(`${tabName}-page`);
             if (newPage) {
                 setTimeout(() => {
                     newPage.classList.add('active');
+                    if (tabName === 'equations') {
+                        renderEquationsList();
+                    }
                 }, 100);
             }
             
+            if (tabName === 'equations') {
+                bottomNav.style.display = 'none';
+            } else {
+                bottomNav.style.display = 'flex';
+            }
+
             navButtons.forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.onclick.toString().includes(`'${tabName}'`)) {
@@ -485,6 +698,104 @@
             lucide.createIcons();
         }
 
+        function renderEquationsList() {
+            const equationsListContainer = document.getElementById('equations-list');
+            equationsListContainer.innerHTML = '';
+
+            if (equationsData.length === 0) {
+                equationsListContainer.innerHTML = `<div class="text-center py-10 text-gray-400">
+                    <i data-lucide="folder-search" class="mx-auto h-12 w-12 mb-2"></i>
+                    <p>No equations found. Add your first equation now!</p>
+                </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            const groupedByUnit = equationsData.reduce((acc, e) => {
+                const unitName = e.unit || 'Uncategorized';
+                if (!acc[unitName]) {
+                    acc[unitName] = {};
+                }
+                const subunitName = e.subunit || 'Main';
+                if (!acc[unitName][subunitName]) {
+                    acc[unitName][subunitName] = [];
+                }
+                acc[unitName][subunitName].push(e);
+                return acc;
+            }, {});
+
+            for (const unit in groupedByUnit) {
+                let unitHtml = `
+                    <div class="mb-4">
+                        <h3 class="font-bold text-gray-800 dark:text-gray-300 sticky top-[72px] bg-gray-50 dark:bg-gray-950 py-2">${unit}</h3>
+                        <div class="space-y-4 mt-2">`;
+                
+                for (const subunit in groupedByUnit[unit]) {
+                    unitHtml += `
+                        <div class="ml-4 border-l-2 border-gray-300 dark:border-gray-600 pl-4">
+                            ${subunit !== 'Main' ? `<h4 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-2">${subunit}</h4>` : ''}
+                            <div class="space-y-2">
+                                ${groupedByUnit[unit][subunit].map(e => `
+                                    <div onclick="openAddEquationModal(${e.id})" class="equation-item bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 transition flex items-center justify-between space-x-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <div class="flex-grow flex flex-col">
+                                            <p class="font-semibold text-sm mb-1">${e.name}</p>
+                                            ${e.formula ? `<div class="math-formula text-lg font-mono">${e.formula}</div>` : ''}
+                                        </div>
+                                        <button onclick="event.stopPropagation(); deleteEquation(${e.id})" class="p-2 rounded-full hover:bg-red-200 dark:hover:bg-red-800/50 transition text-red-500">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>`;
+                }
+                
+                unitHtml += `</div></div>`;
+                equationsListContainer.innerHTML += unitHtml;
+            }
+            
+            lucide.createIcons();
+            if (window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+        
+        function renderLessonsList() {
+            lessonsListContainer.innerHTML = '';
+            if (lessonsData.length === 0) {
+                lessonsListContainer.innerHTML = `<div class="text-center py-4 text-gray-400">No lessons added yet.</div>`;
+                return;
+            }
+            lessonsData.forEach(lesson => {
+                const lessonItem = document.createElement('div');
+                lessonItem.className = 'flex justify-between items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg';
+                lessonItem.innerHTML = `
+                    <span class="font-medium">${lesson.name}</span>
+                    <button onclick="deleteLesson(${lesson.id})" class="p-1 rounded-full text-red-500 hover:bg-red-200 dark:hover:bg-red-800/50 transition">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                `;
+                lessonsListContainer.appendChild(lessonItem);
+            });
+            lucide.createIcons();
+        }
+        
+        function populateLessonDropdowns() {
+            practicalUnitSelect.innerHTML = '';
+            equationUnitSelect.innerHTML = '';
+            if (lessonsData.length === 0) {
+                const placeholderOption = `<option value="">No lessons available</option>`;
+                practicalUnitSelect.innerHTML = placeholderOption;
+                equationUnitSelect.innerHTML = placeholderOption;
+                return;
+            }
+            lessonsData.forEach(lesson => {
+                const option = `<option value="${lesson.name}">${lesson.name}</option>`;
+                practicalUnitSelect.innerHTML += option;
+                equationUnitSelect.innerHTML += option;
+            });
+        }
+
         function updateHomePage() {
             const completedCount = practicalsData.filter(p => p.status === 'completed').length;
             const totalCount = practicalsData.length;
@@ -546,11 +857,10 @@
         
         practicalForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const newUnit = practicalUnitInput.value;
+            const newUnit = practicalUnitSelect.value;
             const newName = practicalNameInput.value;
             
             if (editingPracticalId !== null) {
-                // Edit existing practical
                 const practical = practicalsData.find(p => p.id === editingPracticalId);
                 if (practical) {
                     practical.unit = newUnit;
@@ -558,8 +868,7 @@
                     showInfoModal("Practical updated successfully!");
                 }
             } else {
-                // Add new practical
-                const newId = Math.max(...practicalsData.map(p => p.id), 0) + 1;
+                const newId = practicalsData.length > 0 ? Math.max(...practicalsData.map(p => p.id), 0) + 1 : 1;
                 const newPractical = {
                     id: newId,
                     unit: newUnit,
@@ -578,18 +887,100 @@
             closeModal('practical-modal');
         });
 
+        equationForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newUnit = equationUnitSelect.value;
+            const newSubunit = equationSubunitInput.value.trim();
+            const newName = equationNameInput.value;
+            const newFormula = equationFormulaInput.value;
+            
+            if (!newName) {
+                showInfoModal('Equation Name is required.');
+                return;
+            }
+
+            if (editingEquationId !== null) {
+                const equation = equationsData.find(e => e.id === editingEquationId);
+                if (equation) {
+                    equation.unit = newUnit;
+                    equation.subunit = newSubunit || null;
+                    equation.name = newName;
+                    equation.formula = newFormula;
+                    showInfoModal("Equation updated successfully!");
+                }
+            } else {
+                const newId = equationsData.length > 0 ? Math.max(...equationsData.map(e => e.id), 0) + 1 : 1;
+                const newEquation = {
+                    id: newId,
+                    unit: newUnit,
+                    subunit: newSubunit || null,
+                    name: newName,
+                    formula: newFormula,
+                };
+                equationsData.push(newEquation);
+                showInfoModal("Equation added successfully!");
+            }
+
+            saveData();
+            renderEquationsList();
+            closeModal('equation-modal');
+        });
+        
+        addLessonForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newLessonName = newLessonNameInput.value.trim();
+            if (newLessonName) {
+                if (!lessonsData.find(lesson => lesson.name === newLessonName)) {
+                    const newId = lessonsData.length > 0 ? Math.max(...lessonsData.map(l => l.id), 0) + 1 : 1;
+                    lessonsData.push({ id: newId, name: newLessonName });
+                    saveData();
+                    renderLessonsList();
+                    populateLessonDropdowns();
+                    showInfoModal("Lesson added successfully!");
+                } else {
+                    showInfoModal("Lesson already exists.");
+                }
+                newLessonNameInput.value = '';
+            }
+        });
+        
+        function deleteLesson(id) {
+             showConfirmationModal('Are you sure you want to delete this lesson? All practicals and equations under this lesson will remain, but will not have a valid lesson associated.', () => {
+                lessonsData = lessonsData.filter(l => l.id !== id);
+                saveData();
+                renderLessonsList();
+                populateLessonDropdowns();
+                showInfoModal("Lesson deleted successfully!");
+            });
+        }
+        
+        function deleteEquation(id) {
+            showConfirmationModal('Are you sure you want to delete this equation?', () => {
+                equationsData = equationsData.filter(e => e.id !== id);
+                saveData();
+                renderEquationsList();
+                showInfoModal("Equation deleted successfully!");
+            });
+        }
+
         function importData(file) {
             const reader = new FileReader();
             reader.onload = (event) => {
                 try {
                     const importedData = JSON.parse(event.target.result);
-                    if (Array.isArray(importedData) && importedData.every(item => typeof item.id === 'number')) {
-                        practicalsData = importedData;
+                    if (importedData.practicals && Array.isArray(importedData.practicals)) {
+                        practicalsData = importedData.practicals;
+                        if(importedData.equations && Array.isArray(importedData.equations)) {
+                            equationsData = importedData.equations;
+                        }
+                        if(importedData.lessons && Array.isArray(importedData.lessons)) {
+                             lessonsData = importedData.lessons;
+                        }
                         saveData();
                         refreshAllViews();
                         showInfoModal('Data imported successfully!');
                     } else {
-                        showInfoModal('Error: The file format is not valid.');
+                        showInfoModal('Error: The file format is not valid. It should contain a "practicals" array.');
                     }
                 } catch (e) {
                     showInfoModal('Error: Could not read the file. Please check the JSON format.');
@@ -608,16 +999,23 @@
 
         function resetData() {
             localStorage.removeItem('physicsPracticals');
+            localStorage.removeItem('physicsEquations');
+            localStorage.removeItem('physicsLessons');
             loadData();
             refreshAllViews();
             showInfoModal('All data has been reset.');
         }
 
         function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(practicalsData, null, 2));
+            const combinedData = {
+                practicals: practicalsData,
+                equations: equationsData,
+                lessons: lessonsData
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(combinedData, null, 2));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "physics_practicals_data.json");
+            downloadAnchorNode.setAttribute("download", "physics_tracker_data.json");
             document.body.appendChild(downloadAnchorNode);
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
@@ -627,6 +1025,7 @@
             updateHomePage();
             renderPracticalsList();
             updateProgressPage();
+            populateLessonDropdowns();
         }
         
         // Custom Confirmation Modal
@@ -666,31 +1065,35 @@
             `;
             document.body.appendChild(infoModal);
             
-            // Trigger animation
             setTimeout(() => {
                 infoModal.querySelector('div').classList.remove('scale-95', 'opacity-0');
                 infoModal.querySelector('div').classList.add('scale-100', 'opacity-100');
             }, 10);
             
-            // Function to close the modal
             const closeInfoModal = () => {
                 infoModal.querySelector('div').classList.remove('scale-100', 'opacity-100');
                 infoModal.querySelector('div').classList.add('scale-95', 'opacity-0');
                 setTimeout(() => {
                     document.body.removeChild(infoModal);
-                }, 300); // Match CSS transition duration
+                }, 300);
             };
             
-            // Close on 'OK' button click
             const okButton = infoModal.querySelector('button');
             okButton.onclick = closeInfoModal;
             
-            // Close on outside click
             infoModal.addEventListener('click', (e) => {
                 if (e.target === infoModal) {
                     closeInfoModal();
                 }
             });
+        }
+        
+        function checkConnectionAndReload() {
+            if (navigator.onLine) {
+                window.location.reload();
+            } else {
+                showInfoModal("Still offline. Please check your internet connection.");
+            }
         }
 
         // Theme Management
@@ -711,7 +1114,6 @@
             applyTheme(isDark);
         });
 
-        // Initializer
         document.addEventListener('DOMContentLoaded', () => {
             loadData();
             refreshAllViews();
@@ -720,10 +1122,10 @@
             applyTheme(savedTheme === 'dark');
             
             lucide.createIcons();
-            filterPracticals('all'); // Initialize filter buttons
+            filterPracticals('all');
+            switchTab('home');
 
-            // Close modals on outside click
-            [practicalModal, confirmationModal].forEach(modal => {
+            [practicalModal, equationModal, lessonsModal, confirmationModal, offlineModal].forEach(modal => {
                 modal.addEventListener('click', (e) => {
                     if (e.target === modal) {
                         closeModal(modal.id);
@@ -731,7 +1133,19 @@
                 });
             });
 
-            // Prevent text selection and copying
+            function showOfflineMessage() {
+                openModal('offline-modal');
+            }
+            function hideOfflineMessage() {
+                 closeModal('offline-modal');
+            }
+            window.addEventListener('offline', showOfflineMessage);
+            window.addEventListener('online', hideOfflineMessage);
+
+            if (!navigator.onLine) {
+                showOfflineMessage();
+            }
+
             document.body.addEventListener('copy', (e) => {
                 e.preventDefault();
             });
