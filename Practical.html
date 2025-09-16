@@ -119,6 +119,12 @@
             transform: scale(1);
             opacity: 1;
         }
+        
+        .editable-name-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+        }
 
     </style>
 </head>
@@ -287,9 +293,12 @@
                     <label for="practical-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Practical Name</label>
                     <input type="text" id="practical-name" name="name" required class="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2" placeholder="e.g., ගුරුත්වජ ත්වරණය සෙවීම">
                 </div>
-                <div class="flex justify-end space-x-3">
-                    <button type="button" onclick="closeModal('practical-modal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Cancel</button>
-                    <button id="modal-submit-btn" type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"></button>
+                <div class="flex justify-between items-center mt-6">
+                    <button type="button" id="delete-practical-btn" onclick="" class="px-3 py-1.5 text-xs text-red-500 bg-red-100 dark:bg-red-900/50 rounded-md hover:bg-red-200 dark:hover:bg-red-800 transition">Delete Practical</button>
+                    <div class="flex space-x-3">
+                        <button type="button" onclick="closeModal('practical-modal')" class="px-3 py-1.5 text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Cancel</button>
+                        <button id="modal-submit-btn" type="submit" class="px-3 py-1.5 text-xs bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"></button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -308,7 +317,14 @@
                 </div>
                 <div class="mb-4">
                     <label for="equation-subunit" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Subunit Name (Optional)</label>
-                    <input type="text" id="equation-subunit" name="subunit" class="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2" placeholder="e.g., ගුරුත්වජ ක්ෂේත්‍රය">
+                    <div class="flex items-center space-x-2">
+                        <select id="equation-subunit" name="subunit" class="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2">
+                            <!-- Options will be populated by JS -->
+                        </select>
+                        <button type="button" onclick="openAddSubunitModal()" class="p-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="mb-4">
                     <label for="equation-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Equation Name</label>
@@ -319,8 +335,8 @@
                     <textarea id="equation-formula" name="formula" class="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2" rows="4" placeholder="e.g., $F = ma$"></textarea>
                 </div>
                 <div class="flex justify-end space-x-3">
-                    <button type="button" onclick="closeModal('equation-modal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Cancel</button>
-                    <button id="equation-modal-submit-btn" type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">Add Equation</button>
+                    <button type="button" onclick="closeModal('equation-modal')" class="px-3 py-1.5 text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Cancel</button>
+                    <button id="equation-modal-submit-btn" type="submit" class="px-3 py-1.5 text-xs bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">Add Equation</button>
                 </div>
             </form>
         </div>
@@ -340,7 +356,37 @@
                 </button>
             </form>
             <div class="flex justify-end mt-4">
-                <button type="button" onclick="closeModal('lessons-modal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Close</button>
+                <button type="button" onclick="closeModal('lessons-modal')" class="px-3 py-1.5 text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subunit Modal -->
+    <div id="subunit-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
+            <h2 class="text-lg font-bold mb-4">Subunit Management</h2>
+            <form id="add-subunit-form" class="space-y-4">
+                <div class="mb-4">
+                    <label for="subunit-unit" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Parent Unit</label>
+                    <select id="subunit-unit" name="unit" required class="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2">
+                        <!-- Options populated by JS -->
+                    </select>
+                </div>
+                <div class="flex space-x-2">
+                    <input type="text" id="new-subunit-name" placeholder="Add new subunit..." required class="flex-grow bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2">
+                    <button type="submit" class="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </form>
+            <div class="mt-4">
+                 <h3 class="font-bold mb-2">Existing Subunits</h3>
+                <div id="subunits-list" class="space-y-2">
+                    <!-- Dynamic list of subunits will be injected here -->
+                </div>
+            </div>
+            <div class="flex justify-end mt-4">
+                <button type="button" onclick="closeModal('subunit-modal')" class="px-3 py-1.5 text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Close</button>
             </div>
         </div>
     </div>
@@ -351,8 +397,8 @@
             <i data-lucide="alert-triangle" class="w-12 h-12 text-red-500 mx-auto mb-4"></i>
             <h3 id="confirmation-message" class="text-lg font-semibold mb-4"></h3>
             <div class="flex justify-center space-x-3">
-                <button id="cancel-confirm-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Cancel</button>
-                <button id="confirm-btn" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition">Confirm</button>
+                <button id="cancel-confirm-btn" class="px-3 py-1.5 text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Cancel</button>
+                <button id="confirm-btn" class="px-3 py-1.5 text-xs bg-red-500 text-white rounded-md hover:bg-red-600 transition">Confirm</button>
             </div>
         </div>
     </div>
@@ -372,51 +418,54 @@
 
     <script>
         const initialPracticals = [
-            // I. මිනුම් (Measurements)
-            { id: 1, unit: "මිනුම් (Measurements)", name: "වර්නියර් කැලිපරය භාවිතයෙන් මිනුම් ගැනීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 2, unit: "මිනුම් (Measurements)", name: "මයික්‍රෝමීටර ඉස්කුරුප්පු ආමානය භාවිතයෙන් මිනුම් ගැනීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 3, unit: "මිනුම් (Measurements)", name: "ගෝලමානය භාවිතයෙන් මිනුම් ගැනීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 4, unit: "මිනුම් (Measurements)", name: "සංචාරක අන්වීක්ෂය භාවිතයෙන් මිනුම් ගැනීම.", status: "pending", marks: null, date: "", notes: "" },
-            // II. යාන්ත්‍ර විද්‍යාව (Mechanics)
-            { id: 5, unit: "යාන්ත්‍ර විද්‍යාව (Mechanics)", name: "බල සමාන්තරාස්‍ර නියමය තහවුරු කිරීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 6, unit: "යාන්ත්‍ර විද්‍යාව (Mechanics)", name: "ඝූර්ණ මූලධර්මය භාවිතයෙන් වස්තුවක බර සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 7, unit: "යාන්ත්‍ර විද්‍යාව (Mechanics)", name: "U-නළය භාවිතයෙන් සාපේක්ෂ ඝනත්වය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 8, unit: "යාන්ත්‍ර විද්‍යාව (Mechanics)", name: "හේර්ගේ උපකරණය භාවිතයෙන් සාපේක්ෂ ඝනත්වය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 9, unit: "යාන්ත්‍ර විද්‍යාව (Mechanics)", name: "ඝනත්ව බෝතලයක් භාවිතයෙන් සාපේක්ෂ ඝනත්වය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            // III. දෝලන සහ තරංග (Oscillations and Waves)
-            { id: 10, unit: "දෝලන සහ තරංග (Oscillations and Waves)", name: "සරල අවලම්බයක් භාවිතයෙන් ගුරුත්වජ ත්වරණය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 11, unit: "දෝලන සහ තරංග (Oscillations and Waves)", name: "සර්පිලාකාර ස්ප්‍රිං එකක ස්ප්‍රිං නියතය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 12, unit: "දෝලන සහ තරංග (Oscillations and Waves)", name: "ඇද තැබූ තතක තීර්යක් තරංගවල ප්‍රවේගය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 13, unit: "දෝලන සහ තරංග (Oscillations and Waves)", name: "තරංගවල ගුණාංග තහවුරු කිරීම.", status: "pending", marks: null, date: "", notes: "" },
-            // IV. තාපය (Thermal Physics)
-            { id: 14, unit: "තාපය (Thermal Physics)", name: "ඝනයක විශිෂ්ට තාප ධාරිතාව සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 15, unit: "තාපය (Thermal Physics)", name: "ද්‍රවයක විශිෂ්ට තාප ධාරිතාව සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 16, unit: "තාපය (Thermal Physics)", name: "ජලයේ විශිෂ්ට ගුප්ත තාපය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 17, unit: "තාපය (Thermal Physics)", name: "වාතයේ සාපේක්ෂ ආර්ද්‍රතාව සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 18, unit: "තාපය (Thermal Physics)", name: "රබර්වල තාප සන්නායකතාව සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            // V. ආලෝකය (Geometrical Optics)
-            { id: 19, unit: "ආලෝකය (Geometrical Optics)", name: "උත්තල කාචයක නාභීය දුර සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 20, unit: "ආලෝකය (Geometrical Optics)", name: "අවතල දර්පණයක නාභීය දුර සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 21, unit: "ආලෝකය (Geometrical Optics)", name: "වීදුරු තලයක වර්තන අංකය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 22, unit: "ආලෝකය (Geometrical Optics)", name: "ප්‍රිස්ම කෝණය සහ අවම අපගමනය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 23, unit: "ආලෝකය (Geometrical Optics)", name: "වීදුරු-වායු තීරණාත්මක කෝණය සෙවීම.", status: "pending", marks: null, date: "" },
-            // VI. විද්‍යුතය සහ චුම්බකත්වය (Electricity and Magnetism)
-            { id: 24, unit: "විද්‍යුතය සහ චුම්බකත්වය (Electricity and Magnetism)", name: "වියළි කෝෂයක අභ්‍යන්තර ප්‍රතිරෝධය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 25, unit: "විද්‍යුතය සහ චුම්බකත්වය (Electricity and Magnetism)", name: "මීටර සේතුවක් භාවිතයෙන් නොදන්නා ප්‍රතිරෝධයක් සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 26, unit: "විද්‍යුතය සහ චුම්බකත්වය (Electricity and Magnetism)", name: "ලෝහයක ප්‍රතිරෝධයේ උෂ්ණත්ව සංගුණකය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 27, unit: "විද්‍යුතය සහ චුම්බකත්වය (Electricity and Magnetism)", name: "විද්‍යුත් ගාමක බලය සහ අභ්‍යන්තර ප්‍රතිරෝධය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 28, unit: "විද්‍යුතය සහ චුම්බකත්වය (Electricity and Magnetism)", name: "විද්‍යුත් විච්ඡේදනය භාවිතයෙන් තඹවල විද්‍යුත් රසායනික සමතුල්‍යතාව සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 29, unit: "විද්‍යුතය සහ චුම්බකත්වය (Electricity and Magnetism)", name: "දඟරයක ආත්ම ප්‍රේරණතාව (Self-inductance) සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
-            { id: 30, unit: "විද්‍යුතය සහ චුම්බකත්වය (Electricity and Magnetism)", name: "චුම්බක ක්ෂේත්‍රයක විද්‍යුත් ගාමක බලය සෙවීම.", status: "pending", marks: null, date: "", notes: "" }
+            // I. මිනුම්
+            { id: 1, unit: "මිනුම්", name: "වර්නියර් කැලිපරය භාවිතයෙන් මිනුම් ගැනීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 2, unit: "මිනුම්", name: "මයික්‍රෝමීටර ඉස්කුරුප්පු ආමානය භාවිතයෙන් මිනුම් ගැනීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 3, unit: "මිනුම්", name: "ගෝලමානය භාවිතයෙන් මිනුම් ගැනීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 4, unit: "මිනුම්", name: "සංචාරක අන්වීක්ෂය භාවිතයෙන් මිනුම් ගැනීම.", status: "pending", marks: null, date: "", notes: "" },
+            // II. යාන්ත්‍ර විද්‍යාව
+            { id: 5, unit: "යාන්ත්‍ර විද්‍යාව", name: "බල සමාන්තරාස්‍ර නියමය තහවුරු කිරීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 6, unit: "යාන්ත්‍ර විද්‍යාව", name: "ඝූර්ණ මූලධර්මය භාවිතයෙන් වස්තුවක බර සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 7, unit: "යාන්ත්‍ර විද්‍යාව", name: "U-නළය භාවිතයෙන් සාපේක්ෂ ඝනත්වය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 8, unit: "යාන්ත්‍ර විද්‍යාව", name: "හේර්ගේ උපකරණය භාවිතයෙන් සාපේක්ෂ ඝනත්වය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 9, unit: "යාන්ත්‍ර විද්‍යාව", name: "ඝනත්ව බෝතලයක් භාවිතයෙන් සාපේක්ෂ ඝනත්වය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            // III. දෝලන සහ තරංග
+            { id: 10, unit: "දෝලන සහ තරංග", name: "සරල අවලම්බයක් භාවිතයෙන් ගුරුත්වජ ත්වරණය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 11, unit: "දෝලන සහ තරංග", name: "සර්පිලාකාර ස්ප්‍රිං එකක ස්ප්‍රිං නියතය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 12, unit: "දෝලන සහ තරංග", name: "ඇද තැබූ තතක තීර්යක් තරංගවල ප්‍රවේගය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 13, unit: "දෝලන සහ තරංග", name: "තරංගවල ගුණාංග තහවුරු කිරීම.", status: "pending", marks: null, date: "", notes: "" },
+            // IV. තාපය
+            { id: 14, unit: "තාපය", name: "ඝනයක විශිෂ්ට තාප ධාරිතාව සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 15, unit: "තාපය", name: "ද්‍රවයක විශිෂ්ට තාප ධාරිතාව සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 16, unit: "තාපය", name: "ජලයේ විශිෂ්ට ගුප්ත තාපය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 17, unit: "තාපය", name: "වාතයේ සාපේක්ෂ ආර්ද්‍රතාව සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 18, unit: "තාපය", name: "රබර්වල තාප සන්නායකතාව සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            // V. ආලෝකය
+            { id: 19, unit: "ආලෝකය", name: "උත්තල කාචයක නාභීය දුර සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 20, unit: "ආලෝකය", name: "අවතල දර්පණයක නාභීය දුර සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 21, unit: "ආලෝකය", name: "වීදුරු තලයක වර්තන අංකය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 22, unit: "ආලෝකය", name: "ප්‍රිස්ම කෝණය සහ අවම අපගමනය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 23, unit: "ආලෝකය", name: "වීදුරු-වායු තීරණාත්මක කෝණය සෙවීම.", status: "pending", marks: null, date: "" },
+            // VI. විද්‍යුතය සහ චුම්බකත්වය
+            { id: 24, unit: "විද්‍යුතය සහ චුම්බකත්වය", name: "වියළි කෝෂයක අභ්‍යන්තර ප්‍රතිරෝධය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 25, unit: "විද්‍යුතය සහ චුම්බකත්වය", name: "මීටර සේතුවක් භාවිතයෙන් නොදන්නා ප්‍රතිරෝධයක් සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 26, unit: "විද්‍යුතය සහ චුම්බකත්වය", name: "ලෝහයක ප්‍රතිරෝධයේ උෂ්ණත්ව සංගුණකය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 27, unit: "විද්‍යුතය සහ චුම්බකත්වය", name: "විද්‍යුත් ගාමක බලය සහ අභ්‍යන්තර ප්‍රතිරෝධය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 28, unit: "විද්‍යුතය සහ චුම්බකත්වය", name: "විද්‍යුත් විච්ඡේදනය භාවිතයෙන් තඹවල විද්‍යුත් රසායනික සමතුල්‍යතාව සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 29, unit: "විද්‍යුතය සහ චුම්බකත්වය", name: "දඟරයක ආත්ම ප්‍රේරණතාව (Self-inductance) සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 30, unit: "විද්‍යුතය සහ චුම්බකත්වය", name: "චුම්බක ක්ෂේත්‍රයක විද්‍යුත් ගාමක බලය සෙවීම.", status: "pending", marks: null, date: "", notes: "" }
         ];
 
         let practicalsData = [];
         let equationsData = [];
         let lessonsData = [];
+        let subunitsData = [];
         let editingPracticalId = null;
         let editingEquationId = null;
         let currentFilter = 'all';
         let currentTab = 'home';
+        let lastSelectedUnit = null;
+        let lastSelectedSubunit = null;
         
         const headerContent = document.getElementById('header-content');
         const pages = document.querySelectorAll('.page');
@@ -427,6 +476,7 @@
         const practicalModal = document.getElementById('practical-modal');
         const equationModal = document.getElementById('equation-modal');
         const lessonsModal = document.getElementById('lessons-modal');
+        const subunitModal = document.getElementById('subunit-modal');
         const confirmationModal = document.getElementById('confirmation-modal');
         const offlineModal = document.getElementById('offline-modal');
         const practicalForm = document.getElementById('practical-form');
@@ -436,7 +486,7 @@
         const practicalUnitSelect = document.getElementById('practical-unit');
         const practicalNameInput = document.getElementById('practical-name');
         const equationUnitSelect = document.getElementById('equation-unit');
-        const equationSubunitInput = document.getElementById('equation-subunit');
+        const equationSubunitSelect = document.getElementById('equation-subunit');
         const equationNameInput = document.getElementById('equation-name');
         const equationFormulaInput = document.getElementById('equation-formula');
         const darkModeToggle = document.getElementById('dark-mode-toggle');
@@ -444,13 +494,19 @@
         const lessonsListContainer = document.getElementById('lessons-list');
         const newLessonNameInput = document.getElementById('new-lesson-name');
         const addLessonForm = document.getElementById('add-lesson-form');
-
+        const subunitsListContainer = document.getElementById('subunits-list');
+        const newSubunitNameInput = document.getElementById('new-subunit-name');
+        const addSubunitForm = document.getElementById('add-subunit-form');
+        const subunitUnitSelect = document.getElementById('subunit-unit');
+        const deletePracticalBtn = document.getElementById('delete-practical-btn');
+        let editingLessonId = null;
 
         // --- Data Persistence ---
         function saveData() {
             localStorage.setItem('physicsPracticals', JSON.stringify(practicalsData));
             localStorage.setItem('physicsEquations', JSON.stringify(equationsData));
             localStorage.setItem('physicsLessons', JSON.stringify(lessonsData));
+            localStorage.setItem('physicsSubunits', JSON.stringify(subunitsData));
         }
 
         function loadData() {
@@ -475,15 +531,27 @@
                  // Initialize lessons from initial practicals and new list
                 const initialLessonSet = new Set([
                     ...initialPracticals.map(p => p.unit),
-                    "ගුරුත්වාකර්ෂණ ක්ෂේත්‍ර (Gravitational Fields)",
-                    "ස්ථිති විද්‍යුත් ක්ෂේත්‍ර (Electrostatic Fields)",
-                    "චුම්බක ක්ෂේත්‍ර (Magnetic Fields)",
-                    "ධාරා විද්‍යුතය (Current Electricity)",
-                    "ඉලෙක්ට්‍රොනික විද්‍යාව (Electronics)",
-                    "පදාර්ථයේ යාන්ත්‍රික ගුණ (Mechanical Properties of Matter)",
-                    "පදාර්ථය සහ විකිරණ (Matter and Radiation)",
+                    "ගුරුත්වාකර්ෂණ ක්ෂේත්‍ර",
+                    "ස්ථිති විද්‍යුත් ක්ෂේත්‍ර",
+                    "චුම්බක ක්ෂේත්‍ර",
+                    "ධාරා විද්‍යුතය",
+                    "ඉලෙක්ට්‍රොනික විද්‍යාව",
+                    "පදාර්ථයේ යාන්ත්‍රික ගුණ",
+                    "පදාර්ථය සහ විකිරණ",
                 ]);
                 lessonsData = Array.from(initialLessonSet).map((unit, index) => ({ id: index + 1, name: unit }));
+            }
+
+            const savedSubunits = localStorage.getItem('physicsSubunits');
+            if (savedSubunits) {
+                subunitsData = JSON.parse(savedSubunits);
+            } else {
+                subunitsData = [
+                    { id: 1, name: "සරල අවලම්බක", parentUnit: "දෝලන සහ තරංග" },
+                    { id: 2, name: "සර්පිලාකාර ස්ප්‍රිං", parentUnit: "දෝලන සහ තරංග" },
+                    { id: 3, name: "තාප ධාරිතාව", parentUnit: "තාපය" },
+                    { id: 4, name: "තාප සන්නායකතාව", parentUnit: "තාපය" },
+                ];
             }
         }
 
@@ -508,7 +576,8 @@
             modalSubmitBtn.textContent = "Add Practical";
             practicalUnitSelect.value = lessonsData.length > 0 ? lessonsData[0].name : '';
             practicalNameInput.value = "";
-            populateLessonDropdowns();
+            populateLessonDropdowns(practicalUnitSelect);
+            deletePracticalBtn.style.display = 'none';
             openModal('practical-modal');
         }
         
@@ -517,25 +586,28 @@
             const modalTitle = document.getElementById('equation-modal-title');
             const submitBtn = document.getElementById('equation-modal-submit-btn');
             
+            populateLessonDropdowns(equationUnitSelect);
+
             if (id) {
                 const equation = equationsData.find(e => e.id === id);
                 if (equation) {
                     modalTitle.textContent = "Edit Equation";
                     submitBtn.textContent = "Save Changes";
                     equationUnitSelect.value = equation.unit;
-                    equationSubunitInput.value = equation.subunit || "";
+                    populateSubunitDropdowns(equation.unit);
+                    equationSubunitSelect.value = equation.subunit || "";
                     equationNameInput.value = equation.name;
                     equationFormulaInput.value = equation.formula;
                 }
             } else {
                 modalTitle.textContent = "Add New Equation";
                 submitBtn.textContent = "Add Equation";
-                equationUnitSelect.value = lessonsData.length > 0 ? lessonsData[0].name : '';
-                equationSubunitInput.value = "";
+                equationUnitSelect.value = lastSelectedUnit || (lessonsData.length > 0 ? lessonsData[0].name : '');
+                populateSubunitDropdowns(equationUnitSelect.value);
+                equationSubunitSelect.value = lastSelectedSubunit || '';
                 equationNameInput.value = "";
                 equationFormulaInput.value = "";
             }
-            populateLessonDropdowns();
             openModal('equation-modal');
         }
 
@@ -547,7 +619,9 @@
                 modalSubmitBtn.textContent = "Save Changes";
                 practicalUnitSelect.value = practical.unit;
                 practicalNameInput.value = practical.name;
-                populateLessonDropdowns();
+                populateLessonDropdowns(practicalUnitSelect);
+                deletePracticalBtn.style.display = 'inline-block';
+                deletePracticalBtn.setAttribute('onclick', `showConfirmationModal('Are you sure you want to delete this practical?', () => deletePractical(${id}))`);
                 openModal('practical-modal');
             }
         }
@@ -555,6 +629,15 @@
         function openLessonsModal() {
             renderLessonsList();
             openModal('lessons-modal');
+        }
+
+        function openAddSubunitModal(parentUnit = null) {
+            populateLessonDropdowns(subunitUnitSelect);
+            if (parentUnit) {
+                 subunitUnitSelect.value = parentUnit;
+            }
+            renderSubunitsList(subunitUnitSelect.value);
+            openModal('subunit-modal');
         }
 
         function switchTab(tabName) {
@@ -769,30 +852,164 @@
             lessonsData.forEach(lesson => {
                 const lessonItem = document.createElement('div');
                 lessonItem.className = 'flex justify-between items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg';
-                lessonItem.innerHTML = `
-                    <span class="font-medium">${lesson.name}</span>
-                    <button onclick="deleteLesson(${lesson.id})" class="p-1 rounded-full text-red-500 hover:bg-red-200 dark:hover:bg-red-800/50 transition">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
+                
+                let contentHtml = `
+                    <div class="editable-name-container">
+                        <span class="font-medium lesson-name" data-id="${lesson.id}">${lesson.name}</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                         <button onclick="openAddSubunitModal('${lesson.name}')" class="p-1 rounded-full text-blue-500 hover:bg-blue-200 dark:hover:bg-blue-800/50 transition">
+                            <i data-lucide="folder-plus" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="editLesson(${lesson.id})" class="p-1 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 transition edit-btn">
+                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="deleteLesson(${lesson.id})" class="p-1 rounded-full text-red-500 hover:bg-red-200 dark:hover:bg-red-800/50 transition">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
                 `;
+                
+                lessonItem.innerHTML = contentHtml;
                 lessonsListContainer.appendChild(lessonItem);
             });
             lucide.createIcons();
         }
         
-        function populateLessonDropdowns() {
-            practicalUnitSelect.innerHTML = '';
-            equationUnitSelect.innerHTML = '';
-            if (lessonsData.length === 0) {
-                const placeholderOption = `<option value="">No lessons available</option>`;
-                practicalUnitSelect.innerHTML = placeholderOption;
-                equationUnitSelect.innerHTML = placeholderOption;
+        function editLesson(id) {
+            const lessonItem = lessonsListContainer.querySelector(`.lesson-name[data-id="${id}"]`);
+            if (!lessonItem) return;
+
+            const lesson = lessonsData.find(l => l.id === id);
+            if (!lesson) return;
+
+            editingLessonId = id;
+            const originalName = lesson.name;
+            
+            const parentDiv = lessonItem.closest('.flex.justify-between');
+            const editBtn = parentDiv.querySelector('.edit-btn');
+            const deleteBtn = parentDiv.querySelector('button[onclick*="deleteLesson"]');
+            const addSubunitBtn = parentDiv.querySelector('button[onclick*="openAddSubunitModal"]');
+
+            // Hide the "add subunit" icon when editing
+            if (addSubunitBtn) {
+                addSubunitBtn.style.display = 'none';
+            }
+            
+            // Create input field
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = originalName;
+            input.className = 'flex-grow bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm sm:text-sm p-2 editable-input';
+            
+            // Replace span with input
+            const nameContainer = parentDiv.querySelector('.editable-name-container');
+            nameContainer.innerHTML = '';
+            nameContainer.appendChild(input);
+            input.focus();
+
+            // Change buttons
+            editBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-green-500"></i>';
+            editBtn.onclick = () => saveLessonName(id, input.value, originalName);
+            
+            const cancelBtn = document.createElement('button');
+            cancelBtn.innerHTML = '<i data-lucide="x" class="w-4 h-4 text-red-500"></i>';
+            cancelBtn.className = 'p-1 rounded-full text-red-500 hover:bg-red-200 dark:hover:bg-red-800/50 transition cancel-btn';
+            cancelBtn.onclick = () => cancelEditLesson(id, originalName);
+            
+            editBtn.parentNode.insertBefore(cancelBtn, editBtn);
+            deleteBtn.style.display = 'none';
+
+            lucide.createIcons();
+        }
+        
+        function saveLessonName(id, newName, originalName) {
+            const lesson = lessonsData.find(l => l.id === id);
+            if (!lesson || newName.trim() === '') {
+                 showInfoModal('Lesson name cannot be empty.');
+                 cancelEditLesson(id, originalName);
+                 return;
+            }
+            const isDuplicate = lessonsData.some(l => l.name === newName.trim() && l.id !== id);
+            if (isDuplicate) {
+                showInfoModal('A lesson with this name already exists.');
+                cancelEditLesson(id, originalName);
                 return;
             }
+
+            // Update practicals and equations with the old lesson name
+            practicalsData.forEach(p => {
+                if (p.unit === originalName) {
+                    p.unit = newName.trim();
+                }
+            });
+            equationsData.forEach(e => {
+                if (e.unit === originalName) {
+                    e.unit = newName.trim();
+                }
+            });
+            subunitsData.forEach(s => {
+                 if (s.parentUnit === originalName) {
+                     s.parentUnit = newName.trim();
+                 }
+            });
+            
+            lesson.name = newName.trim();
+            saveData();
+            refreshAllViews();
+            renderLessonsList(); // Re-render the lesson list to show the updated name
+            showInfoModal('Lesson name updated successfully!');
+            editingLessonId = null;
+        }
+
+        function cancelEditLesson(id, originalName) {
+            const lesson = lessonsData.find(l => l.id === id);
+            if (lesson) {
+                lesson.name = originalName;
+            }
+            renderLessonsList();
+            editingLessonId = null;
+        }
+
+        function renderSubunitsList(parentUnit) {
+            subunitsListContainer.innerHTML = '';
+            const filteredSubunits = subunitsData.filter(s => s.parentUnit === parentUnit);
+            if (filteredSubunits.length === 0) {
+                subunitsListContainer.innerHTML = `<div class="text-center py-4 text-gray-400">No subunits for this unit yet.</div>`;
+                return;
+            }
+            filteredSubunits.forEach(subunit => {
+                const subunitItem = document.createElement('div');
+                subunitItem.className = 'flex justify-between items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg';
+                subunitItem.innerHTML = `
+                    <span class="font-medium">${subunit.name}</span>
+                    <button onclick="deleteSubunit(${subunit.id})" class="p-1 rounded-full text-red-500 hover:bg-red-200 dark:hover:bg-red-800/50 transition">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                `;
+                subunitsListContainer.appendChild(subunitItem);
+            });
+            lucide.createIcons();
+        }
+        
+        function populateLessonDropdowns(selectElement) {
+            selectElement.innerHTML = '';
             lessonsData.forEach(lesson => {
                 const option = `<option value="${lesson.name}">${lesson.name}</option>`;
-                practicalUnitSelect.innerHTML += option;
-                equationUnitSelect.innerHTML += option;
+                selectElement.innerHTML += option;
+            });
+            if (lessonsData.length === 0) {
+                 const placeholderOption = `<option value="">No lessons available</option>`;
+                 selectElement.innerHTML = placeholderOption;
+            }
+        }
+        
+        function populateSubunitDropdowns(parentUnit) {
+            equationSubunitSelect.innerHTML = '<option value="">(None)</option>';
+            const filteredSubunits = subunitsData.filter(s => s.parentUnit === parentUnit);
+            filteredSubunits.forEach(subunit => {
+                const option = `<option value="${subunit.name}">${subunit.name}</option>`;
+                equationSubunitSelect.innerHTML += option;
             });
         }
 
@@ -890,7 +1107,7 @@
         equationForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const newUnit = equationUnitSelect.value;
-            const newSubunit = equationSubunitInput.value.trim();
+            const newSubunit = equationSubunitSelect.value.trim();
             const newName = equationNameInput.value;
             const newFormula = equationFormulaInput.value;
             
@@ -898,6 +1115,9 @@
                 showInfoModal('Equation Name is required.');
                 return;
             }
+            
+            lastSelectedUnit = newUnit;
+            lastSelectedSubunit = newSubunit;
 
             if (editingEquationId !== null) {
                 const equation = equationsData.find(e => e.id === editingEquationId);
@@ -935,12 +1155,32 @@
                     lessonsData.push({ id: newId, name: newLessonName });
                     saveData();
                     renderLessonsList();
-                    populateLessonDropdowns();
+                    populateLessonDropdowns(practicalUnitSelect);
+                    populateLessonDropdowns(equationUnitSelect);
                     showInfoModal("Lesson added successfully!");
                 } else {
                     showInfoModal("Lesson already exists.");
                 }
                 newLessonNameInput.value = '';
+            }
+        });
+
+        addSubunitForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newSubunitName = newSubunitNameInput.value.trim();
+            const parentUnit = subunitUnitSelect.value;
+            if (newSubunitName && parentUnit) {
+                if (!subunitsData.find(subunit => subunit.name === newSubunitName && subunit.parentUnit === parentUnit)) {
+                    const newId = subunitsData.length > 0 ? Math.max(...subunitsData.map(s => s.id), 0) + 1 : 1;
+                    subunitsData.push({ id: newId, name: newSubunitName, parentUnit: parentUnit });
+                    saveData();
+                    renderSubunitsList(parentUnit);
+                    populateSubunitDropdowns(equationUnitSelect.value);
+                    showInfoModal("Subunit added successfully!");
+                } else {
+                    showInfoModal("Subunit already exists for this unit.");
+                }
+                newSubunitNameInput.value = '';
             }
         });
         
@@ -949,11 +1189,30 @@
                 lessonsData = lessonsData.filter(l => l.id !== id);
                 saveData();
                 renderLessonsList();
-                populateLessonDropdowns();
+                populateLessonDropdowns(practicalUnitSelect);
+                populateLessonDropdowns(equationUnitSelect);
                 showInfoModal("Lesson deleted successfully!");
             });
         }
         
+        function deleteSubunit(id) {
+            showConfirmationModal('Are you sure you want to delete this subunit? Equations under this subunit will remain, but will not have a valid subunit associated.', () => {
+                subunitsData = subunitsData.filter(s => s.id !== id);
+                saveData();
+                renderSubunitsList(subunitUnitSelect.value);
+                populateSubunitDropdowns(equationUnitSelect.value);
+                showInfoModal("Subunit deleted successfully!");
+            });
+        }
+
+        function deletePractical(id) {
+            practicalsData = practicalsData.filter(p => p.id !== id);
+            saveData();
+            refreshAllViews();
+            closeModal('practical-modal');
+            showInfoModal("Practical deleted successfully!");
+        }
+
         function deleteEquation(id) {
             showConfirmationModal('Are you sure you want to delete this equation?', () => {
                 equationsData = equationsData.filter(e => e.id !== id);
@@ -975,6 +1234,9 @@
                         }
                         if(importedData.lessons && Array.isArray(importedData.lessons)) {
                              lessonsData = importedData.lessons;
+                        }
+                        if(importedData.subunits && Array.isArray(importedData.subunits)) {
+                             subunitsData = importedData.subunits;
                         }
                         saveData();
                         refreshAllViews();
@@ -1001,6 +1263,7 @@
             localStorage.removeItem('physicsPracticals');
             localStorage.removeItem('physicsEquations');
             localStorage.removeItem('physicsLessons');
+            localStorage.removeItem('physicsSubunits');
             loadData();
             refreshAllViews();
             showInfoModal('All data has been reset.');
@@ -1010,7 +1273,8 @@
             const combinedData = {
                 practicals: practicalsData,
                 equations: equationsData,
-                lessons: lessonsData
+                lessons: lessonsData,
+                subunits: subunitsData
             };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(combinedData, null, 2));
             const downloadAnchorNode = document.createElement('a');
@@ -1025,7 +1289,9 @@
             updateHomePage();
             renderPracticalsList();
             updateProgressPage();
-            populateLessonDropdowns();
+            populateLessonDropdowns(practicalUnitSelect);
+            populateLessonDropdowns(equationUnitSelect);
+            populateSubunitDropdowns(equationUnitSelect.value);
         }
         
         // Custom Confirmation Modal
@@ -1107,6 +1373,14 @@
             }
             filterPracticals(currentFilter);
         }
+        
+        equationUnitSelect.addEventListener('change', (e) => {
+            populateSubunitDropdowns(e.target.value);
+        });
+
+        subunitUnitSelect.addEventListener('change', (e) => {
+            renderSubunitsList(e.target.value);
+        });
 
         darkModeToggle.addEventListener('change', () => {
             const isDark = darkModeToggle.checked;
@@ -1125,7 +1399,7 @@
             filterPracticals('all');
             switchTab('home');
 
-            [practicalModal, equationModal, lessonsModal, confirmationModal, offlineModal].forEach(modal => {
+            [practicalModal, equationModal, lessonsModal, subunitModal, confirmationModal, offlineModal].forEach(modal => {
                 modal.addEventListener('click', (e) => {
                     if (e.target === modal) {
                         closeModal(modal.id);
