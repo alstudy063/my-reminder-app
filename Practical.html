@@ -1500,8 +1500,9 @@
             filterPracticals('all');
             switchTab('home');
 
+            // Corrected and safer way to add event listeners to modals
             [practicalModal, equationModal, lessonsModal, subunitModal, confirmationModal, offlineModal, pasteDataModal].forEach(modal => {
-                if (modal) {
+                if (modal) { // This check prevents errors if a modal element is not found
                     modal.addEventListener('click', (e) => {
                         if (e.target === modal) {
                             closeModal(modal.id);
@@ -1523,13 +1524,23 @@
                 showOfflineMessage();
             }
 
+            // This prevents copying text from the body, which might be too restrictive.
+            // You can remove this if you want to allow text selection and copying.
             document.body.addEventListener('copy', (e) => {
+                // Allow copying from input fields and textareas
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    return;
+                }
                 e.preventDefault();
             });
             document.body.addEventListener('cut', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    return;
+                }
                 e.preventDefault();
             });
         });
     </script>
 </body>
 </html>
+
