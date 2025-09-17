@@ -223,11 +223,17 @@
                            <i data-lucide="book-open-check"></i>
                            <span>පාඩම් කළමනාකරණය (Manage Lessons)</span>
                         </button>
-                        <label for="import-data-file" class="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex items-center space-x-3 cursor-pointer">
-                            <i data-lucide="upload"></i>
-                            <span>දත්ත ආනයනය කරන්න (JSON)</span>
-                        </label>
-                        <input type="file" id="import-data-file" accept=".json" class="hidden">
+                        <div class="flex items-center space-x-2 w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition cursor-pointer">
+                            <label for="import-data-file" class="flex items-center space-x-3 w-full cursor-pointer">
+                                <i data-lucide="upload"></i>
+                                <span>දත්ත ආනයනය කරන්න (JSON)</span>
+                            </label>
+                            <input type="file" id="import-data-file" accept=".json" class="hidden">
+                        </div>
+                        <button onclick="shareData()" class="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex items-center space-x-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-share-2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
+                            <span>Share Data (JSON)</span>
+                        </button>
                         <button onclick="exportData()" class="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex items-center space-x-3">
                             <i data-lucide="download"></i>
                             <span>Export Data (JSON)</span>
@@ -890,7 +896,7 @@
             const editBtn = parentDiv.querySelector('.edit-btn');
             const deleteBtn = parentDiv.querySelector('button[onclick*="deleteLesson"]');
             const addSubunitBtn = parentDiv.querySelector('button[onclick*="openAddSubunitModal"]');
-
+            
             // Hide the "add subunit" icon when editing
             if (addSubunitBtn) {
                 addSubunitBtn.style.display = 'none';
@@ -1258,6 +1264,31 @@
                 importData(file);
             }
         });
+
+        function shareData() {
+            if (navigator.share) {
+                const combinedData = {
+                    practicals: practicalsData,
+                    equations: equationsData,
+                    lessons: lessonsData,
+                    subunits: subunitsData
+                };
+                const file = new Blob([JSON.stringify(combinedData, null, 2)], { type: 'application/json' });
+                const data = {
+                    files: [new File([file], 'physics_tracker_data.json', { type: file.type })],
+                    title: 'Physics Practical & Equation Tracker Backup',
+                    text: 'Here is a backup of my physics practicals and equations data.'
+                };
+                navigator.share(data).then(() => {
+                    console.log('Data shared successfully');
+                }).catch((error) => {
+                    console.error('Error sharing data', error);
+                    showInfoModal('Sharing failed. Your browser might not support this feature or an error occurred.');
+                });
+            } else {
+                showInfoModal('Sharing is not supported on this device or browser. Please use the "Export Data" option instead.');
+            }
+        }
 
         function resetData() {
             localStorage.removeItem('physicsPracticals');
