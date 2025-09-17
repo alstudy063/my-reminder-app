@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Practical Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --background-light: #f3f4f6;
+            --card-light: #ffffff;
+            --text-light: #1f2937;
+            --text-muted-light: #6b7280;
+            --border-light: #e5e7eb;
+
+            --background-dark: #111827;
+            --card-dark: #1f2937;
+            --text-dark: #f9fafb;
+            --text-muted-dark: #9ca3af;
+            --border-dark: #374151;
+        }
+
+        html.dark {
+            color-scheme: dark;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+            -webkit-user-select: none;  /* Safari */
+            -moz-user-select: none;     /* Firefox */
+            -ms-user-select: none;      /* IE/Edge */
+            user-select: none;          /* Non-prefixed version */
+        }
+
+        .page {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .page.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .bottom-nav-btn {
+            transition: color 0.3s, transform 0.2s;
+        }
+        
+        .bottom-nav-btn.active svg,
+        .bottom-nav-btn.active span {
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Custom scrollbar for better look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.4);
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .filter-btn {
+            transition: background-color 0.3s, color 0.3s, transform 0.2s;
+        }
+        .filter-btn:hover {
+            transform: translateY(-1px);
+        }
+        .filter-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+
+    <div id="app-container" class="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+        
+        <!-- Header -->
+        <header class="p-5 bg-white dark:bg-gray-800 sticky top-0 z-10 border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
+            <h1 id="header-title" class="text-xl font-bold text-center text-gray-800 dark:text-gray-200">Home</h1>
+        </header>
+
+        <!-- Main content with padding at the bottom for the fixed nav -->
+        <main class="p-5 pb-24">
+            <!-- Home Page -->
+            <div id="home-page" class="page active max-w-2xl mx-auto">
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-xl mb-6 border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-lg font-bold mb-4">Progress Summary</h2>
+                    <div class="relative pt-1 mb-4">
+                        <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200 dark:bg-gray-700">
+                            <div id="progress-bar" style="width:0%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500 rounded"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center text-sm font-semibold">
+                        <span id="progress-text-count" class="text-blue-500">0/30</span>
+                        <span id="progress-text-percent" class="text-gray-500 dark:text-gray-400">0%</span>
+                    </div>
+                </div>
+
+                <div id="up-next-section" class="max-w-2xl mx-auto">
+                    <h3 class="font-bold text-lg mb-2">Up Next</h3>
+                    <div id="up-next-practical" class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                        <!-- Dynamic content here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Practicals Page -->
+            <div id="practicals-page" class="page max-w-2xl mx-auto">
+                <div class="flex flex-wrap gap-2 mb-4 justify-between items-center">
+                     <div class="flex-grow flex gap-2 overflow-x-auto pb-2">
+                        <button onclick="filterPracticals('all')" class="filter-btn px-4 py-2 rounded-full text-sm font-semibold">All</button>
+                        <button onclick="filterPracticals('pending')" class="filter-btn px-4 py-2 rounded-full text-sm font-semibold">Pending</button>
+                        <button onclick="filterPracticals('completed')" class="filter-btn px-4 py-2 rounded-full text-sm font-semibold">Completed</button>
+                    </div>
+                    <button onclick="openAddPracticalModal()" class="flex-shrink-0 bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div id="practicals-list" class="space-y-4">
+                    <!-- Dynamic content will be injected here -->
+                </div>
+            </div>
+
+            <!-- Progress Page -->
+            <div id="progress-page" class="page max-w-2xl mx-auto">
+                 <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-xl mb-6 text-center border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-lg font-bold">Overall Performance</h2>
+                    <p class="text-4xl font-extrabold text-blue-500 mt-2" id="average-score">N/A</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Average Score</p>
+                </div>
+                <h3 class="font-bold text-lg mb-2">Completed Practicals</h3>
+                <div id="completed-list" class="space-y-4">
+                   <!-- Dynamic list of completed practicals -->
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settings-page" class="page max-w-2xl mx-auto">
+                <div class="space-y-4">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700">
+                        <h3 class="font-bold mb-2">Appearance</h3>
+                        <div class="flex justify-between items-center">
+                            <span>Dark Mode</span>
+                            <label for="dark-mode-toggle" class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="dark-mode-toggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700">
+                        <h3 class="font-bold mb-2">Data Management</h3>
+                        <label for="import-data-file" class="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex items-center space-x-3 cursor-pointer">
+                            <i data-lucide="upload"></i>
+                            <span>දත්ත ආනයනය කරන්න (JSON)</span>
+                        </label>
+                        <input type="file" id="import-data-file" accept=".json" class="hidden">
+                        <button onclick="exportData()" class="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex items-center space-x-3">
+                            <i data-lucide="download"></i>
+                            <span>Export Data (JSON)</span>
+                        </button>
+                        <button onclick="showConfirmationModal('Are you sure you want to reset all data?', resetData)" class="w-full text-left p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/50 rounded-lg transition flex items-center space-x-3 mt-2">
+                           <i data-lucide="trash-2"></i>
+                           <span>Reset All Data</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 w-full bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex justify-around p-3 shadow-top rounded-t-xl transition-colors duration-300">
+        <button onclick="switchTab('home')" class="bottom-nav-btn active flex flex-col items-center text-gray-500 dark:text-gray-400 w-1/4">
+            <i data-lucide="home" class="w-6 h-6"></i>
+            <span class="text-xs mt-1 font-semibold">Home</span>
+        </button>
+        <button onclick="switchTab('practicals')" class="bottom-nav-btn flex flex-col items-center text-gray-500 dark:text-gray-400 w-1/4">
+            <i data-lucide="flask-conical" class="w-6 h-6"></i>
+            <span class="text-xs mt-1 font-semibold">Practicals</span>
+        </button>
+        <button onclick="switchTab('progress')" class="bottom-nav-btn flex flex-col items-center text-gray-500 dark:text-gray-400 w-1/4">
+            <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+            <span class="text-xs mt-1 font-semibold">Progress</span>
+        </button>
+        <button onclick="switchTab('settings')" class="bottom-nav-btn flex flex-col items-center text-gray-500 dark:text-gray-400 w-1/4">
+            <i data-lucide="settings" class="w-6 h-6"></i>
+            <span class="text-xs mt-1 font-semibold">Settings</span>
+        </button>
+    </nav>
+    
+    <!-- Add/Edit Practical Modal -->
+    <div id="practical-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto transform scale-95 opacity-0 transition-all duration-300">
+            <h2 id="modal-title" class="text-lg font-bold mb-4"></h2>
+            <form id="practical-form">
+                <div class="mb-4">
+                    <label for="practical-unit" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Unit Name</label>
+                    <input type="text" id="practical-unit" name="unit" required class="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2" placeholder="e.g., යාන්ත්‍ර විද්‍යාව">
+                </div>
+                <div class="mb-4">
+                    <label for="practical-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Practical Name</label>
+                    <input type="text" id="practical-name" name="name" required class="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2" placeholder="e.g., ගුරුත්වජ ත්වරණය සෙවීම">
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('practical-modal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Cancel</button>
+                    <button id="modal-submit-btn" type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Custom Confirmation Modal -->
+    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto text-center transform scale-95 opacity-0 transition-all duration-300">
+            <i data-lucide="alert-triangle" class="w-12 h-12 text-red-500 mx-auto mb-4"></i>
+            <h3 id="confirmation-message" class="text-lg font-semibold mb-4"></h3>
+            <div class="flex justify-center space-x-3">
+                <button id="cancel-confirm-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Cancel</button>
+                <button id="confirm-btn" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const initialPracticals = [
+            // I. මිනුම් (Measurements)
+            { id: 1, unit: "මිනුම් (Measurements)", name: "වර්නියර් කැලිපරය භාවිතයෙන් මිනුම් ගැනීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 2, unit: "මිනුම් (Measurements)", name: "මයික්‍රෝමීටර ඉස්කුරුප්පු ආමානය භාවිතයෙන් මිනුම් ගැනීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 3, unit: "මිනුම් (Measurements)", name: "ගෝලමානය භාවිතයෙන් මිනුම් ගැනීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 4, unit: "මිනුම් (Measurements)", name: "සංචාරක අන්වීක්ෂය භාවිතයෙන් මිනුම් ගැනීම.", status: "pending", marks: null, date: "", notes: "" },
+            // II. යාන්ත්‍ර විද්‍යාව (Mechanics)
+            { id: 5, unit: "යාන්ත්‍ර විද්‍යාව (Mechanics)", name: "බල සමාන්තරාස්‍ර නියමය තහවුරු කිරීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 6, unit: "යාන්ත්‍ර විද්‍යාව (Mechanics)", name: "ඝූර්ණ මූලධර්මය භාවිතයෙන් වස්තුවක බර සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 7, unit: "යාන්ත්‍ර විද්‍යාව (Mechanics)", name: "U-නළය භාවිතයෙන් සාපේක්ෂ ඝනත්වය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 8, unit: "යාන්ත්‍ර විද්‍යාව (Mechanics)", name: "හේර්ගේ උපකරණය භාවිතයෙන් සාපේක්ෂ ඝනත්වය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 9, unit: "යාන්ත්‍ර විද්‍යාව (Mechanics)", name: "ඝනත්ව බෝතලයක් භාවිතයෙන් සාපේක්ෂ ඝනත්වය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            // III. දෝලන සහ තරංග (Oscillations and Waves)
+            { id: 10, unit: "දෝලන සහ තරංග (Oscillations and Waves)", name: "සරල අවලම්බයක් භාවිතයෙන් ගුරුත්වජ ත්වරණය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 11, unit: "දෝලන සහ තරංග (Oscillations and Waves)", name: "සර්පිලාකාර ස්ප්‍රිං එකක ස්ප්‍රිං නියතය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 12, unit: "දෝලන සහ තරංග (Oscillations and Waves)", name: "ඇද තැබූ තතක තීර්යක් තරංගවල ප්‍රවේගය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 13, unit: "දෝලන සහ තරංග (Oscillations and Waves)", name: "තරංගවල ගුණාංග තහවුරු කිරීම.", status: "pending", marks: null, date: "", notes: "" },
+            // IV. තාපය (Thermal Physics)
+            { id: 14, unit: "තාපය (Thermal Physics)", name: "ඝනයක විශිෂ්ට තාප ධාරිතාව සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 15, unit: "තාපය (Thermal Physics)", name: "ද්‍රවයක විශිෂ්ට තාප ධාරිතාව සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 16, unit: "තාපය (Thermal Physics)", name: "ජලයේ විශිෂ්ට ගුප්ත තාපය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 17, unit: "තාපය (Thermal Physics)", name: "වාතයේ සාපේක්ෂ ආර්ද්‍රතාව සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 18, unit: "තාපය (Thermal Physics)", name: "රබර්වල තාප සන්නායකතාව සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            // V. ආලෝකය (Geometrical Optics)
+            { id: 19, unit: "ආලෝකය (Geometrical Optics)", name: "උත්තල කාචයක නාභීය දුර සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 20, unit: "ආලෝකය (Geometrical Optics)", name: "අවතල දර්පණයක නාභීය දුර සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 21, unit: "ආලෝකය (Geometrical Optics)", name: "වීදුරු තලයක වර්තන අංකය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 22, unit: "ආලෝකය (Geometrical Optics)", name: "ප්‍රිස්ම කෝණය සහ අවම අපගමනය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 23, unit: "ආලෝකය (Geometrical Optics)", name: "වීදුරු-වායු තීරණාත්මක කෝණය සෙවීම.", status: "pending", marks: null, date: "" },
+            // VI. විද්‍යුතය සහ චුම්බකත්වය (Electricity and Magnetism)
+            { id: 24, unit: "විද්‍යුතය සහ චුම්බකත්වය (Electricity and Magnetism)", name: "වියළි කෝෂයක අභ්‍යන්තර ප්‍රතිරෝධය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 25, unit: "විද්‍යුතය සහ චුම්බකත්වය (Electricity and Magnetism)", name: "මීටර සේතුවක් භාවිතයෙන් නොදන්නා ප්‍රතිරෝධයක් සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 26, unit: "විද්‍යුතය සහ චුම්බකත්වය (Electricity and Magnetism)", name: "ලෝහයක ප්‍රතිරෝධයේ උෂ්ණත්ව සංගුණකය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 27, unit: "විද්‍යුතය සහ චුම්බකත්වය (Electricity and Magnetism)", name: "විද්‍යුත් ගාමක බලය සහ අභ්‍යන්තර ප්‍රතිරෝධය සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 28, unit: "විද්‍යුතය සහ චුම්බකත්වය (Electricity and Magnetism)", name: "විද්‍යුත් විච්ඡේදනය භාවිතයෙන් තඹවල විද්‍යුත් රසායනික සමතුල්‍යතාව සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 29, unit: "විද්‍යුතය සහ චුම්බකත්වය (Electricity and Magnetism)", name: "දඟරයක ආත්ම ප්‍රේරණතාව (Self-inductance) සෙවීම.", status: "pending", marks: null, date: "", notes: "" },
+            { id: 30, unit: "විද්‍යුතය සහ චුම්බකත්වය (Electricity and Magnetism)", name: "චුම්බක ක්ෂේත්‍රයක විද්‍යුත් ගාමක බලය සෙවීම.", status: "pending", marks: null, date: "", notes: "" }
+        ];
+
+        let practicalsData = [];
+        let editingPracticalId = null;
+
+        // App State
+        let currentTab = 'home';
+        let currentFilter = 'all';
+
+        // DOM Elements
+        const headerTitle = document.getElementById('header-title');
+        const pages = document.querySelectorAll('.page');
+        const navButtons = document.querySelectorAll('.bottom-nav-btn');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const practicalsListContainer = document.getElementById('practicals-list');
+        const practicalModal = document.getElementById('practical-modal');
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const practicalForm = document.getElementById('practical-form');
+        const modalTitle = document.getElementById('modal-title');
+        const modalSubmitBtn = document.getElementById('modal-submit-btn');
+        const practicalUnitInput = document.getElementById('practical-unit');
+        const practicalNameInput = document.getElementById('practical-name');
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const importDataFile = document.getElementById('import-data-file');
+        
+        function saveData() {
+            localStorage.setItem('physicsPracticals', JSON.stringify(practicalsData));
+        }
+
+        function loadData() {
+            const savedData = localStorage.getItem('physicsPracticals');
+            if (savedData) {
+                practicalsData = JSON.parse(savedData);
+            } else {
+                practicalsData = JSON.parse(JSON.stringify(initialPracticals)); // Deep copy
+            }
+        }
+        
+        // --- Modal Control Functions ---
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+                // Trigger animation
+                setTimeout(() => {
+                    modal.querySelector('div').classList.remove('scale-95', 'opacity-0');
+                    modal.querySelector('div').classList.add('scale-100', 'opacity-100');
+                }, 10);
+            }
+        }
+        
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.querySelector('div').classList.remove('scale-100', 'opacity-100');
+                modal.querySelector('div').classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                     modal.style.display = 'none';
+                }, 300); // Match CSS transition duration
+            }
+        }
+
+        function openAddPracticalModal() {
+            editingPracticalId = null;
+            modalTitle.textContent = "Add New Practical";
+            modalSubmitBtn.textContent = "Add Practical";
+            practicalUnitInput.value = "";
+            practicalNameInput.value = "";
+            openModal('practical-modal');
+        }
+
+        function openEditPracticalModal(id) {
+            const practical = practicalsData.find(p => p.id === id);
+            if (practical) {
+                editingPracticalId = id;
+                modalTitle.textContent = "Edit Practical";
+                modalSubmitBtn.textContent = "Save Changes";
+                practicalUnitInput.value = practical.unit;
+                practicalNameInput.value = practical.name;
+                openModal('practical-modal');
+            }
+        }
+
+        function switchTab(tabName) {
+            if (currentTab === tabName) return;
+
+            // Fade out the current page
+            const currentPage = document.getElementById(`${currentTab}-page`);
+            if (currentPage) {
+                currentPage.classList.remove('active');
+            }
+            
+            currentTab = tabName;
+            headerTitle.textContent = tabName.charAt(0).toUpperCase() + tabName.slice(1);
+
+            // Fade in the new page
+            const newPage = document.getElementById(`${tabName}-page`);
+            if (newPage) {
+                setTimeout(() => {
+                    newPage.classList.add('active');
+                }, 100);
+            }
+            
+            navButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.onclick.toString().includes(`'${tabName}'`)) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            window.scrollTo(0, 0);
+        }
+
+        function filterPracticals(filter) {
+            currentFilter = filter;
+            filterButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+             document.querySelector(`.filter-btn[onclick*="'${filter}'"]`).classList.add('active');
+            renderPracticalsList();
+        }
+        
+        function togglePracticalStatus(id) {
+            const practical = practicalsData.find(p => p.id === id);
+            if (practical) {
+                if (practical.status === 'pending') {
+                    const today = new Date().toISOString().split('T')[0];
+                    practical.status = 'completed';
+                    practical.date = today;
+                    practical.marks = 10;
+                    saveData();
+                    refreshAllViews();
+                    showInfoModal("Practical marked as completed!");
+                } else {
+                    showConfirmationModal('Are you sure you want to revert this practical to "Pending" status?', () => {
+                        practical.status = 'pending';
+                        practical.marks = null;
+                        practical.date = "";
+                        practical.notes = "";
+                        saveData();
+                        refreshAllViews();
+                        showInfoModal("Practical data cleared.");
+                    });
+                }
+            }
+        }
+
+        function getStatusIcon(status) {
+            if (status === 'completed') {
+                return `<i data-lucide="check-circle-2" class="text-green-500 flex-shrink-0"></i>`;
+            } else {
+                return `<i data-lucide="circle" class="text-gray-400 flex-shrink-0"></i>`;
+            }
+        }
+
+        function renderPracticalsList() {
+            practicalsListContainer.innerHTML = '';
+            const filteredData = practicalsData.filter(p => {
+                if (currentFilter === 'all') return true;
+                return p.status === currentFilter;
+            });
+
+            if (filteredData.length === 0) {
+                 practicalsListContainer.innerHTML = `<div class="text-center py-10 text-gray-400">
+                    <i data-lucide="folder-search" class="mx-auto h-12 w-12 mb-2"></i>
+                    <p>No practicals found for this filter.</p>
+                </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            const groupedPracticals = filteredData.reduce((acc, p) => {
+                if (!acc[p.unit]) {
+                    acc[p.unit] = [];
+                }
+                acc[p.unit].push(p);
+                return acc;
+            }, {});
+
+            for (const unit in groupedPracticals) {
+                const unitHtml = `
+                    <div class="mb-4">
+                        <h3 class="font-bold text-gray-800 dark:text-gray-300 sticky top-[72px] bg-gray-50 dark:bg-gray-950 py-2">${unit}</h3>
+                        <div class="space-y-2 mt-2">
+                            ${groupedPracticals[unit].map(p => `
+                                <div data-id="${p.id}" class="practical-item bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 transition flex items-center justify-between space-x-4">
+                                    <div onclick="togglePracticalStatus(${p.id})" class="flex items-center space-x-4 flex-grow cursor-pointer">
+                                        ${getStatusIcon(p.status)}
+                                        <div class="flex-grow">
+                                            <p class="font-semibold text-sm">${p.name}</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="event.stopPropagation(); openEditPracticalModal(${p.id})" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+                                        <i data-lucide="pencil" class="w-4 h-4 text-gray-500 dark:text-gray-400"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>`;
+                practicalsListContainer.innerHTML += unitHtml;
+            }
+            lucide.createIcons();
+        }
+
+        function updateHomePage() {
+            const completedCount = practicalsData.filter(p => p.status === 'completed').length;
+            const totalCount = practicalsData.length;
+            const percentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+            document.getElementById('progress-text-count').textContent = `${completedCount}/${totalCount}`;
+            document.getElementById('progress-text-percent').textContent = `${percentage.toFixed(0)}%`;
+
+
+            const upNextPractical = practicalsData.find(p => p.status === 'pending');
+            const upNextContainer = document.getElementById('up-next-practical');
+            if(upNextPractical) {
+                upNextContainer.innerHTML = `
+                    <p class="text-xs text-gray-500 dark:text-gray-400">${upNextPractical.unit}</p>
+                    <p class="font-semibold">${upNextPractical.name}</p>
+                `;
+                 upNextContainer.setAttribute('onclick', `showInfoModal('This practical is pending.')`);
+                 document.getElementById('up-next-section').style.display = 'block';
+
+            } else {
+                document.getElementById('up-next-section').style.display = 'none';
+            }
+        }
+        
+        function updateProgressPage() {
+            const completedPracticals = practicalsData.filter(p => p.status === 'completed');
+            const completedListContainer = document.getElementById('completed-list');
+            completedListContainer.innerHTML = '';
+
+            if (completedPracticals.length === 0) {
+                completedListContainer.innerHTML = `<div class="text-center py-10 text-gray-400">
+                    <i data-lucide="bar-chart-3" class="mx-auto h-12 w-12 mb-2"></i>
+                    <p>You haven't completed any practicals yet.</p>
+                </div>`;
+                lucide.createIcons();
+                 document.getElementById('average-score').textContent = 'N/A';
+                return;
+            }
+            
+            let totalScore = 0;
+            completedPracticals.forEach(p => {
+                totalScore += parseFloat(p.marks || 0);
+                const itemHtml = `
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div>
+                        <p class="font-semibold text-sm">${p.name}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">${p.date}</p>
+                    </div>
+                    <div class="text-lg font-bold text-blue-500">${p.marks || 'N/A'}/10</div>
+                </div>
+                `;
+                completedListContainer.innerHTML += itemHtml;
+            });
+            
+            const averageScore = totalScore / completedPracticals.length;
+            document.getElementById('average-score').textContent = `${averageScore.toFixed(1)}/10`;
+        }
+        
+        practicalForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newUnit = practicalUnitInput.value;
+            const newName = practicalNameInput.value;
+            
+            if (editingPracticalId !== null) {
+                // Edit existing practical
+                const practical = practicalsData.find(p => p.id === editingPracticalId);
+                if (practical) {
+                    practical.unit = newUnit;
+                    practical.name = newName;
+                    showInfoModal("Practical updated successfully!");
+                }
+            } else {
+                // Add new practical
+                const newId = Math.max(...practicalsData.map(p => p.id), 0) + 1;
+                const newPractical = {
+                    id: newId,
+                    unit: newUnit,
+                    name: newName,
+                    status: "pending",
+                    marks: null,
+                    date: "",
+                    notes: ""
+                };
+                practicalsData.push(newPractical);
+                showInfoModal("Practical added successfully!");
+            }
+
+            saveData();
+            refreshAllViews();
+            closeModal('practical-modal');
+        });
+
+        function importData(file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    if (Array.isArray(importedData) && importedData.every(item => typeof item.id === 'number')) {
+                        practicalsData = importedData;
+                        saveData();
+                        refreshAllViews();
+                        showInfoModal('Data imported successfully!');
+                    } else {
+                        showInfoModal('Error: The file format is not valid.');
+                    }
+                } catch (e) {
+                    showInfoModal('Error: Could not read the file. Please check the JSON format.');
+                    console.error('Failed to import data:', e);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        importDataFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                importData(file);
+            }
+        });
+
+        function resetData() {
+            localStorage.removeItem('physicsPracticals');
+            loadData();
+            refreshAllViews();
+            showInfoModal('All data has been reset.');
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(practicalsData, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "physics_practicals_data.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function refreshAllViews() {
+            updateHomePage();
+            renderPracticalsList();
+            updateProgressPage();
+        }
+        
+        // Custom Confirmation Modal
+        function showConfirmationModal(message, callback) {
+            document.getElementById('confirmation-message').textContent = message;
+            openModal('confirmation-modal');
+            
+            const confirmBtn = document.getElementById('confirm-btn');
+            const cancelBtn = document.getElementById('cancel-confirm-btn');
+
+            const handleConfirm = () => {
+                closeModal('confirmation-modal');
+                callback();
+                confirmBtn.removeEventListener('click', handleConfirm);
+                cancelBtn.removeEventListener('click', handleCancel);
+            };
+
+            const handleCancel = () => {
+                 closeModal('confirmation-modal');
+                 confirmBtn.removeEventListener('click', handleConfirm);
+                 cancelBtn.removeEventListener('click', handleCancel);
+            };
+
+            confirmBtn.addEventListener('click', handleConfirm);
+            cancelBtn.addEventListener('click', handleCancel);
+        }
+
+        // Custom Info/Alert Modal
+        function showInfoModal(message) {
+            const infoModal = document.createElement('div');
+            infoModal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+            infoModal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-xs p-6 max-h-[90vh] overflow-y-auto text-center transform scale-95 opacity-0 transition-all duration-300">
+                    <h3 class="text-lg font-semibold mb-4">${message}</h3>
+                    <button class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">OK</button>
+                </div>
+            `;
+            document.body.appendChild(infoModal);
+            
+            // Trigger animation
+            setTimeout(() => {
+                infoModal.querySelector('div').classList.remove('scale-95', 'opacity-0');
+                infoModal.querySelector('div').classList.add('scale-100', 'opacity-100');
+            }, 10);
+            
+            // Function to close the modal
+            const closeInfoModal = () => {
+                infoModal.querySelector('div').classList.remove('scale-100', 'opacity-100');
+                infoModal.querySelector('div').classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    document.body.removeChild(infoModal);
+                }, 300); // Match CSS transition duration
+            };
+            
+            // Close on 'OK' button click
+            const okButton = infoModal.querySelector('button');
+            okButton.onclick = closeInfoModal;
+            
+            // Close on outside click
+            infoModal.addEventListener('click', (e) => {
+                if (e.target === infoModal) {
+                    closeInfoModal();
+                }
+            });
+        }
+
+        // Theme Management
+        function applyTheme(isDark) {
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                darkModeToggle.checked = true;
+            } else {
+                document.documentElement.classList.remove('dark');
+                darkModeToggle.checked = false;
+            }
+            filterPracticals(currentFilter);
+        }
+
+        darkModeToggle.addEventListener('change', () => {
+            const isDark = darkModeToggle.checked;
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            applyTheme(isDark);
+        });
+
+        // Initializer
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            refreshAllViews();
+            
+            const savedTheme = localStorage.getItem('theme');
+            applyTheme(savedTheme === 'dark');
+            
+            lucide.createIcons();
+            filterPracticals('all'); // Initialize filter buttons
+
+            // Close modals on outside click
+            [practicalModal, confirmationModal].forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeModal(modal.id);
+                    }
+                });
+            });
+
+            // Prevent text selection and copying
+            document.body.addEventListener('copy', (e) => {
+                e.preventDefault();
+            });
+            document.body.addEventListener('cut', (e) => {
+                e.preventDefault();
+            });
+        });
+    </script>
+</body>
+</html>
