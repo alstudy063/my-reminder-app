@@ -45,7 +45,7 @@
             -webkit-user-select: none;  /* Safari */
             -moz-user-select: none;     /* Firefox */
             -ms-user-select: none;      /* IE/Edge */
-            user-select: none;          /* Non-prefixed version */
+            user-select: none;          /* Non-prefixedNon-prefixed version */
         }
 
         .page {
@@ -223,13 +223,14 @@
                            <i data-lucide="book-open-check"></i>
                            <span>පාඩම් කළමනාකරණය (Manage Lessons)</span>
                         </button>
-                        <div class="flex items-center space-x-2 w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition cursor-pointer">
-                            <label for="import-data-file" class="flex items-center space-x-3 w-full cursor-pointer">
-                                <i data-lucide="upload"></i>
-                                <span>දත්ත ආනයනය කරන්න (JSON)</span>
-                            </label>
-                            <input type="file" id="import-data-file" accept=".json" class="hidden">
-                        </div>
+                        <button onclick="copyData()" class="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex items-center space-x-3">
+                           <i data-lucide="clipboard-copy"></i>
+                           <span>දත්ත පිටපත් කරන්න (JSON)</span>
+                        </button>
+                        <button onclick="pasteData()" class="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex items-center space-x-3">
+                           <i data-lucide="clipboard-paste"></i>
+                           <span>දත්ත අලවන්න (JSON)</span>
+                        </button>
                         <button onclick="shareData()" class="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex items-center space-x-3">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-share-2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
                             <span>Share Data (JSON)</span>
@@ -1265,6 +1266,56 @@
             }
         });
 
+        async function copyData() {
+            try {
+                const combinedData = {
+                    practicals: practicalsData,
+                    equations: equationsData,
+                    lessons: lessonsData,
+                    subunits: subunitsData
+                };
+                await navigator.clipboard.writeText(JSON.stringify(combinedData, null, 2));
+                showInfoModal('දත්ත සාර්ථකව පිටපත් කරන ලදී! (Data copied successfully!)');
+            } catch (err) {
+                console.error('Failed to copy data: ', err);
+                showInfoModal('දත්ත පිටපත් කිරීම අසාර්ථක විය. කරුණාකර නැවත උත්සාහ කරන්න. (Failed to copy data. Please try again.)');
+            }
+        }
+
+        async function pasteData() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (!text) {
+                    showInfoModal('ක්ලිප්බෝඩ් එකේ දත්ත නොමැත. (No data found on the clipboard.)');
+                    return;
+                }
+
+                const importedData = JSON.parse(text);
+                if (importedData.practicals && Array.isArray(importedData.practicals)) {
+                    showConfirmationModal('Do you want to overwrite all existing data with the data from the clipboard?', () => {
+                         practicalsData = importedData.practicals;
+                         if(importedData.equations && Array.isArray(importedData.equations)) {
+                             equationsData = importedData.equations;
+                         }
+                         if(importedData.lessons && Array.isArray(importedData.lessons)) {
+                              lessonsData = importedData.lessons;
+                         }
+                         if(importedData.subunits && Array.isArray(importedData.subunits)) {
+                              subunitsData = importedData.subunits;
+                         }
+                         saveData();
+                         refreshAllViews();
+                         showInfoModal('දත්ත සාර්ථකව අලවන ලදී! (Data pasted successfully!)');
+                    });
+                } else {
+                    showInfoModal('අසාර්ථකයි: ක්ලිප්බෝඩ් එකේ ඇති දත්ත වලංගු ආකෘතියක නොමැත. (Failed: Data on clipboard is not in a valid format.)');
+                }
+            } catch (err) {
+                console.error('Failed to paste data: ', err);
+                showInfoModal('දත්ත ඇලවීම අසාර්ථකයි. වලංගු JSON දත්ත අඩංගු බවට සහතික වන්න. (Failed to paste data. Ensure clipboard contains valid JSON data.)');
+            }
+        }
+        
         function shareData() {
             if (navigator.share) {
                 const combinedData = {
