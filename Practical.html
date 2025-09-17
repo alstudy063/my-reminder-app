@@ -45,7 +45,7 @@
             -webkit-user-select: none;  /* Safari */
             -moz-user-select: none;     /* Firefox */
             -ms-user-select: none;      /* IE/Edge */
-            user-select: none;          /* Non-prefixedNon-prefixed version */
+            user-select: none;          /* Non-prefixed version */
         }
 
         .page {
@@ -223,21 +223,22 @@
                            <i data-lucide="book-open-check"></i>
                            <span>පාඩම් කළමනාකරණය (Manage Lessons)</span>
                         </button>
-                        <button onclick="copyData()" class="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex items-center space-x-3">
-                           <i data-lucide="clipboard-copy"></i>
-                           <span>දත්ත පිටපත් කරන්න (JSON)</span>
-                        </button>
-                        <button onclick="pasteData()" class="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex items-center space-x-3">
-                           <i data-lucide="clipboard-paste"></i>
-                           <span>දත්ත අලවන්න (JSON)</span>
-                        </button>
-                        <button onclick="shareData()" class="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex items-center space-x-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-share-2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
-                            <span>Share Data (JSON)</span>
-                        </button>
+                        <label for="import-data-file" class="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex items-center space-x-3 cursor-pointer">
+                            <i data-lucide="upload"></i>
+                            <span>දත්ත ආනයනය කරන්න (JSON File)</span>
+                        </label>
+                        <input type="file" id="import-data-file" accept=".json" class="hidden">
                         <button onclick="exportData()" class="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex items-center space-x-3">
                             <i data-lucide="download"></i>
-                            <span>Export Data (JSON)</span>
+                            <span>Export Data (JSON File)</span>
+                        </button>
+                        <button onclick="copyDataToClipboard()" class="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex items-center space-x-3">
+                            <i data-lucide="copy"></i>
+                            <span>දත්ත පිටපත් කරන්න (Copy Data)</span>
+                        </button>
+                        <button onclick="openPasteDataModal()" class="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition flex items-center space-x-3">
+                            <i data-lucide="clipboard-paste"></i>
+                            <span>දත්ත අලවන්න (Paste Data)</span>
                         </button>
                         <button onclick="showConfirmationModal('Are you sure you want to reset all data?', resetData)" class="w-full text-left p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/50 rounded-lg transition flex items-center space-x-3 mt-2">
                            <i data-lucide="trash-2"></i>
@@ -410,6 +411,19 @@
         </div>
     </div>
 
+    <!-- Paste Data Modal -->
+    <div id="paste-data-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
+            <h2 class="text-lg font-bold mb-4">දත්ත අලවන්න (Paste Data)</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">කලින් පිටපත් කරගත් JSON දත්ත මෙහි අලවන්න.</p>
+            <textarea id="paste-data-textarea" class="w-full h-40 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2" placeholder="Paste your JSON data here..."></textarea>
+            <div class="flex justify-end space-x-3 mt-4">
+                <button type="button" onclick="closeModal('paste-data-modal')" class="px-3 py-1.5 text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Cancel</button>
+                <button onclick="pasteDataFromClipboard()" class="px-3 py-1.5 text-xs bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">Import</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Offline Modal -->
     <div id="offline-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
         <div class="modal-content bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 text-center">
@@ -485,6 +499,7 @@
         const lessonsModal = document.getElementById('lessons-modal');
         const subunitModal = document.getElementById('subunit-modal');
         const confirmationModal = document.getElementById('confirmation-modal');
+        const pasteDataModal = document.getElementById('paste-data-modal');
         const offlineModal = document.getElementById('offline-modal');
         const practicalForm = document.getElementById('practical-form');
         const equationForm = document.getElementById('equation-form');
@@ -897,7 +912,7 @@
             const editBtn = parentDiv.querySelector('.edit-btn');
             const deleteBtn = parentDiv.querySelector('button[onclick*="deleteLesson"]');
             const addSubunitBtn = parentDiv.querySelector('button[onclick*="openAddSubunitModal"]');
-            
+
             // Hide the "add subunit" icon when editing
             if (addSubunitBtn) {
                 addSubunitBtn.style.display = 'none';
@@ -1247,7 +1262,7 @@
                         }
                         saveData();
                         refreshAllViews();
-                        showInfoModal('Data imported successfully!');
+                        showInfoModal('දත්ත සාර්ථකව ආනයනය කරන ලදී!');
                     } else {
                         showInfoModal('Error: The file format is not valid. It should contain a "practicals" array.');
                     }
@@ -1265,81 +1280,6 @@
                 importData(file);
             }
         });
-
-        async function copyData() {
-            try {
-                const combinedData = {
-                    practicals: practicalsData,
-                    equations: equationsData,
-                    lessons: lessonsData,
-                    subunits: subunitsData
-                };
-                await navigator.clipboard.writeText(JSON.stringify(combinedData, null, 2));
-                showInfoModal('දත්ත සාර්ථකව පිටපත් කරන ලදී! (Data copied successfully!)');
-            } catch (err) {
-                console.error('Failed to copy data: ', err);
-                showInfoModal('දත්ත පිටපත් කිරීම අසාර්ථක විය. කරුණාකර නැවත උත්සාහ කරන්න. (Failed to copy data. Please try again.)');
-            }
-        }
-
-        async function pasteData() {
-            try {
-                const text = await navigator.clipboard.readText();
-                if (!text) {
-                    showInfoModal('ක්ලිප්බෝඩ් එකේ දත්ත නොමැත. (No data found on the clipboard.)');
-                    return;
-                }
-
-                const importedData = JSON.parse(text);
-                if (importedData.practicals && Array.isArray(importedData.practicals)) {
-                    showConfirmationModal('Do you want to overwrite all existing data with the data from the clipboard?', () => {
-                         practicalsData = importedData.practicals;
-                         if(importedData.equations && Array.isArray(importedData.equations)) {
-                             equationsData = importedData.equations;
-                         }
-                         if(importedData.lessons && Array.isArray(importedData.lessons)) {
-                              lessonsData = importedData.lessons;
-                         }
-                         if(importedData.subunits && Array.isArray(importedData.subunits)) {
-                              subunitsData = importedData.subunits;
-                         }
-                         saveData();
-                         refreshAllViews();
-                         showInfoModal('දත්ත සාර්ථකව අලවන ලදී! (Data pasted successfully!)');
-                    });
-                } else {
-                    showInfoModal('අසාර්ථකයි: ක්ලිප්බෝඩ් එකේ ඇති දත්ත වලංගු ආකෘතියක නොමැත. (Failed: Data on clipboard is not in a valid format.)');
-                }
-            } catch (err) {
-                console.error('Failed to paste data: ', err);
-                showInfoModal('දත්ත ඇලවීම අසාර්ථකයි. වලංගු JSON දත්ත අඩංගු බවට සහතික වන්න. (Failed to paste data. Ensure clipboard contains valid JSON data.)');
-            }
-        }
-        
-        function shareData() {
-            if (navigator.share) {
-                const combinedData = {
-                    practicals: practicalsData,
-                    equations: equationsData,
-                    lessons: lessonsData,
-                    subunits: subunitsData
-                };
-                const file = new Blob([JSON.stringify(combinedData, null, 2)], { type: 'application/json' });
-                const data = {
-                    files: [new File([file], 'physics_tracker_data.json', { type: file.type })],
-                    title: 'Physics Practical & Equation Tracker Backup',
-                    text: 'Here is a backup of my physics practicals and equations data.'
-                };
-                navigator.share(data).then(() => {
-                    console.log('Data shared successfully');
-                }).catch((error) => {
-                    console.error('Error sharing data', error);
-                    showInfoModal('Sharing failed. Your browser might not support this feature or an error occurred.');
-                });
-            } else {
-                showInfoModal('Sharing is not supported on this device or browser. Please use the "Export Data" option instead.');
-            }
-        }
 
         function resetData() {
             localStorage.removeItem('physicsPracticals');
@@ -1365,6 +1305,85 @@
             document.body.appendChild(downloadAnchorNode);
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
+        }
+
+        function copyDataToClipboard() {
+            const combinedData = {
+                practicals: practicalsData,
+                equations: equationsData,
+                lessons: lessonsData,
+                subunits: subunitsData
+            };
+            const dataStr = JSON.stringify(combinedData, null, 2);
+            
+            const textArea = document.createElement("textarea");
+            textArea.value = dataStr;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showInfoModal('දත්ත සාර්ථකව පිටපත් කරන ලදී!');
+                } else {
+                    showInfoModal('දත්ත පිටපත් කිරීමට නොහැකි විය.');
+                }
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+                showInfoModal('දත්ත පිටපත් කිරීමට නොහැකි විය.');
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        function openPasteDataModal() {
+            document.getElementById('paste-data-textarea').value = '';
+            openModal('paste-data-modal');
+        }
+
+        function pasteDataFromClipboard() {
+            const pastedText = document.getElementById('paste-data-textarea').value;
+            if (!pastedText.trim()) {
+                showInfoModal('කරුණාකර දත්ත ඇතුළත් කරන්න.');
+                return;
+            }
+
+            try {
+                const importedData = JSON.parse(pastedText);
+                
+                if (importedData.practicals && Array.isArray(importedData.practicals)) {
+                    showConfirmationModal('Are you sure you want to overwrite current data with the pasted data?', () => {
+                        practicalsData = importedData.practicals;
+                        if(importedData.equations && Array.isArray(importedData.equations)) {
+                            equationsData = importedData.equations;
+                        } else {
+                            equationsData = [];
+                        }
+                        if(importedData.lessons && Array.isArray(importedData.lessons)) {
+                            lessonsData = importedData.lessons;
+                        } else {
+                            lessonsData = [];
+                        }
+                        if(importedData.subunits && Array.isArray(importedData.subunits)) {
+                            subunitsData = importedData.subunits;
+                        } else {
+                            subunitsData = [];
+                        }
+                        saveData();
+                        refreshAllViews();
+                        closeModal('paste-data-modal');
+                        showInfoModal('දත්ත සාර්ථකව ආනයනය කරන ලදී!');
+                    });
+                } else {
+                    showInfoModal('Error: The data format is not valid. It should contain a "practicals" array.');
+                }
+            } catch (e) {
+                showInfoModal('Error: Could not read the data. Please check the JSON format.');
+                console.error('Failed to import data from clipboard:', e);
+            }
         }
 
         function refreshAllViews() {
@@ -1481,12 +1500,14 @@
             filterPracticals('all');
             switchTab('home');
 
-            [practicalModal, equationModal, lessonsModal, subunitModal, confirmationModal, offlineModal].forEach(modal => {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        closeModal(modal.id);
-                    }
-                });
+            [practicalModal, equationModal, lessonsModal, subunitModal, confirmationModal, offlineModal, pasteDataModal].forEach(modal => {
+                if (modal) {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            closeModal(modal.id);
+                        }
+                    });
+                }
             });
 
             function showOfflineMessage() {
