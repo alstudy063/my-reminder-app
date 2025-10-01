@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A/L රසායන විද්‍යාව - සම්පූර්ණ මාර්ගෝපදේශය</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- MathJax for complex formulas -->
+    <script>
+        MathJax = {
+            loader: { load: ['input/tex', 'output/chtml'] },
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        /* Styling for the accordion content and Sinhala text readability */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
+            padding: 0 1rem;
+        }
+        .accordion-item.active .accordion-content {
+            /* Large value to ensure all content fits */
+            max-height: 5000px; 
+            padding: 1rem;
+        }
+        .accordion-item.active .accordion-header svg {
+            transform: rotate(180deg);
+        }
+        .detail-box {
+            border-left: 5px solid #1e3a8a; /* Dark Blue */
+            padding: 1rem;
+            border-radius: 8px;
+            background-color: #ffffff;
+            margin-top: 0.5rem;
+        }
+        .text-sinhala {
+            line-height: 1.8; 
+        }
+        /* Style for bolded key concepts */
+        .key-concept {
+            font-weight: 700; /* font-bold */
+            color: #1f2937; /* A dark gray for contrast */
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 bg-gray-100">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="bg-blue-800 text-white p-6 rounded-2xl shadow-xl mb-6">
+            <h1 class="text-3xl md:text-4xl font-extrabold mb-1 text-center">A/L රසායන විද්‍යා මාර්ගෝපදේශය (සම්පූර්ණයි)</h1>
+            <p class="text-blue-300 text-center text-lg">විභාගයේ වැඩිම ලකුණු ලැබෙන අනිවාර්ය කරුණු</p>
+        </header>
+
+        <div id="accordion-container" class="space-y-6">
+
+            <!-- 1. ප්‍රධාන යාන්ත්‍රණ (කාබනික) -->
+            <div class="accordion-item bg-white rounded-xl shadow-lg overflow-hidden border border-blue-400">
+                <div class="accordion-header flex justify-between items-center p-5 cursor-pointer bg-blue-100 hover:bg-blue-200 transition duration-300" onclick="toggleAccordion(this)">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <span class="text-2xl mr-3">⚙️</span> 1. සියලුම ප්‍රධාන යාන්ත්‍රණ (Mechanisms)
+                    </h2>
+                    <svg class="w-6 h-6 transform transition-transform duration-300 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="accordion-content bg-gray-50 space-y-4 text-sinhala">
+                    <div class="detail-box">
+                        <h3 class="font-bold text-blue-800">න්‍යෂ්ටිකකාමී ආදේශනය ($\text{SN}1$ & $\text{SN}2$)</h3>
+                        <p class="text-sm text-gray-700 mt-1">
+                            <span class="key-concept">$\text{SN}1$</span>: <span class="key-concept">කාබෝ කැටායන ($\text{C}^+$)</span> හරහා. වේගය $3^{\circ} > 2^{\circ} > 1^{\circ}$. <span class="key-concept">රේසමික් මිශ්‍රණ</span> සෑදේ.<br>
+                            <span class="key-concept">$\text{SN}2$</span>: පියවර 1. වේගය $1^{\circ} > 2^{\circ} > 3^{\circ}$.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. කාබනික පරිවර්තන සහ තෝරාගත් ප්‍රතිකාරක -->
+            <div class="accordion-item bg-white rounded-xl shadow-lg overflow-hidden border border-green-400">
+                <div class="accordion-header flex justify-between items-center p-5 cursor-pointer bg-green-100 hover:bg-green-200 transition duration-300" onclick="toggleAccordion(this)">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <span class="text-2xl mr-3">🔄</span> 2. පරිවර්තන රටා සහ තෝරාගත් ප්‍රතිකාරක
+                    </h2>
+                    <svg class="w-6 h-6 transform transition-transform duration-300 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="accordion-content bg-gray-50 space-y-4 text-sinhala">
+                     <div class="detail-box border-l-4 border-green-600">
+                        <h3 class="font-bold text-green-800">තෝරාගත් අවකාරක (Exam Favourites)</h3>
+                        <p class="text-sm text-gray-700 mt-1">
+                            <span class="key-concept">$\text{LiAlH}_4$</span>: <span class="key-concept">සියලුම</span> කාබනයිල් ව්‍යුත්පන්න අවකරණය කරයි.<br>
+                            <span class="key-concept">$\text{NaBH}_4$</span>: අවකරණය කරන්නේ <span class="key-concept">ඇල්ඩිහයිඩ සහ කීටෝන</span> පමණි (කාබොක්සිලික් අම්ල ව්‍යුත්පන්න නොකරයි).
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. ව්‍යුහ හා ප්‍රවණතා (Inorganic/Physical) -->
+            <div class="accordion-item bg-white rounded-xl shadow-lg overflow-hidden border border-red-400">
+                <div class="accordion-header flex justify-between items-center p-5 cursor-pointer bg-red-100 hover:bg-red-200 transition duration-300" onclick="toggleAccordion(this)">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <span class="text-2xl mr-3">📊</span> 3. ආවර්තිතා සහ ව්‍යුහගත ප්‍රවණතා
+                    </h2>
+                    <svg class="w-6 h-6 transform transition-transform duration-300 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="accordion-content bg-gray-50 space-y-4 text-sinhala">
+                     <div class="detail-box border-l-4 border-red-600">
+                        <h3 class="font-bold text-red-800">තාපාංක ප්‍රවණතා</h3>
+                        <p class="text-sm text-gray-700 mt-1">
+                            තාපාංකය තීරණය කරන ප්‍රධාන බලය: <span class="key-concept">හයිඩ්‍රජන් බන්ධන</span> (කාබොක්සිලික් අම්ල > ඇල්කොහොල්) > <span class="key-concept">ද්විධ්‍රැව-ද්විධ්‍රැව</span> > <span class="key-concept">වෑන්ඩර්වාල්ස්</span>.
+                        </p>
+                    </div>
+                    <div class="detail-box border-l-4 border-red-600">
+                        <h3 class="font-bold text-red-800">VSEPR සහ හැඩ</h3>
+                        <p class="text-sm text-gray-700 mt-1">
+                            අණුවක $\text{C}$ පරමාණුවේ <span class="key-concept">දෙමුහුන්කරණය</span> සහ <span class="key-concept">නිදහස් ඉලෙක්ට්‍රෝන යුගල</span> අනුව හැඩය තීරණය වේ.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 4. කාබනික - සුවිශේෂී අවස්ථා -->
+            <div class="accordion-item bg-white rounded-xl shadow-lg overflow-hidden border border-yellow-400">
+                <div class="accordion-header flex justify-between items-center p-5 cursor-pointer bg-yellow-100 hover:bg-yellow-200 transition duration-300" onclick="toggleAccordion(this)">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <span class="text-2xl mr-3">🔥</span> 4. කාබනික - විභාගයේදී නිතර අසන සුවිශේෂී අවස්ථා
+                    </h2>
+                    <svg class="w-6 h-6 transform transition-transform duration-300 text-yellow-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="accordion-content bg-gray-50 space-y-4 text-sinhala">
+                     <div class="detail-box border-l-4 border-yellow-600">
+                        <h3 class="font-bold text-yellow-800">අම්ලතාවය/භාෂ්මිකතාවය සංසන්දනය</h3>
+                        <p class="text-sm text-gray-700 mt-1">
+                            අම්ලතාවය තීරණය වන්නේ <span class="key-concept">සංයුග්මක භාෂ්මිකයේ අනුනාද ස්ථායීතාව</span> අනුවයි. (උදා: ෆීනෝල් වලට වඩා කාබොක්සිලික් අම්ල ප්‍රබලයි).
+                        </p>
+                    </div>
+                    <div class="detail-box border-l-4 border-yellow-600">
+                        <h3 class="font-bold text-yellow-800">වෙන්කර හඳුනාගැනීමේ පරීක්ෂණ</h3>
+                        <p class="text-sm text-gray-700 mt-1">
+                            **ඇල්ඩිහයිඩ් vs කීටෝන:** $\text{Tollen's}$ සහ $\text{Fehling's/Benedict's}$ පරීක්ෂණ.<br>
+                            **$\text{C=C}$ vs $\text{C-C}$:** $\text{Br}_2/\text{CCl}_4$ වර්ණය නැතිවීම.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 5. ගුණාත්මක විශ්ලේෂණය (අයන හඳුනාගැනීම) -->
+            <div class="accordion-item bg-white rounded-xl shadow-lg overflow-hidden border border-purple-400">
+                <div class="accordion-header flex justify-between items-center p-5 cursor-pointer bg-purple-100 hover:bg-purple-200 transition duration-300" onclick="toggleAccordion(this)">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <span class="text-2xl mr-3">🧪</span> 5. අකාබනික ගුණාත්මක විශ්ලේෂණය (Practical Tests)
+                    </h2>
+                    <svg class="w-6 h-6 transform transition-transform duration-300 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="accordion-content bg-gray-50 space-y-4 text-sinhala">
+                     <div class="detail-box border-l-4 border-purple-600">
+                        <h3 class="font-bold text-purple-800">හැලයිඩ වෙන්කර හඳුනාගැනීම</h3>
+                        <p class="text-sm text-gray-700 mt-1">
+                            $\text{AgCl}$ (සුදු), $\text{AgBr}$ (ලා කහ), $\text{AgI}$ (තද කහ) <span class="key-concept">ඇමෝනියා ද්‍රාව්‍යතාව</span> අනුව වෙන්කර හඳුනාගත හැක ($\text{AgI}$ දිය නොවේ).
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. තාප ගති විද්‍යාව (Physical Chemistry) -->
+            <div class="accordion-item bg-white rounded-xl shadow-lg overflow-hidden border border-orange-400">
+                <div class="accordion-header flex justify-between items-center p-5 cursor-pointer bg-orange-100 hover:bg-orange-200 transition duration-300" onclick="toggleAccordion(this)">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <span class="text-2xl mr-3">🌡️</span> 6. තාප ගති විද්‍යාව සහ ගණනය කිරීම්
+                    </h2>
+                    <svg class="w-6 h-6 transform transition-transform duration-300 text-orange-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="accordion-content bg-gray-50 space-y-4 text-sinhala">
+                     <div class="detail-box border-l-4 border-orange-600">
+                        <h3 class="font-bold text-orange-800">ස්වයංසිද්ධතාවය සහ $\Delta G$</h3>
+                        <p class="text-sm text-gray-700 mt-1">
+                            $$\Delta G = \Delta H - T \Delta S$$<br>
+                            <span class="key-concept">ස්වයංසිද්ධතාවය</span> සඳහා ($\Delta G < 0$) විය යුතුයි. $\Delta H$ සහ $\Delta S$ හි ලකුණු අනුව උෂ්ණත්වයේ බලපෑම තීරණය වේ.
+                        </p>
+                    </div>
+                    <div class="detail-box border-l-4 border-orange-600">
+                        <h3 class="font-bold text-orange-800">බන්ධන ශක්ති ගණනය</h3>
+                        <p class="text-sm text-gray-700 mt-1">
+                            $$\Delta H_{\text{reaction}} = \sum (\text{Reactant Bond Energies}) - \sum (\text{Product Bond Energies})$$
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. විද්‍යුත් රසායනය (Physical Chemistry) -->
+            <div class="accordion-item bg-white rounded-xl shadow-lg overflow-hidden border border-teal-400">
+                <div class="accordion-header flex justify-between items-center p-5 cursor-pointer bg-teal-100 hover:bg-teal-200 transition duration-300" onclick="toggleAccordion(this)">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <span class="text-2xl mr-3">🔋</span> 7. විද්‍යුත් රසායනය (Electrochemistry)
+                    </h2>
+                    <svg class="w-6 h-6 transform transition-transform duration-300 text-teal-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="accordion-content bg-gray-50 space-y-4 text-sinhala">
+                     <div class="detail-box border-l-4 border-teal-600">
+                        <h3 class="font-bold text-teal-800">කෝෂ විභවය හා $\text{Nernst}$</h3>
+                        <p class="text-sm text-gray-700 mt-1">
+                            සම්මත විභවය: $$E_{\text{cell}}^{0} = E_{\text{reduction, cathode}}^{0} - E_{\text{reduction, anode}}^{0}$$<br>
+                            $\text{Nernst}$ (සම්මත නොවන තත්ව): $$E_{\text{cell}} = E_{\text{cell}}^{0} - \frac{0.0592}{n} \log Q$$
+                        </p>
+                    </div>
+                    <div class="detail-box border-l-4 border-teal-600">
+                        <h3 class="font-bold text-teal-800">විද්‍යුත් විච්ඡේදනය</h3>
+                        <p class="text-sm text-gray-700 mt-1">
+                            **ෆැරඩේ නීති:** $\text{mol} = Q/(nF)$.<br>
+                            **ක්ලෝරීන්-ක්ෂාර ක්‍රියාවලිය** (Chlor-Alkali) මෙයට අයත් වන අතර, එහි $\text{Cl}_2$ සහ $\text{H}_2$ නිපදවනු ලබයි.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. ව්‍යවහාරික රසායනය (Applied Chemistry) -->
+            <div class="accordion-item bg-white rounded-xl shadow-lg overflow-hidden border border-gray-400">
+                <div class="accordion-header flex justify-between items-center p-5 cursor-pointer bg-gray-200 hover:bg-gray-300 transition duration-300" onclick="toggleAccordion(this)">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <span class="text-2xl mr-3">🏭</span> 8. ව්‍යවහාරික රසායනය (කාර්මික ක්‍රියාවලි)
+                    </h2>
+                    <svg class="w-6 h-6 transform transition-transform duration-300 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="accordion-content bg-gray-50 space-y-4 text-sinhala">
+                     <div class="detail-box border-l-4 border-gray-600">
+                        <h3 class="font-bold text-gray-800">සල්ෆියුරික් අම්ලය (Contact Process)</h3>
+                        <p class="text-sm text-gray-700 mt-1">
+                            ප්‍රධාන පියවර: $$2\text{SO}_2(\text{g}) + \text{O}_2(\text{g}) \rightleftharpoons 2\text{SO}_3(\text{g}) \quad \Delta H < 0$$<br>
+                            <span class="key-concept">උපදෙස:</span> $\text{450}^{\circ}\text{C}$ වැනි උෂ්ණත්වයක් යොදන්නේ <span class="key-concept">අස්වැන්න (Thermodynamics)</span> සහ <span class="key-concept">වේගය (Kinetics)</span> අතර සමබරතාවයක් පවත්වා ගැනීමටයි.
+                        </p>
+                    </div>
+                    <div class="detail-box border-l-4 border-gray-600">
+                        <h3 class="font-bold text-gray-800">ඇමෝනියා (Haber Process)</h3>
+                        <p class="text-sm text-gray-700 mt-1">
+                            අස්වැන්න වැඩි කිරීමට **අධි පීඩනයක්** (High Pressure) අවශ්‍ය වේ (Le Chatelier). උත්ප්‍රේරකය: **යකඩ** ($\text{Fe}$).
+                        </p>
+                    </div>
+                    <div class="detail-box border-l-4 border-gray-600">
+                        <h3 class="font-bold text-gray-800">ක්ලෝරීන්-ක්ෂාර ක්‍රියාවලිය</h3>
+                        <p class="text-sm text-gray-700 mt-1">
+                            **අයන හුවමාරු පටලය (Membrane)** යොදන්නේ $\text{Cl}_2$ සහ $\text{OH}^{-}$ ප්‍රතික්‍රියා කිරීම වැළැක්වීමටයි.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+        <footer class="mt-8 text-center text-gray-500 text-sm p-4">
+            <p>මෙම සම්පූර්ණ මාර්ගෝපදේශය ඔබගේ විභාග සූදානම සඳහා අත්‍යවශ්‍ය සියලුම කරුණු ආවරණය කරයි.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        // JavaScript for Accordion functionality and explicit MathJax typesetting
+        function toggleAccordion(header) {
+            const item = header.parentElement;
+            const content = header.nextElementSibling;
+            const isActive = item.classList.contains('active');
+
+            document.querySelectorAll('.accordion-item.active').forEach(activeItem => {
+                if (activeItem !== item) {
+                    activeItem.classList.remove('active');
+                    activeItem.querySelector('.accordion-content').style.maxHeight = 0;
+                }
+            });
+
+            if (isActive) {
+                item.classList.remove('active');
+                content.style.maxHeight = 0;
+            } else {
+                item.classList.add('active');
+                // Set max height large enough to accommodate the content smoothly
+                content.style.maxHeight = content.scrollHeight + 100 + "px"; 
+
+                // Ensure MathJax renders the new content
+                if (window.MathJax) {
+                    window.MathJax.typesetPromise([content]).catch((err) => console.log('MathJax Error:', err));
+                }
+            }
+        }
+    </script>
+</body>
+</html>
