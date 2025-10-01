@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A/L රසායන විද්‍යා විභාග උපාය මාර්ග</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- MathJax for complex formulas -->
+    <script>
+        MathJax = {
+            loader: { load: ['input/tex', 'output/chtml'] },
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+            padding: 0 1rem;
+        }
+        .accordion-item.active .accordion-content {
+            max-height: 5000px; 
+            padding: 1rem;
+        }
+        .accordion-item.active .accordion-header svg {
+            transform: rotate(180deg);
+        }
+        .detail-box {
+            border-left: 5px solid #065f46; /* Dark Green */
+            padding: 1rem;
+            border-radius: 8px;
+            background-color: #ffffff;
+            margin-top: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .text-sinhala {
+            line-height: 1.8; 
+            font-size: 1.05rem;
+        }
+        .key-concept {
+            font-weight: 700;
+            color: #1f2937; 
+            background-color: #fef9c3; /* Light yellow highlight */
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 bg-gray-100">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="bg-teal-600 text-white p-6 rounded-2xl shadow-xl mb-6">
+            <h1 class="text-3xl md:text-4xl font-extrabold mb-1 text-center">විභාග උපක්‍රම සහ අනිවාර්ය කරුණු</h1>
+            <p class="text-teal-200 text-center text-lg">රසායන විද්‍යා ප්‍රශ්න පත්‍රය සාර්ථකව කළමනාකරණය කිරීම</p>
+        </header>
+
+        <div id="accordion-container" class="space-y-6">
+
+            <!-- 1. ප්‍රශ්න පත්‍ර ව්‍යුහය සහ කාල කළමනාකරණය -->
+            <div class="accordion-item bg-white rounded-xl shadow-lg overflow-hidden border border-teal-400">
+                <div class="accordion-header flex justify-between items-center p-5 cursor-pointer bg-teal-100 hover:bg-teal-200 transition duration-300" onclick="toggleAccordion(this)">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <span class="text-2xl mr-3">🕒</span> 1. ප්‍රශ්න පත්‍ර ව්‍යුහය (මුළු කළ යුතු ප්‍රශ්න)
+                    </h2>
+                    <svg class="w-6 h-6 transform transition-transform duration-300 text-teal-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="accordion-content bg-gray-50 space-y-4 text-sinhala">
+                    <div class="detail-box">
+                        <h3 class="font-bold text-teal-800">පිළිතුරු සැපයිය යුතු මුළු ප්‍රශ්න ගණන (56)</h3>
+                        <p class="text-sm text-gray-700 mt-1">
+                            රසායන විද්‍යා පත්‍රය සාර්ථකව අවසන් කිරීමට ඔබ කළ යුතු ප්‍රශ්න ගණන මෙසේය:
+                            <ul class="list-disc ml-6 mt-2 space-y-1">
+                                <li>**I කොටස (MCQ):** 50ම අනිවාර්යයි.</li>
+                                <li>**II A කොටස (SEQ):** 4ම අනිවාර්යයි.</li>
+                                <li>**II B කොටස (රචනා):** 3න් **2ක්** තෝරා ගැනීම අනිවාර්යයි.</li>
+                            </ul>
+                            <p class="mt-2 text-red-600 font-bold">
+                                **වැදගත්:** Part C හි 3 වන රචනා ප්‍රශ්නය කිරීමට කාලය නාස්ති නොකරන්න. ඔබගේ හොඳම පිළිතුරු 2 පමණක් සලකා බලයි.
+                            </p>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. ප්‍රශ්න තෝරාගැනීමේ අනුපිළිවෙල සහ උපාය මාර්ගය -->
+            <div class="accordion-item bg-white rounded-xl shadow-lg overflow-hidden border border-blue-400">
+                <div class="accordion-header flex justify-between items-center p-5 cursor-pointer bg-blue-100 hover:bg-blue-200 transition duration-300" onclick="toggleAccordion(this)">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <span class="text-2xl mr-3">🎯</span> 2. ලකුණු වැඩිපුරම ලැබෙන ප්‍රශ්න අනුපිළිවෙල
+                    </h2>
+                    <svg class="w-6 h-6 transform transition-transform duration-300 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="accordion-content bg-gray-50 space-y-4 text-sinhala">
+                    <div class="detail-box border-l-4 border-blue-600">
+                        <h3 class="font-bold text-blue-800">SEQ සහ රචනා සඳහා අනුපිළිවෙල</h3>
+                        <p class="text-sm text-gray-700 mt-1">
+                            <ol class="list-decimal ml-6 mt-2 space-y-1">
+                                <li>**පළමු තේරීම:** **ගුණාත්මක විශ්ලේෂණය** (Q8 - Practical) සහ **කාර්මික රසායනය** (සරල කරුණු) - ගණනය කිරීම් නැති නිසා කාලය ඉතිරි වේ.</li>
+                                <li>**දෙවන තේරීම (රචනා):** **කාබනික සංස්ලේෂණ ප්‍රශ්නය** (Q11). මෙහිදී <span class="key-concept">අනුක්‍රමික ලකුණු (Consecutive Marks)</span> ලැබෙන නිසා එක් පියවරක් වැරදුනත් ලකුණු රැක ගත හැකියි.</li>
+                                <li>**තෙවන තේරීම (රචනා):** භෞතික රසායනයේ **Nernst/Thermo** වැනි <span class="key-concept">න්‍යායික ගණනය කිරීම්</span> වැඩිපුර අසන ප්‍රශ්නය තෝරන්න.</li>
+                                <li>**අවසන් තේරීම:** සංකීර්ණ $\text{Titration}$ හෝ $\text{Kinetics}$ ග්‍රාෆ් ඇඳීම අසන කොටස් අගට තබන්න.</li>
+                            </ol>
+                        </p>
+                    </div>
+                    <div class="detail-box border-l-4 border-red-600">
+                        <h3 class="font-bold text-red-800">රචනා (Part C) A/B කොටස් ව්‍යුහය</h3>
+                        <p class="text-sm text-gray-700 mt-1">
+                            <ul class="list-disc ml-6 mt-2 space-y-1">
+                                <li>**A කොටස (ප්‍රධාන):** වැඩිම ලකුණු (60-70). සාමාන්‍යයෙන් <span class="key-concept">සංකීර්ණ ගණනය කිරීම්</span> හෝ <span class="key-concept">දිගු සංස්ලේෂණ දාම</span> අසයි.</li>
+                                <li>**B කොටස (සහායක):** අඩු ලකුණු (30-40). <span class="key-concept">සරල න්‍යායික පැහැදිලි කිරීම්</span> (උදා: $\text{SN}1$ vs $\text{SN}2$ සංසන්දනය) හෝ <span class="key-concept">යෙදීම්</span> අසයි.</li>
+                            </ul>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 3. නව සිලබස් එකේ නිතරම අසන ප්‍රධාන මාතෘකා -->
+            <div class="accordion-item bg-white rounded-xl shadow-lg overflow-hidden border border-green-400">
+                <div class="accordion-header flex justify-between items-center p-5 cursor-pointer bg-green-100 hover:bg-green-200 transition duration-300" onclick="toggleAccordion(this)">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <span class="text-2xl mr-3">📚</span> 3. නිතරම අසන ප්‍රශ්න මාතෘකා විශ්ලේෂණය (New Syllabus)
+                    </h2>
+                    <svg class="w-6 h-6 transform transition-transform duration-300 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="accordion-content bg-gray-50 space-y-4 text-sinhala">
+                    
+                    <h3 class="text-lg font-bold text-green-800 mt-2">කාබනික රසායනය (Organic Chemistry)</h3>
+                    <div class="detail-box border-l-4 border-green-600">
+                        <p class="text-sm text-gray-700">
+                            **ප්‍රමුඛතාව:** **සංස්ලේෂණය**, **$\text{SN}1$/$\text{SN}2$ වේග ප්‍රවණතා**, සහ <span class="key-concept">තෝරාගත් අවකාරක</span> ($\text{LiAlH}_4$ vs $\text{NaBH}_4$).
+                        </p>
+                    </div>
+
+                    <h3 class="text-lg font-bold text-green-800 mt-2">විද්‍යුත් රසායනය (Electrochemistry)</h3>
+                    <div class="detail-box border-l-4 border-green-600">
+                        <p class="text-sm text-gray-700">
+                            **ප්‍රමුඛතාව:** <span class="key-concept">නර්න්ස්ට් සමීකරණය</span> යෙදීම ($E_{\text{cell}}$ ගණනය), <span class="key-concept">ෆැරඩේ නීති</span> (Q=It), සහ $E_{\text{cell}}^{0}$ හා $\Delta G^{0}$ සම්බන්ධය.
+                        </p>
+                    </div>
+
+                    <h3 class="text-lg font-bold text-green-800 mt-2">භෞතික රසායනය (Kinetics & Thermodynamics)</h3>
+                    <div class="detail-box border-l-4 border-green-600">
+                        <p class="text-sm text-gray-700">
+                            **ප්‍රමුඛතාව:** <span class="key-concept">ප්‍රවේග කම්පාංකය</span> සොයා ගැනීම, $\Delta G = \Delta H - T\Delta S$ යොදා <span class="key-concept">උෂ්ණත්වය මත ස්වයංසිද්ධතාවය</span> පැහැදිලි කිරීම.
+                        </p>
+                    </div>
+
+                    <h3 class="text-lg font-bold text-green-800 mt-2">කාර්මික රසායනය (Applied Chemistry)</h3>
+                    <div class="detail-box border-l-4 border-green-600">
+                        <p class="text-sm text-gray-700">
+                            **ප්‍රමුඛතාව:** <span class="key-concept">Contact/Haber ක්‍රියාවලිවල $\text{Le Chatelier}$ බලපෑම</span> (Compromise Temperature), <span class="key-concept">Chlor-Alkali පටල කෝෂයේ</span> කාර්යභාරය.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <footer class="mt-8 text-center text-gray-600 text-base p-4">
+            <p>මෙම මාර්ගෝපදේශය ඔබට විභාගයේදී උපරිම ලකුණු ලබා ගැනීමට උපකාරී වනු ඇත.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        // JavaScript for Accordion functionality and explicit MathJax typesetting
+        function toggleAccordion(header) {
+            const item = header.parentElement;
+            const content = header.nextElementSibling;
+            const isActive = item.classList.contains('active');
+
+            document.querySelectorAll('.accordion-item.active').forEach(activeItem => {
+                if (activeItem !== item) {
+                    activeItem.classList.remove('active');
+                    activeItem.querySelector('.accordion-content').style.maxHeight = 0;
+                    activeItem.querySelector('.accordion-content').style.padding = '0 1rem';
+                }
+            });
+
+            if (isActive) {
+                item.classList.remove('active');
+                content.style.maxHeight = 0;
+                content.style.padding = '0 1rem';
+            } else {
+                item.classList.add('active');
+                content.style.maxHeight = content.scrollHeight + 100 + "px"; 
+                content.style.padding = '1rem'; 
+
+                // Ensure MathJax renders the new content
+                if (window.MathJax) {
+                    window.MathJax.typesetPromise([content]).catch((err) => console.log('MathJax Error:', err));
+                }
+            }
+        }
+    </script>
+</body>
+</html>
