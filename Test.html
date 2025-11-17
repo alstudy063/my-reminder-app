@@ -11,9 +11,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Ensures the app fills the entire viewport */
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevents external scrollbars */
+        }
         /* Apply the Inter font family */
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f7f7f7; /* Slightly darker background for the full viewport */
         }
         /* Custom scrollbar for horizontal nav */
         .no-scrollbar::-webkit-scrollbar {
@@ -26,6 +35,7 @@
         
         /* Custom background for the individual chat view */
         #individual-chat-section {
+            /* Full screen mode makes the background image less practical, but keeping it for consistency */
             background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQiJKMy4z1AgRUt9Z_0ZLYzDGvk5-6RqIzV2cE4NCJO06hAE_qOI2lK_ui5&s=10');
             background-size: cover;
             background-repeat: no-repeat;
@@ -62,349 +72,359 @@
             max-height: 120px; /* Limit max height to prevent overflow */
             line-height: 1.5;
         }
+        
+        /* Ensures main app content area respects the footer height and allows scrolling */
+        .main-app-content {
+            height: calc(100vh - 6rem); /* 100vh minus footer height (h-24 ~ 6rem) */
+            overflow-y: auto;
+        }
     </style>
 </head>
-<body class="bg-white">
+<body>
 
-    <!-- Main container to simulate app view on desktop -->
-    <div class="max-w-md mx-auto bg-white min-h-screen relative shadow-lg overflow-hidden">
+    <!-- Main container is now w-full h-full, spanning the whole viewport. -->
+    <div class="w-full h-full bg-white relative overflow-hidden">
         
-        <!-- Top Navigation Tabs (Hidden when in chat) -->
-        <nav id="top-nav" class="p-4 pt-6 mb-2">
-            <div class="flex space-x-3 overflow-x-auto no-scrollbar py-2">
-                <button class="px-5 py-2.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 whitespace-nowrap">General</button>
-                <button class="px-5 py-2.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 whitespace-nowrap">Design</button>
-                <button class="px-5 py-2.5 rounded-full text-sm font-medium bg-orange-500 text-white shadow-md whitespace-nowrap">Meetings</button>
-                <button class="px-5 py-2.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 whitespace-nowrap">Develop</button>
-                <button class="px-5 py-2.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 whitespace-nowrap">Marketing</button>
-            </div>
-        </nav>
+        <!-- Wrapper for all scrollable content (Meetings, Chats, User Profile) -->
+        <div id="main-content-wrapper" class="main-app-content">
 
-        <!-- Main Content Area -->
-        <div>
+            <!-- Top Navigation Tabs (Hidden when in chat) -->
+            <nav id="top-nav" class="p-4 pt-6 mb-2">
+                <div class="flex space-x-3 overflow-x-auto no-scrollbar py-2">
+                    <button class="px-5 py-2.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 whitespace-nowrap">General</button>
+                    <button class="px-5 py-2.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 whitespace-nowrap">Design</button>
+                    <button class="px-5 py-2.5 rounded-full text-sm font-medium bg-orange-500 text-white shadow-md whitespace-nowrap">Meetings</button>
+                    <button class="px-5 py-2.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 whitespace-nowrap">Develop</button>
+                    <button class="px-5 py-2.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 whitespace-nowrap">Marketing</button>
+                </div>
+            </nav>
 
-            <!-- Section 1: Meetings -->
-            <main id="meetings-section" class="p-4 pb-32">
-                <!-- Content from previous step -->
-                <section class="mb-8">
-                    <div class="flex justify-between items-center text-center">
-                        <div class="flex flex-col items-center space-y-2 text-gray-500">
-                            <span class="text-xs font-medium">Sun</span>
-                            <span class="font-semibold text-lg">5</span>
+            <!-- Main Content Area -->
+            <div>
+
+                <!-- Section 1: Meetings -->
+                <main id="meetings-section" class="p-4">
+                    <!-- Content from previous step -->
+                    <section class="mb-8">
+                        <div class="flex justify-between items-center text-center max-w-md mx-auto">
+                            <div class="flex flex-col items-center space-y-2 text-gray-500">
+                                <span class="text-xs font-medium">Sun</span>
+                                <span class="font-semibold text-lg">5</span>
+                            </div>
+                            <div class="flex flex-col items-center space-y-2 text-gray-500">
+                                <span class="text-xs font-medium">Mon</span>
+                                <span class="font-semibold text-lg">6</span>
+                            </div>
+                            <div class="flex flex-col items-center space-y-2 text-gray-500">
+                                <span class="text-xs font-medium">Tue</span>
+                                <span class="font-semibold text-lg">7</span>
+                            </div>
+                            <!-- Active Day -->
+                            <div class="flex flex-col items-center space-y-2 text-white bg-indigo-600 rounded-2xl px-4 py-3 shadow-lg">
+                                <span class="text-xs font-medium">Wed</span>
+                                <span class="font-semibold text-lg">8</span>
+                            </div>
+                            <div class="flex flex-col items-center space-y-2 text-gray-500">
+                                <span class="text-xs font-medium">Thu</span>
+                                <span class="font-semibold text-lg">9</span>
+                            </div>
+                            <div class="flex flex-col items-center space-y-2 text-gray-500">
+                                <span class="text-xs font-medium">Fri</span>
+                                <span class="font-semibold text-lg">10</span>
+                            </div>
+                            <div class="flex flex-col items-center space-y-2 text-gray-500">
+                                <span class="text-xs font-medium">Sat</span>
+                                <span class="font-semibold text-lg">11</span>
+                            </div>
                         </div>
-                        <div class="flex flex-col items-center space-y-2 text-gray-500">
-                            <span class="text-xs font-medium">Mon</span>
-                            <span class="font-semibold text-lg">6</span>
+                    </section>
+
+                    <!-- Schedule/Timeline -->
+                    <section class="max-w-md mx-auto">
+                        <div class="relative">
+                            <!-- Timeline Vertical Line -->
+                            <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-100" style="left: 3.25rem;"></div>
+
+                            <!-- Timeline Items -->
+                            <div class="space-y-6">
+                                <!-- Item 1: Weekly Meetup -->
+                                <div class="flex space-x-4">
+                                    <div class="w-10 text-right text-sm text-gray-400 font-medium pt-1">01</div>
+                                    <div class="flex-1 bg-white border border-gray-100 rounded-2xl shadow-sm p-4 border-l-4 border-orange-500">
+                                        <div class="flex justify-between items-start mb-3">
+                                            <div>
+                                                <h3 class="font-semibold text-gray-900">Weekly Meetup</h3>
+                                                <span class="text-xs font-medium bg-green-100 text-green-700 px-2 py-0.5 rounded-full">On Going</span>
+                                            </div>
+                                            <button class="bg-orange-500 text-white text-sm font-medium px-5 py-2 rounded-full shadow-md">Join</button>
+                                        </div>
+                                        <div class="flex justify-between items-center text-sm text-gray-500">
+                                            <div class="flex items-center space-x-2">
+                                                <!-- Google Meet Icon -->
+                                                <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M12.012 11.001c.217.039.43.076.64.112l-1.39-1.39c-.112.21-.21.425-.303.64l1.053 1.053zM10 12c.553 0 1-.447 1-1s-.447-1-1-1-1 .447-1 1 .447 1 1 1z"></path><path fill-rule="evenodd" d="M8 2a1 1 0 00-1 1v2.215c-1.68.384-3 1.83-3 3.553v1.464c0 1.724 1.32 3.17 3 3.553V17a1 1 0 102 0v-2.215c1.68-.384 3-1.83 3-3.553V8.768c0-1.724-1.32-3.17-3-3.553V3a1 1 0 00-1-1H8zm0 4.768a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z" clip-rule="evenodd"></path><path d="M13.25 10c0 .5-.1.975-.28 1.418l1.39 1.39a6.25 6.25 0 000-5.617l-1.39 1.39c.18.443.28.918.28 1.419z"></path></svg>
+                                                <span>Google Meet</span>
+                                            </div>
+                                            <div class="flex items-center space-x-2">
+                                                <span class="text-sm text-gray-500">Members</span>
+                                                <div class="flex -space-x-2">
+                                                    <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/FFC107/FFFFFF?text=A" onerror="this.onerror=null;this.src='https://placehold.co/32x32/FFC107/FFFFFF?text=A';" alt="member 1">
+                                                    <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/4CAF50/FFFFFF?text=B" onerror="this.onerror=null;this.src='https://placehold.co/32x32/4CAF50/FFFFFF?text=B';" alt="member 2">
+                                                    <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/03A9F4/FFFFFF?text=C" onerror="this.onerror=null;this.src='https://placehold.co/32x32/03A9F4/FFFFFF?text=C';" alt="member 3">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Item 2: Break -->
+                                <div class="flex space-x-4">
+                                    <div class="w-10 text-right text-sm text-gray-400 font-medium pt-1">02</div>
+                                    <div class="flex-1 bg-white border border-gray-100 rounded-2xl shadow-sm p-4 border-l-4 border-gray-300">
+                                        <h3 class="font-semibold text-gray-900">Break</h3>
+                                        <p class="text-sm text-gray-500">02:30 PM - 03:30 PM</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Item 3: Design Review -->
+                                <div class="flex space-x-4">
+                                    <div class="w-10 text-right text-sm text-gray-400 font-medium pt-1">01</div>
+                                    <div class="flex-1 bg-white border border-gray-100 rounded-2xl shadow-sm p-4 border-l-4 border-indigo-600">
+                                        <div class="flex justify-between items-start mb-3">
+                                            <div>
+                                                <h3 class="font-semibold text-gray-900">Design Review</h3>
+                                                <p class="text-sm text-gray-500">10:30 AM - 11:30 AM</p>
+                                            </div>
+                                            <button class="text-gray-400 hover:text-indigo-600">
+                                                <!-- Bell Icon -->
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                                            </button>
+                                        </div>
+                                        <div class="flex justify-between items-center text-sm text-gray-500">
+                                            <div class="flex items-center space-x-2">
+                                                <!-- Google Meet Icon -->
+                                                <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M12.012 11.001c.217.039.43.076.64.112l-1.39-1.39c-.112.21-.21.425-.303.64l1.053 1.053zM10 12c.553 0 1-.447 1-1s-.447-1-1-1-1 .447-1 1 .447 1 1 1z"></path><path fill-rule="evenodd" d="M8 2a1 1 0 00-1 1v2.215c-1.68.384-3 1.83-3 3.553v1.464c0 1.724 1.32 3.17 3 3.553V17a1 1 0 102 0v-2.215c1.68-.384 3-1.83 3-3.553V8.768c0-1.724-1.32-3.17-3-3.553V3a1 1 0 00-1-1H8zm0 4.768a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z" clip-rule="evenodd"></path><path d="M13.25 10c0 .5-.1.975-.28 1.418l1.39 1.39a6.25 6.25 0 000-5.617l-1.39 1.39c.18.443.28.918.28 1.419z"></path></svg>
+                                                <span>Google Meet</span>
+                                            </div>
+                                            <div class="flex items-center space-x-2">
+                                                <span class="text-sm text-gray-500">Members</span>
+                                                <div class="flex -space-x-2">
+                                                    <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/F44336/FFFFFF?text=D" onerror="this.onerror=null;this.src='https://placehold.co/32x32/F44336/FFFFFF?text=D';" alt="member 1">
+                                                    <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/9C27B0/FFFFFF?text=E" onerror="this.onerror=null;this.src='https://placehold.co/32x32/9C27B0/FFFFFF?text=E';" alt="member 2">
+                                                    <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/FFEB3B/333333?text=F" onerror="this.onerror=null;this.src='https://placehold.co/32x32/FFEB3B/333333?text=F';" alt="member 3">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Item 4: Q2 Round Up -->
+                                <div class="flex space-x-4">
+                                    <div class="w-10 text-right text-sm text-gray-400 font-medium pt-1">02</div>
+                                    <div class="flex-1 bg-white border border-gray-100 rounded-2xl shadow-sm p-4 border-l-4 border-indigo-600">
+                                        <div class="flex justify-between items-start mb-3">
+                                            <div>
+                                                <h3 class="font-semibold text-gray-900">Q2 Round Up</h3>
+                                                <p class="text-sm text-gray-500">12:30 PM - 02:30 PM</p>
+                                            </div>
+                                            <button class="text-gray-400 hover:text-indigo-600">
+                                                <!-- Bell Icon -->
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                                            </button>
+                                        </div>
+                                        <div class="flex justify-between items-center text-sm text-gray-500">
+                                            <div class="flex items-center space-x-2">
+                                                <!-- Google Meet Icon -->
+                                                <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M12.012 11.001c.217.039.43.076.64.112l-1.39-1.39c-.112.21-.21.425-.303.64l1.053 1.053zM10 12c.553 0 1-.447 1-1s-.447-1-1-1-1 .447-1 1 .447 1 1 1z"></path><path fill-rule="evenodd" d="M8 2a1 1 0 00-1 1v2.215c-1.68.384-3 1.83-3 3.553v1.464c0 1.724 1.32 3.17 3 3.553V17a1 1 0 102 0v-2.215c1.68-.384 3-1.83 3-3.553V8.768c0-1.724-1.32-3.17-3-3.553V3a1 1 0 00-1-1H8zm0 4.768a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z" clip-rule="evenodd"></path><path d="M13.25 10c0 .5-.1.975-.28 1.418l1.39 1.39a6.25 6.25 0 000-5.617l-1.39 1.39c.18.443.28.918.28 1.419z"></path></svg>
+                                                <span>Google Meet</span>
+                                            </div>
+                                            <div class="flex items-center space-x-2">
+                                                <span class="text-sm text-gray-500">Members</span>
+                                                <div class="flex -space-x-2">
+                                                    <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/FF9800/FFFFFF?text=G" onerror="this.onerror=null;this.src='https://placehold.co/32x32/FF9800/FFFFFF?text=G';" alt="member 1">
+                                                    <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/795548/FFFFFF?text=H" onerror="this.onerror=null;this.src='https://placehold.co/32x32/795548/FFFFFF?text=H';" alt="member 2">
+                                                    <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/607D8B/FFFFFF?text=I" onerror="this.onerror=null;this.src='https://placehold.co/32x32/607D8B/FFFFFF?text=I';" alt="member 3">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex flex-col items-center space-y-2 text-gray-500">
-                            <span class="text-xs font-medium">Tue</span>
-                            <span class="font-semibold text-lg">7</span>
+                    </section>
+                </main>
+
+                <!-- Section 2: Chat List -->
+                <section id="chat-list-section" class="hidden p-4">
+                    <h1 class="text-3xl font-bold mb-6 text-gray-900 max-w-md mx-auto">Chats</h1>
+                    <div class="space-y-4 max-w-md mx-auto">
+                        <!-- Chat Item 1 (One Goal) - NOW WITH IDs FOR DYNAMIC UPDATING -->
+                        <div class="chat-item flex items-center space-x-4 p-3 rounded-2xl hover:bg-gray-100 cursor-pointer" data-chat-name="One Goal">
+                            <img class="w-12 h-12 rounded-full" src="https://placehold.co/64x64/FFC107/FFFFFF?text=A" onerror="this.onerror=null;this.src='https://placehold.co/64x64/FFC107/FFFFFF?text=A';" alt="Avatar">
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900">One Goal</h3>
+                                <!-- TARGET ELEMENT FOR LAST MESSAGE PREVIEW -->
+                                <p class="text-sm text-gray-500 truncate" id="one-goal-last-message">Hey, are we still on for the design review?</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-gray-400" id="one-goal-last-message-time">10:30 AM</span>
+                                <span class="block text-xs bg-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center font-semibold ml-auto mt-1">2</span>
+                            </div>
                         </div>
-                        <!-- Active Day -->
-                        <div class="flex flex-col items-center space-y-2 text-white bg-indigo-600 rounded-2xl px-4 py-3 shadow-lg">
-                            <span class="text-xs font-medium">Wed</span>
-                            <span class="font-semibold text-lg">8</span>
+                        <!-- Chat Item 2 (Design Team) -->
+                        <div class="chat-item flex items-center space-x-4 p-3 rounded-2xl hover:bg-gray-100 cursor-pointer" data-chat-name="Design Team">
+                            <img class="w-12 h-12 rounded-full" src="https://placehold.co/64x64/4CAF50/FFFFFF?text=B" onerror="this.onerror=null;this.src='https://placehold.co/64x64/4CAF50/FFFFFF?text=B';" alt="Avatar">
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900">Design Team</h3>
+                                <p class="text-sm text-gray-500 truncate">Sarah: Just pushed the latest mockups.</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-gray-400">Yesterday</span>
+                            </div>
                         </div>
-                        <div class="flex flex-col items-center space-y-2 text-gray-500">
-                            <span class="text-xs font-medium">Thu</span>
-                            <span class="font-semibold text-lg">9</span>
-                        </div>
-                        <div class="flex flex-col items-center space-y-2 text-gray-500">
-                            <span class="text-xs font-medium">Fri</span>
-                            <span class="font-semibold text-lg">10</span>
-                        </div>
-                        <div class="flex flex-col items-center space-y-2 text-gray-500">
-                            <span class="text-xs font-medium">Sat</span>
-                            <span class="font-semibold text-lg">11</span>
+                        <!-- Chat Item 3 (Chris Lee) -->
+                        <div class="chat-item flex items-center space-x-4 p-3 rounded-2xl hover:bg-gray-100 cursor-pointer" data-chat-name="Chris Lee">
+                            <img class="w-12 h-12 rounded-full" src="https://placehold.co/64x64/03A9F4/FFFFFF?text=C" onerror="this.onerror=null;this.src='https://placehold.co/64x64/03A9F4/FFFFFF?text=C';" alt="Avatar">
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900">Chris Lee</h3>
+                                <p class="text-sm text-gray-500 truncate">Got it, thanks!</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-gray-400">Mon</span>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Schedule/Timeline -->
-                <section>
-                    <div class="relative">
-                        <!-- Timeline Vertical Line -->
-                        <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-100" style="left: 3.25rem;"></div>
-
-                        <!-- Timeline Items -->
-                        <div class="space-y-6">
-                            <!-- Item 1: Weekly Meetup -->
-                            <div class="flex space-x-4">
-                                <div class="w-10 text-right text-sm text-gray-400 font-medium pt-1">01</div>
-                                <div class="flex-1 bg-white border border-gray-100 rounded-2xl shadow-sm p-4 border-l-4 border-orange-500">
-                                    <div class="flex justify-between items-start mb-3">
-                                        <div>
-                                            <h3 class="font-semibold text-gray-900">Weekly Meetup</h3>
-                                            <span class="text-xs font-medium bg-green-100 text-green-700 px-2 py-0.5 rounded-full">On Going</span>
-                                        </div>
-                                        <button class="bg-orange-500 text-white text-sm font-medium px-5 py-2 rounded-full shadow-md">Join</button>
-                                    </div>
-                                    <div class="flex justify-between items-center text-sm text-gray-500">
-                                        <div class="flex items-center space-x-2">
-                                            <!-- Google Meet Icon -->
-                                            <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M12.012 11.001c.217.039.43.076.64.112l-1.39-1.39c-.112.21-.21.425-.303.64l1.053 1.053zM10 12c.553 0 1-.447 1-1s-.447-1-1-1-1 .447-1 1 .447 1 1 1z"></path><path fill-rule="evenodd" d="M8 2a1 1 0 00-1 1v2.215c-1.68.384-3 1.83-3 3.553v1.464c0 1.724 1.32 3.17 3 3.553V17a1 1 0 102 0v-2.215c1.68-.384 3-1.83 3-3.553V8.768c0-1.724-1.32-3.17-3-3.553V3a1 1 0 00-1-1H8zm0 4.768a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z" clip-rule="evenodd"></path><path d="M13.25 10c0 .5-.1.975-.28 1.418l1.39 1.39a6.25 6.25 0 000-5.617l-1.39 1.39c.18.443.28.918.28 1.419z"></path></svg>
-                                            <span>Google Meet</span>
-                                        </div>
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-sm text-gray-500">Members</span>
-                                            <div class="flex -space-x-2">
-                                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/FFC107/FFFFFF?text=A" onerror="this.onerror=null;this.src='https://placehold.co/32x32/FFC107/FFFFFF?text=A';" alt="member 1">
-                                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/4CAF50/FFFFFF?text=B" onerror="this.onerror=null;this.src='https://placehold.co/32x32/4CAF50/FFFFFF?text=B';" alt="member 2">
-                                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/03A9F4/FFFFFF?text=C" onerror="this.onerror=null;this.src='https://placehold.co/32x32/03A9F4/FFFFFF?text=C';" alt="member 3">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- ... other meetings content ... -->
-                            
-                            <!-- Item 2: Break -->
-                            <div class="flex space-x-4">
-                                <div class="w-10 text-right text-sm text-gray-400 font-medium pt-1">02</div>
-                                <div class="flex-1 bg-white border border-gray-100 rounded-2xl shadow-sm p-4 border-l-4 border-gray-300">
-                                    <h3 class="font-semibold text-gray-900">Break</h3>
-                                    <p class="text-sm text-gray-500">02:30 PM - 03:30 PM</p>
-                                </div>
-                            </div>
-                            
-                            <!-- Item 3: Design Review -->
-                            <div class="flex space-x-4">
-                                <div class="w-10 text-right text-sm text-gray-400 font-medium pt-1">01</div> <!-- Note: Image repeats '01', '02' -->
-                                <div class="flex-1 bg-white border border-gray-100 rounded-2xl shadow-sm p-4 border-l-4 border-indigo-600">
-                                    <div class="flex justify-between items-start mb-3">
-                                        <div>
-                                            <h3 class="font-semibold text-gray-900">Design Review</h3>
-                                            <p class="text-sm text-gray-500">10:30 AM - 11:30 AM</p>
-                                        </div>
-                                        <button class="text-gray-400 hover:text-indigo-600">
-                                            <!-- Bell Icon -->
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center text-sm text-gray-500">
-                                        <div class="flex items-center space-x-2">
-                                            <!-- Google Meet Icon -->
-                                            <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M12.012 11.001c.217.039.43.076.64.112l-1.39-1.39c-.112.21-.21.425-.303.64l1.053 1.053zM10 12c.553 0 1-.447 1-1s-.447-1-1-1-1 .447-1 1 .447 1 1 1z"></path><path fill-rule="evenodd" d="M8 2a1 1 0 00-1 1v2.215c-1.68.384-3 1.83-3 3.553v1.464c0 1.724 1.32 3.17 3 3.553V17a1 1 0 102 0v-2.215c1.68-.384 3-1.83 3-3.553V8.768c0-1.724-1.32-3.17-3-3.553V3a1 1 0 00-1-1H8zm0 4.768a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z" clip-rule="evenodd"></path><path d="M13.25 10c0 .5-.1.975-.28 1.418l1.39 1.39a6.25 6.25 0 000-5.617l-1.39 1.39c.18.443.28.918.28 1.419z"></path></svg>
-                                            <span>Google Meet</span>
-                                        </div>
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-sm text-gray-500">Members</span>
-                                            <div class="flex -space-x-2">
-                                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/F44336/FFFFFF?text=D" onerror="this.onerror=null;this.src='https://placehold.co/32x32/F44336/FFFFFF?text=D';" alt="member 1">
-                                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/9C27B0/FFFFFF?text=E" onerror="this.onerror=null;this.src='https://placehold.co/32x32/9C27B0/FFFFFF?text=E';" alt="member 2">
-                                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/FFEB3B/333333?text=F" onerror="this.onerror=null;this.src='https://placehold.co/32x32/FFEB3B/333333?text=F';" alt="member 3">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Item 4: Q2 Round Up -->
-                            <div class="flex space-x-4">
-                                <div class="w-10 text-right text-sm text-gray-400 font-medium pt-1">02</div>
-                                <div class="flex-1 bg-white border border-gray-100 rounded-2xl shadow-sm p-4 border-l-4 border-indigo-600">
-                                    <div class="flex justify-between items-start mb-3">
-                                        <div>
-                                            <h3 class="font-semibold text-gray-900">Q2 Round Up</h3>
-                                            <p class="text-sm text-gray-500">12:30 PM - 02:30 PM</p>
-                                        </div>
-                                        <button class="text-gray-400 hover:text-indigo-600">
-                                            <!-- Bell Icon -->
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center text-sm text-gray-500">
-                                        <div class="flex items-center space-x-2">
-                                            <!-- Google Meet Icon -->
-                                            <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M12.012 11.001c.217.039.43.076.64.112l-1.39-1.39c-.112.21-.21.425-.303.64l1.053 1.053zM10 12c.553 0 1-.447 1-1s-.447-1-1-1-1 .447-1 1 .447 1 1 1z"></path><path fill-rule="evenodd" d="M8 2a1 1 0 00-1 1v2.215c-1.68.384-3 1.83-3 3.553v1.464c0 1.724 1.32 3.17 3 3.553V17a1 1 0 102 0v-2.215c1.68-.384 3-1.83 3-3.553V8.768c0-1.724-1.32-3.17-3-3.553V3a1 1 0 00-1-1H8zm0 4.768a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z" clip-rule="evenodd"></path><path d="M13.25 10c0 .5-.1.975-.28 1.418l1.39 1.39a6.25 6.25 0 000-5.617l-1.39 1.39c.18.443.28.918.28 1.419z"></path></svg>
-                                            <span>Google Meet</span>
-                                        </div>
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-sm text-gray-500">Members</span>
-                                            <div class="flex -space-x-2">
-                                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/FF9800/FFFFFF?text=G" onerror="this.onerror=null;this.src='https://placehold.co/32x32/FF9800/FFFFFF?text=G';" alt="member 1">
-                                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/795548/FFFFFF?text=H" onerror="this.onerror=null;this.src='https://placehold.co/32x32/795548/FFFFFF?text=H';" alt="member 2">
-                                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://placehold.co/32x32/607D8B/FFFFFF?text=I" onerror="this.onerror=null;this.src='https://placehold.co/32x32/607D8B/FFFFFF?text=I';" alt="member 3">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Section 3: User Profile -->
+                <section id="user-section" class="hidden p-4">
+                    <h1 class="text-3xl font-bold mb-6 text-gray-900 max-w-md mx-auto">Profile</h1>
+                    <!-- Profile Card -->
+                    <div class="flex flex-col items-center bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6 max-w-md mx-auto">
+                        <img class="w-24 h-24 rounded-full shadow-lg" src="https://placehold.co/128x128/673AB7/FFFFFF?text=U" onerror="this.onerror=null;this.src='https://placehold.co/128x128/673AB7/FFFFFF?text=U';" alt="User Profile">
+                        <h2 class="text-2xl font-semibold mt-4 text-gray-900">Udara</h2>
+                        <p class="text-gray-500">Project Manager</p>
+                        <button class="mt-4 bg-indigo-600 text-white text-sm font-medium px-5 py-2 rounded-full shadow-md">Edit Profile</button>
+                    </div>
+                    <!-- Settings List -->
+                    <div class="space-y-2 max-w-md mx-auto">
+                        <a href="#" class="flex justify-between items-center p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:bg-gray-50">
+                            <span class="font-medium text-gray-700">Account Settings</span>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </a>
+                        <a href="#" class="flex justify-between items-center p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:bg-gray-50">
+                            <span class="font-medium text-gray-700">Notifications</span>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </a>
+                        <a href="#" class="flex justify-between items-center p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:bg-gray-50">
+                            <span class="font-medium text-gray-700">App Appearance</span>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </a>
+                        <a href="#" class="flex justify-between items-center p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:bg-gray-50 text-red-600">
+                            <span class="font-medium">Log Out</span>
+                        </a>
                     </div>
                 </section>
-            </main>
+                
+            </div> <!-- End of content sections wrapper -->
 
-            <!-- Section 2: Chat List -->
-            <section id="chat-list-section" class="hidden p-4 pb-32">
-                <h1 class="text-3xl font-bold mb-6 text-gray-900">Chats</h1>
-                <div class="space-y-4">
-                    <!-- Chat Item 1 (One Goal) - NOW WITH IDs FOR DYNAMIC UPDATING -->
-                    <div class="chat-item flex items-center space-x-4 p-3 rounded-2xl hover:bg-gray-100 cursor-pointer" data-chat-name="One Goal">
-                        <img class="w-12 h-12 rounded-full" src="https://placehold.co/64x64/FFC107/FFFFFF?text=A" onerror="this.onerror=null;this.src='https://placehold.co/64x64/FFC107/FFFFFF?text=A';" alt="Avatar">
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-gray-900">One Goal</h3>
-                            <!-- TARGET ELEMENT FOR LAST MESSAGE PREVIEW -->
-                            <p class="text-sm text-gray-500 truncate" id="one-goal-last-message">Hey, are we still on for the design review?</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-xs text-gray-400" id="one-goal-last-message-time">10:30 AM</span>
-                            <span class="block text-xs bg-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center font-semibold ml-auto mt-1">2</span>
-                        </div>
-                    </div>
-                    <!-- Chat Item 2 (Design Team) -->
-                    <div class="chat-item flex items-center space-x-4 p-3 rounded-2xl hover:bg-gray-100 cursor-pointer" data-chat-name="Design Team">
-                        <img class="w-12 h-12 rounded-full" src="https://placehold.co/64x64/4CAF50/FFFFFF?text=B" onerror="this.onerror=null;this.src='https://placehold.co/64x64/4CAF50/FFFFFF?text=B';" alt="Avatar">
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-gray-900">Design Team</h3>
-                            <p class="text-sm text-gray-500 truncate">Sarah: Just pushed the latest mockups.</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-xs text-gray-400">Yesterday</span>
-                        </div>
-                    </div>
-                    <!-- Chat Item 3 (Chris Lee) -->
-                    <div class="chat-item flex items-center space-x-4 p-3 rounded-2xl hover:bg-gray-100 cursor-pointer" data-chat-name="Chris Lee">
-                        <img class="w-12 h-12 rounded-full" src="https://placehold.co/64x64/03A9F4/FFFFFF?text=C" onerror="this.onerror=null;this.src='https://placehold.co/64x64/03A9F4/FFFFFF?text=C';" alt="Avatar">
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-gray-900">Chris Lee</h3>
-                            <p class="text-sm text-gray-500 truncate">Got it, thanks!</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-xs text-gray-400">Mon</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
+        </div> <!-- End of main-content-wrapper (Scrollable Area) -->
 
-            <!-- Section 3: User Profile -->
-            <section id="user-section" class="hidden p-4 pb-32">
-                <h1 class="text-3xl font-bold mb-6 text-gray-900">Profile</h1>
-                <!-- Profile Card -->
-                <div class="flex flex-col items-center bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6">
-                    <img class="w-24 h-24 rounded-full shadow-lg" src="https://placehold.co/128x128/673AB7/FFFFFF?text=U" onerror="this.onerror=null;this.src='https://placehold.co/128x128/673AB7/FFFFFF?text=U';" alt="User Profile">
-                    <h2 class="text-2xl font-semibold mt-4 text-gray-900">Udara</h2>
-                    <p class="text-gray-500">Project Manager</p>
-                    <button class="mt-4 bg-indigo-600 text-white text-sm font-medium px-5 py-2 rounded-full shadow-md">Edit Profile</button>
-                </div>
-                <!-- Settings List -->
-                <div class="space-y-2">
-                    <a href="#" class="flex justify-between items-center p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:bg-gray-50">
-                        <span class="font-medium text-gray-700">Account Settings</span>
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </a>
-                    <a href="#" class="flex justify-between items-center p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:bg-gray-50">
-                        <span class="font-medium text-gray-700">Notifications</span>
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </a>
-                    <a href="#" class="flex justify-between items-center p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:bg-gray-50">
-                        <span class="font-medium text-gray-700">App Appearance</span>
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </a>
-                    <a href="#" class="flex justify-between items-center p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:bg-gray-50 text-red-600">
-                        <span class="font-medium">Log Out</span>
-                    </a>
-                </div>
-            </section>
+        <!-- Section 4: Individual Chat (Absolute positioning ensures it overlays the entire screen when active) -->
+        <section id="individual-chat-section" class="hidden absolute top-0 left-0 right-0 bottom-0 w-full h-full flex flex-col z-10">
+            <!-- Chat Header -->
+            <header class="flex items-center p-4 border-b border-gray-200 flex-shrink-0 bg-white/90 backdrop-blur-sm">
+                <button id="back-to-chat-list-btn" class="text-gray-600 hover:text-gray-900">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <img id="chat-header-avatar" class="w-10 h-10 rounded-full mx-3" src="" onerror="this.onerror=null;this.src='https://placehold.co/64x64/673AB7/FFFFFF?text=C';" alt="Avatar">
+                <h2 id="chat-header-name" class="text-lg font-semibold text-gray-900"></h2>
+            </header>
             
-            <!-- Section 4: Individual Chat -->
-            <section id="individual-chat-section" class="hidden absolute top-0 left-0 right-0 bottom-0 h-full flex flex-col z-10">
-                <!-- Chat Header -->
-                <header class="flex items-center p-4 border-b border-gray-200 flex-shrink-0 bg-white/90 backdrop-blur-sm">
-                    <button id="back-to-chat-list-btn" class="text-gray-600 hover:text-gray-900">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            <!-- EMOJI REACTION BAR -->
+            <div id="emoji-bar" class="absolute z-20 bg-white shadow-xl rounded-full p-1 border border-gray-100 transition-opacity duration-150" style="top: 0; left: 0;">
+                <button data-emoji="👍" class="p-2 hover:bg-gray-100 rounded-full text-xl leading-none transition-transform hover:scale-110">👍</button>
+                <button data-emoji="❤️" class="p-2 hover:bg-gray-100 rounded-full text-xl leading-none transition-transform hover:scale-110">❤️</button>
+                <button data-emoji="🏆" class="p-2 hover:bg-gray-100 rounded-full text-xl leading-none transition-transform hover:scale-110">🏆</button>
+                <button data-emoji="🤔" class="p-2 hover:bg-gray-100 rounded-full text-xl leading-none transition-transform hover:scale-110">🤔</button>
+                <button data-emoji="🙏" class="p-2 hover:bg-gray-100 rounded-full text-xl leading-none transition-transform hover:scale-110">🙏</button>
+            </div>
+
+            <!-- Message Area (Scrollable) -->
+            <div id="message-area" class="flex-1 p-4 space-y-4 overflow-y-auto max-w-lg mx-auto w-full">
+                <!-- Messages will be dynamically added here -->
+            </div>
+            
+            <!-- Centered Channel Broadcast Message -->
+            <div id="messaging-not-allowed" class="hidden absolute inset-0 flex items-center justify-center p-8 z-10 pointer-events-none">
+                <div class="bg-gray-800/80 backdrop-blur-sm text-white p-4 rounded-xl text-center shadow-2xl max-w-xs transition-opacity duration-300">
+                    <!-- Broadcast Icon (e.g., Arrows up and down) -->
+                    <svg class="w-6 h-6 mx-auto mb-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.55 4.55l-4.55 4.55M12 4v16m-3-6l-4.55 4.55L9 19.55"></path></svg>
+                    <p class="font-medium">This is a broadcast channel.</p>
+                    <p class="text-sm text-gray-300">Replies are not allowed.</p>
+                </div>
+            </div>
+
+            <!-- Chat Footer (NEW WHATSAPP/TELEGRAM STYLE INPUT) -->
+            <footer id="chat-footer" class="p-3 border-t border-gray-200 flex-shrink-0 bg-white/90 backdrop-blur-sm">
+                 <div id="message-input-bar" class="hidden flex items-end space-x-2 max-w-lg mx-auto">
+                    
+                    <!-- Attachment Button (left-most) -->
+                    <button id="attachment-btn" class="text-gray-500 hover:text-gray-700 p-3 rounded-full mb-1">
+                        <!-- Plus/Attachment Icon -->
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     </button>
-                    <img id="chat-header-avatar" class="w-10 h-10 rounded-full mx-3" src="" onerror="this.onerror=null;this.src='https://placehold.co/64x64/673AB7/FFFFFF?text=C';" alt="Avatar">
-                    <h2 id="chat-header-name" class="text-lg font-semibold text-gray-900"></h2>
-                </header>
-                
-                <!-- EMOJI REACTION BAR -->
-                <div id="emoji-bar" class="absolute z-20 bg-white shadow-xl rounded-full p-1 border border-gray-100 transition-opacity duration-150" style="top: 0; left: 0;">
-                    <button data-emoji="👍" class="p-2 hover:bg-gray-100 rounded-full text-xl leading-none transition-transform hover:scale-110">👍</button>
-                    <button data-emoji="❤️" class="p-2 hover:bg-gray-100 rounded-full text-xl leading-none transition-transform hover:scale-110">❤️</button>
-                    <button data-emoji="🏆" class="p-2 hover:bg-gray-100 rounded-full text-xl leading-none transition-transform hover:scale-110">🏆</button>
-                    <button data-emoji="🤔" class="p-2 hover:bg-gray-100 rounded-full text-xl leading-none transition-transform hover:scale-110">🤔</button>
-                    <button data-emoji="🙏" class="p-2 hover:bg-gray-100 rounded-full text-xl leading-none transition-transform hover:scale-110">🙏</button>
-                </div>
-
-                <!-- Message Area (Scrollable) -->
-                <div id="message-area" class="flex-1 p-4 space-y-4 overflow-y-auto">
-                    <!-- Messages will be dynamically added here -->
-                </div>
-                
-                <!-- Centered Channel Broadcast Message -->
-                <div id="messaging-not-allowed" class="hidden absolute inset-0 flex items-center justify-center p-8 z-10 pointer-events-none">
-                    <div class="bg-gray-800/80 backdrop-blur-sm text-white p-4 rounded-xl text-center shadow-2xl max-w-xs transition-opacity duration-300">
-                        <!-- Broadcast Icon (e.g., Arrows up and down) -->
-                        <svg class="w-6 h-6 mx-auto mb-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.55 4.55l-4.55 4.55M12 4v16m-3-6l-4.55 4.55L9 19.55"></path></svg>
-                        <p class="font-medium">This is a broadcast channel.</p>
-                        <p class="text-sm text-gray-300">Replies are not allowed.</p>
-                    </div>
-                </div>
-
-                <!-- Chat Footer (NEW WHATSAPP/TELEGRAM STYLE INPUT) -->
-                <footer id="chat-footer" class="p-3 border-t border-gray-200 flex-shrink-0 bg-white/90 backdrop-blur-sm">
-                    <div id="message-input-bar" class="hidden flex items-end space-x-2">
+                    
+                    <!-- Input Wrapper (Textarea + Emoji Icon) -->
+                    <div class="flex-1 relative">
+                        <!-- Note: Changed from <input> to <textarea> and added resize-none -->
+                        <textarea id="message-input" placeholder="Message" rows="1" class="w-full resize-none border border-gray-300 bg-white rounded-3xl py-2 pl-4 pr-12 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 overflow-hidden" style="min-height: 48px;"></textarea>
                         
-                        <!-- Attachment Button (left-most) -->
-                        <button id="attachment-btn" class="text-gray-500 hover:text-gray-700 p-3 rounded-full mb-1">
-                            <!-- Plus/Attachment Icon -->
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        </button>
-                        
-                        <!-- Input Wrapper (Textarea + Emoji Icon) -->
-                        <div class="flex-1 relative">
-                            <!-- Note: Changed from <input> to <textarea> and added resize-none -->
-                            <textarea id="message-input" placeholder="Message" rows="1" class="w-full resize-none border border-gray-300 bg-white rounded-3xl py-2 pl-4 pr-12 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 overflow-hidden" style="min-height: 48px;"></textarea>
-                            
-                            <!-- Emoji Button (Positioned absolute inside textarea area) -->
-                            <button id="emoji-input-btn" class="absolute right-0 bottom-0 text-gray-500 hover:text-gray-700 p-2.5 mb-0.5 mr-1.5 rounded-full">
-                                <!-- Smile/Emoji Icon -->
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </button>
-                        </div>
-
-                        <!-- Send/Mic FAB -->
-                        <!-- NOTE: The old 'send-message-btn' is replaced by 'send-mic-btn' -->
-                        <button id="send-mic-btn" class="bg-orange-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg flex-shrink-0 mb-0.5">
-                            <!-- Send Icon (Visible by default in code, hidden/shown dynamically) -->
-                            <svg id="send-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                            <!-- Mic Icon (Hidden by default in code, hidden/shown dynamically) -->
-                            <svg id="mic-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7v0a7 7 0 01-7-7v0m14 0a7 7 0 00-7-7v0a7 7 0 00-7 7m14 0h1M5 11h-1"></path></svg>
+                        <!-- Emoji Button (Positioned absolute inside textarea area) -->
+                        <button id="emoji-input-btn" class="absolute right-0 bottom-0 text-gray-500 hover:text-gray-700 p-2.5 mb-0.5 mr-1.5 rounded-full">
+                            <!-- Smile/Emoji Icon -->
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </button>
                     </div>
-                </footer>
-            </section>
 
-
-        </div> <!-- End of content sections wrapper -->
+                    <!-- Send/Mic FAB -->
+                    <button id="send-mic-btn" class="bg-orange-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg flex-shrink-0 mb-0.5">
+                        <!-- Send Icon (Visible by default in code, hidden/shown dynamically) -->
+                        <svg id="send-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                        <!-- Mic Icon (Hidden by default in code, hidden/shown dynamically) -->
+                        <svg id="mic-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7v0a7 7 0 01-7-7v0m14 0a7 7 0 00-7-7v0a7 7 0 00-7 7m14 0h1M5 11h-1"></path></svg>
+                    </button>
+                </div>
+            </footer>
+        </section>
 
 
         <!-- Bottom Floating Navigation (Footer) -->
-        <footer id="bottom-nav-footer" class="fixed bottom-0 left-0 right-0 max-w-md mx-auto h-24 z-20">
-            <div class="absolute bottom-5 left-5 right-5 flex justify-between items-center">
-                
-                <!-- Left Icon Group -->
-                <div class="flex items-center bg-gray-800 shadow-xl rounded-full px-5 py-3 space-x-6">
-                    <!-- Active Home Icon -->
-                    <button id="home-btn" class="nav-btn bg-white text-gray-900 rounded-full p-2">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+        <footer id="bottom-nav-footer" class="fixed bottom-0 left-0 right-0 h-24 z-20">
+            <!-- Inner wrapper to keep navigation constrained and centered on large screens -->
+            <div class="max-w-md mx-auto h-full relative">
+                <div class="absolute bottom-5 left-5 right-5 flex justify-between items-center">
+                    
+                    <!-- Left Icon Group -->
+                    <div class="flex items-center bg-gray-800 shadow-xl rounded-full px-5 py-3 space-x-6">
+                        <!-- Active Home Icon -->
+                        <button id="home-btn" class="nav-btn bg-white text-gray-900 rounded-full p-2">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+                        </button>
+                        <!-- Chat Icon -->
+                        <button id="chat-btn" class="nav-btn text-gray-400 hover:text-white rounded-full p-2">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                        </button>
+                        <!-- Person Icon -->
+                        <button id="user-btn" class="nav-btn text-gray-400 hover:text-white rounded-full p-2">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Right Floating Action Button (FAB) -->
+                    <button class="bg-orange-500 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-xl transform transition-transform hover:scale-105">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                     </button>
-                    <!-- Chat Icon -->
-                    <button id="chat-btn" class="nav-btn text-gray-400 hover:text-white rounded-full p-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                    </button>
-                    <!-- Person Icon -->
-                    <button id="user-btn" class="nav-btn text-gray-400 hover:text-white rounded-full p-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                    </button>
+                    
                 </div>
-                
-                <!-- Right Floating Action Button (FAB) -->
-                <button class="bg-orange-500 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-xl transform transition-transform hover:scale-105">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                </button>
-                
             </div>
         </footer>
 
@@ -422,6 +442,7 @@
         const chatListSection = document.getElementById('chat-list-section');
         const userSection = document.getElementById('user-section');
         const individualChatSection = document.getElementById('individual-chat-section');
+        // Note: The main sections are no longer hidden/shown directly, but their parent wrapper handles scroll
         const contentSections = [meetingsSection, chatListSection, userSection, individualChatSection];
 
         const topNav = document.getElementById('top-nav');
@@ -591,10 +612,13 @@
 
         // --- Main Navigation Logic (Unchanged) ---
         function handleNavClick(targetBtn, targetSectionId) {
-            // Hide all content sections
-            contentSections.forEach(section => {
-                section.classList.add('hidden');
-            });
+            // Hide all main content sections
+            meetingsSection.classList.add('hidden');
+            chatListSection.classList.add('hidden');
+            userSection.classList.add('hidden');
+            // Ensure individual chat is hidden
+            individualChatSection.classList.add('hidden');
+
 
             // Hide emoji bar on navigation change
             emojiBar.classList.remove('emoji-show');
@@ -622,8 +646,10 @@
 
         // --- Chat Opening Logic (Updated to use renderChatHistory) ---
         function openChat(chatName, avatarSrc) {
+            // Hide main screen content wrapper
+            document.getElementById('main-content-wrapper').classList.add('hidden');
+
             // Navigation changes
-            chatListSection.classList.add('hidden');
             individualChatSection.classList.remove('hidden');
             topNav.classList.add('hidden'); 
             bottomNavFooter.classList.add('hidden'); // Hide bottom nav in chat view
@@ -664,6 +690,62 @@
         }
 
         // --- Message Click (Event Delegation) ---
+        function positionEmojiBar(bubble) {
+            // Find the index of the message that was reacted to
+            const chatName = currentChatName();
+            const bubbles = messageArea.querySelectorAll('.message-bubble');
+            const messageIndex = Array.from(bubbles).indexOf(bubble);
+
+            // 1. Get the bounding box of the message bubble relative to the viewport
+            const bubbleRect = bubble.getBoundingClientRect();
+            
+            // 2. Get the bounding box of the message area (scrollable container)
+            const messageAreaRect = messageArea.getBoundingClientRect();
+
+            // 3. Calculate the absolute position for the emoji bar relative to the individual-chat-section
+            
+            // Use static dimensions for the emoji bar width for reliable positioning (approx. 200px wide)
+            const emojiBarWidth = 200; 
+
+            // Position relative to the top of the message area viewport, then convert to absolute position within the whole chat section
+            let topPosition = (bubbleRect.top - messageAreaRect.top) + messageArea.scrollTop - 50; // 50px offset above the bubble
+
+            // If positioning causes it to go off the top of the scrollable area, adjust to be below
+            if (topPosition < messageArea.scrollTop + 10) {
+                topPosition = (bubbleRect.bottom - messageAreaRect.top) + messageArea.scrollTop + 10; 
+            }
+
+            let leftPosition;
+            const isUser = bubble.dataset.isUser === 'true';
+            
+            // Center content area for chat is max-w-lg. We must position relative to the bubble's position within the messageArea.
+            const bubbleLeftRelativeToContainer = bubbleRect.left - messageAreaRect.left;
+
+            if (isUser) {
+                // For user's message (right side), align bar to the right edge of the bubble
+                leftPosition = bubbleLeftRelativeToContainer + bubbleRect.width - emojiBarWidth;
+            } else {
+                // For other person's message (left side), align bar to the left edge of the bubble
+                leftPosition = bubbleLeftRelativeToContainer;
+            }
+            
+            // Apply the position to the emoji bar
+            emojiBar.style.top = `${topPosition}px`;
+            emojiBar.style.left = `${leftPosition}px`;
+            emojiBar.classList.add('emoji-show');
+            
+            // Make the emoji bar sticky relative to the message area
+            const chatSectionRect = individualChatSection.getBoundingClientRect();
+            
+            // Final position relative to the chat section (which is the absolute parent)
+            const emojiBarTop = bubbleRect.top - chatSectionRect.top - 50;
+            
+            // Apply the position and show the bar
+            emojiBar.style.top = `${emojiBarTop}px`;
+            emojiBar.style.left = `${bubbleRect.left + (isUser ? bubbleRect.width - emojiBarWidth : 0)}px`;
+            emojiBar.classList.add('emoji-show');
+        }
+        
         messageArea.addEventListener('click', (event) => {
             // Find the closest message bubble element
             const bubble = event.target.closest('.message-bubble');
@@ -677,45 +759,7 @@
 
             // A bubble was clicked!
             activeMessage = bubble;
-            
-            // 1. Get the bounding box of the message bubble relative to the viewport
-            const bubbleRect = bubble.getBoundingClientRect();
-            
-            // 2. Get the bounding box of the individual-chat-section (to get its absolute position context)
-            const chatSectionRect = individualChatSection.getBoundingClientRect();
-
-            // 3. Calculate the absolute position for the emoji bar relative to the chat section
-            
-            // Use static dimensions for the emoji bar width for reliable positioning (approx. 200px wide)
-            const emojiBarWidth = 200; 
-
-            let topPosition = bubbleRect.top - chatSectionRect.top - 50; // 50px offset above the bubble
-
-            // Prevent bar from going off the top of the screen
-            if (topPosition < 10) {
-                topPosition = bubbleRect.bottom - chatSectionRect.top + 10; // Position below instead
-            }
-
-            let leftPosition;
-            const isUser = bubble.dataset.isUser === 'true';
-            if (isUser) {
-                // For user's message (right side), align bar to the right edge of the bubble
-                leftPosition = bubbleRect.right - chatSectionRect.left - emojiBarWidth;
-            } else {
-                // For other person's message (left side), align bar to the left edge of the bubble
-                leftPosition = bubbleRect.left - chatSectionRect.left;
-            }
-            
-            // Apply the position and show the bar
-            emojiBar.style.top = `${topPosition}px`;
-            emojiBar.style.left = `${leftPosition}px`;
-            emojiBar.classList.add('emoji-show');
-
-            // Scroll the chat section to ensure the bar is visible (if needed)
-            messageArea.scrollTo({
-                top: messageArea.scrollTop + topPosition - chatSectionRect.height / 2,
-                behavior: 'smooth'
-            });
+            positionEmojiBar(bubble);
         });
 
         // --- Emoji Bar Click (Applying Reaction) ---
@@ -773,7 +817,25 @@
         // Chat back button
         backToChatListBtn.addEventListener('click', () => {
             individualChatSection.classList.add('hidden');
-            chatListSection.classList.remove('hidden');
+            document.getElementById('main-content-wrapper').classList.remove('hidden');
+            
+            // Show the correct main section based on which nav button is currently active (defaulting to chat-list if unsure)
+            const activeNavId = navBtns.find(btn => btn.classList.contains('bg-white')).id;
+            
+            // Hide all other main sections first
+            meetingsSection.classList.add('hidden');
+            chatListSection.classList.add('hidden');
+            userSection.classList.add('hidden');
+            
+            if (activeNavId === 'chat-btn') {
+                chatListSection.classList.remove('hidden');
+            } else if (activeNavId === 'user-btn') {
+                userSection.classList.remove('hidden');
+            } else { // default to meetings
+                meetingsSection.classList.remove('hidden');
+                topNav.classList.remove('hidden');
+            }
+            
             bottomNavFooter.classList.remove('hidden');
             
             // Hide the emoji bar on exit and the centered warning
@@ -828,4 +890,4 @@
     </script>
 
 </body>
-</html>
+                                                                                                                                                                                                                                                                                                                                      </html>
