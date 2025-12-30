@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biology Reminder App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; overflow: hidden; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .hide { display: none !important; }
+        
+        /* Focus Mode Transitions */
+        .focus-transition { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 transition-colors duration-300" id="body">
+
+    <!-- App Container -->
+    <div class="h-screen w-full flex flex-col relative">
+        
+        <!-- Main Content Area -->
+        <main id="content" class="flex-1 overflow-y-auto pb-24 p-6">
+            
+            <!-- Home View -->
+            <section id="view-home">
+                
+                <!-- 1. Welcome / Pre-Start Screen -->
+                <div id="home-welcome" class="flex flex-col items-center justify-center min-h-[60vh] text-center animate-in fade-in">
+                    <div class="w-20 h-20 bg-teal-500/10 text-teal-600 rounded-[2rem] flex items-center justify-center mb-6">
+                        <i data-lucide="book-open-check" class="w-10 h-10"></i>
+                    </div>
+                    <h1 class="text-4xl font-black tracking-tight mb-2">Ready for today?</h1>
+                    <p class="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em] mb-10">30 NEW DEFINITIONS WAITING</p>
+                    
+                    <button onclick="startFocusMode()" class="group relative px-12 py-5 bg-teal-600 text-white rounded-[2rem] font-black shadow-xl shadow-teal-500/20 hover:scale-105 active:scale-95 transition-all">
+                        LET'S START
+                    </button>
+                </div>
+
+                <!-- 2. Focus Mode Session Screen (Hidden by default) -->
+                <div id="home-session" class="hide flex flex-col items-center animate-in fade-in">
+                    
+                    <!-- Top Bar with Back Button and Progress -->
+                    <div class="w-full mb-10 flex flex-col gap-6">
+                        <div class="flex items-center justify-between">
+                            <button onclick="exitFocusMode()" class="flex items-center gap-2 text-slate-400 font-black text-xs hover:text-teal-600 transition-colors">
+                                <i data-lucide="arrow-left" class="w-4 h-4"></i> BACK HOME
+                            </button>
+                            <span id="progress-text" class="text-sm font-black text-teal-600">0/30</span>
+                        </div>
+                        
+                        <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
+                            <div id="progress-bar" class="h-full bg-teal-500 transition-all duration-700 w-0"></div>
+                        </div>
+                    </div>
+
+                    <div id="card-container" class="w-full max-w-sm mx-auto flex flex-col items-center gap-6">
+                        <!-- Active Flashcard -->
+                        <div id="flashcard" class="w-full aspect-[4/5] p-10 rounded-[3rem] shadow-2xl flex flex-col items-center justify-center text-center border-b-[12px] bg-white border-slate-200 transform transition-all">
+                            <h2 id="card-term" class="text-4xl font-black mb-8 leading-tight text-slate-800">...</h2>
+                            <div class="min-h-[120px] flex items-center justify-center">
+                                <p id="card-def" class="text-lg font-medium text-slate-600 leading-relaxed fade-in hide">Definition content goes here.</p>
+                            </div>
+                            <div class="mt-auto w-full space-y-3">
+                                <button id="btn-reveal" class="w-full py-5 bg-teal-600 text-white rounded-3xl font-black shadow-lg">REVEAL</button>
+                                <div id="choice-buttons" class="flex gap-3 hide">
+                                    <button onclick="handleLog('fail')" class="flex-1 py-5 bg-red-100 text-red-600 rounded-3xl font-black hover:bg-red-200 transition-colors">FORGOT</button>
+                                    <button onclick="handleLog('pass')" class="flex-1 py-5 bg-green-100 text-green-600 rounded-3xl font-black hover:bg-green-200 transition-colors">KNEW IT</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Next Up Preview -->
+                        <div id="next-up" class="w-full p-6 rounded-[2rem] border-2 border-dashed border-slate-200 bg-white/50 flex items-center justify-between opacity-60">
+                            <div class="flex items-center gap-4">
+                                <div class="p-3 bg-teal-500/10 rounded-2xl text-teal-600">
+                                    <i data-lucide="forward" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black uppercase tracking-widest opacity-50">Next Up</p>
+                                    <p id="next-term" class="text-lg font-black">Next Term</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Completion State -->
+                    <div id="empty-state" class="mt-20 text-center flex flex-col items-center hide">
+                        <div class="w-24 h-24 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mb-6">
+                            <i data-lucide="party-popper" class="w-12 h-12"></i>
+                        </div>
+                        <h2 class="text-3xl font-black text-teal-500">Goal Reached!</h2>
+                        <p class="mt-2 opacity-50 font-bold uppercase text-xs tracking-widest mb-10">All 30 suggestions complete</p>
+                        <button onclick="exitFocusMode()" class="px-10 py-4 bg-slate-900 text-white rounded-2xl font-black">RETURN HOME</button>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Library View (Static) -->
+            <section id="view-definitions" class="hide">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black">Library</h1>
+                    <button onclick="toggleModal('unit')" class="p-3 bg-teal-600 text-white rounded-2xl shadow-lg"><i data-lucide="plus"></i></button>
+                </div>
+                <div id="library-list" class="space-y-4"></div>
+            </section>
+
+            <!-- Stats View (Static) -->
+            <section id="view-progress" class="hide">
+                <h1 class="text-3xl font-black mb-8">Performance</h1>
+                <div id="stats-list" class="space-y-6"></div>
+            </section>
+
+            <!-- Profile View (Static) -->
+            <section id="view-settings" class="hide">
+                <h1 class="text-3xl font-black mb-10">Profile</h1>
+                <div class="p-8 rounded-[2.5rem] mb-6 flex items-center gap-6 bg-white shadow-md border border-slate-100">
+                    <div class="w-16 h-16 rounded-[1.5rem] bg-teal-500 flex items-center justify-center text-white"><i data-lucide="user" class="w-8 h-8"></i></div>
+                    <div><p class="text-xl font-black">Bio Scholar</p><p class="text-xs opacity-40">Elite Rank</p></div>
+                </div>
+                <button onclick="toggleTheme()" class="w-full p-6 flex justify-between items-center rounded-3xl bg-white border border-slate-100 mb-3">
+                    <span class="font-black">Switch Theme</span>
+                    <i data-lucide="sun" id="theme-icon"></i>
+                </button>
+                <button onclick="generateSamples()" class="w-full p-6 flex justify-between items-center rounded-3xl bg-teal-600 text-white font-black">
+                    Generate Lesson Samples
+                </button>
+            </section>
+        </main>
+
+        <!-- Navbar -->
+        <nav id="bottom-nav" class="h-24 px-6 border-t-2 flex items-center justify-between bg-white border-slate-100 fixed bottom-0 left-0 w-full z-50 transition-transform duration-500">
+            <button onclick="switchTab('home')" class="nav-btn flex-1 flex flex-col items-center gap-1.5 text-teal-500">
+                <i data-lucide="home"></i> <span class="text-[9px] font-black uppercase tracking-tighter">Home</span>
+            </button>
+            <button onclick="switchTab('definitions')" class="nav-btn flex-1 flex flex-col items-center gap-1.5 text-slate-400 opacity-60">
+                <i data-lucide="book-open"></i> <span class="text-[9px] font-black uppercase tracking-tighter">Library</span>
+            </button>
+            <button onclick="switchTab('progress')" class="nav-btn flex-1 flex flex-col items-center gap-1.5 text-slate-400 opacity-60">
+                <i data-lucide="trending-up"></i> <span class="text-[9px] font-black uppercase tracking-tighter">Stats</span>
+            </button>
+            <button onclick="switchTab('settings')" class="nav-btn flex-1 flex flex-col items-center gap-1.5 text-slate-400 opacity-60">
+                <i data-lucide="settings"></i> <span class="text-[9px] font-black uppercase tracking-tighter">Profile</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Modal (Static) -->
+    <div id="modal-overlay" class="fixed inset-0 z-[100] bg-black/70 backdrop-blur-md flex items-center justify-center p-6 hide">
+        <div class="w-full max-w-sm p-8 rounded-[3rem] shadow-2xl bg-white text-slate-900">
+            <h2 id="modal-title" class="text-xl font-black text-teal-500 mb-6">New Lesson</h2>
+            <div id="modal-form" class="space-y-4"></div>
+            <div class="flex gap-4 pt-4">
+                <button onclick="toggleModal()" class="flex-1 py-5 font-black text-slate-400 uppercase">Cancel</button>
+                <button onclick="saveForm()" class="flex-[2] py-5 bg-teal-600 text-white rounded-3xl font-black uppercase">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let state = {
+            theme: 'light',
+            currentTab: 'home',
+            units: JSON.parse(localStorage.getItem('units') || '[]'),
+            definitions: JSON.parse(localStorage.getItem('definitions') || '[]'),
+            progress: JSON.parse(localStorage.getItem('progress') || '[]'),
+            dailyBatch: [],
+            currentIndex: 0,
+            expandedUnits: {}
+        };
+
+        const getToday = () => new Date().toISOString().split('T')[0];
+
+        window.onload = () => {
+            lucide.createIcons();
+            initDailyBatch();
+            renderAll();
+        };
+
+        // --- NEW FOCUS MODE LOGIC ---
+        function startFocusMode() {
+            if (state.definitions.length === 0) {
+                alert("Please add some definitions to your library first!");
+                return;
+            }
+            // Hide Welcome & Nav
+            document.getElementById('home-welcome').classList.add('hide');
+            document.getElementById('bottom-nav').style.transform = 'translateY(100%)';
+            
+            // Show Session
+            document.getElementById('home-session').classList.remove('hide');
+            renderHome();
+        }
+
+        function exitFocusMode() {
+            // Restore Welcome & Nav
+            document.getElementById('home-session').classList.add('hide');
+            document.getElementById('home-welcome').classList.remove('hide');
+            document.getElementById('bottom-nav').style.transform = 'translateY(0)';
+        }
+
+        // Navigation
+        function switchTab(tab) {
+            if (tab !== 'home') exitFocusMode();
+            state.currentTab = tab;
+            document.querySelectorAll('section').forEach(s => s.classList.add('hide'));
+            document.getElementById(`view-${tab}`).classList.remove('hide');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('text-teal-500', 'scale-110');
+                b.classList.add('text-slate-400', 'opacity-60');
+            });
+            event.currentTarget.classList.add('text-teal-500', 'scale-110');
+            event.currentTarget.classList.remove('text-slate-400', 'opacity-60');
+            
+            if(tab === 'definitions') renderLibrary();
+            if(tab === 'progress') renderStats();
+        }
+
+        // Logic - Daily Batch
+        function initDailyBatch() {
+            if (state.definitions.length === 0) return;
+            const today = getToday();
+            const todayLogs = state.progress.filter(p => p.date === today);
+            
+            // Seeded shuffle logic
+            let shuffled = [...state.definitions].sort(() => 0.5 - Math.random());
+            state.dailyBatch = shuffled.slice(0, 30);
+            
+            state.currentIndex = state.dailyBatch.findIndex(d => 
+                !todayLogs.some(l => l.definitionId === d.id)
+            );
+            if (state.currentIndex === -1) state.currentIndex = state.dailyBatch.length;
+        }
+
+        function renderHome() {
+            const cardContainer = document.getElementById('card-container');
+            const emptyState = document.getElementById('empty-state');
+            const progressBar = document.getElementById('progress-bar');
+            const progText = document.getElementById('progress-text');
+
+            progressBar.style.width = `${(state.currentIndex / 30) * 100}%`;
+            progText.innerText = `${state.currentIndex}/30`;
+
+            if (state.currentIndex >= state.dailyBatch.length || state.currentIndex >= 30) {
+                cardContainer.classList.add('hide');
+                emptyState.classList.remove('hide');
+                return;
+            }
+
+            cardContainer.classList.remove('hide');
+            emptyState.classList.add('hide');
+
+            const current = state.dailyBatch[state.currentIndex];
+            const next = state.dailyBatch[state.currentIndex + 1];
+
+            document.getElementById('card-term').innerText = current.term;
+            document.getElementById('card-def').innerText = current.definition;
+            
+            const nextUpEl = document.getElementById('next-up');
+            if (next && state.currentIndex < 29) {
+                nextUpEl.classList.remove('hide');
+                document.getElementById('next-term').innerText = next.term;
+            } else {
+                nextUpEl.classList.add('hide');
+            }
+
+            document.getElementById('btn-reveal').classList.remove('hide');
+            document.getElementById('choice-buttons').classList.add('hide');
+            document.getElementById('card-def').classList.add('hide');
+        }
+
+        document.getElementById('btn-reveal').onclick = () => {
+            document.getElementById('btn-reveal').classList.add('hide');
+            document.getElementById('choice-buttons').classList.remove('hide');
+            document.getElementById('card-def').classList.remove('hide');
+        };
+
+        function handleLog(status) {
+            const current = state.dailyBatch[state.currentIndex];
+            state.progress.push({
+                id: Date.now(),
+                date: getToday(),
+                status: status,
+                definitionId: current.id,
+                term: current.term
+            });
+            localStorage.setItem('progress', JSON.stringify(state.progress));
+            state.currentIndex++;
+            renderHome();
+        }
+
+        // Static Rendering Helpers (Definitions, Stats, etc.)
+        function renderLibrary() {
+            const list = document.getElementById('library-list');
+            list.innerHTML = '';
+            state.units.forEach(u => {
+                const isExp = state.expandedUnits[u.id];
+                const unitDefs = state.definitions.filter(d => d.unitId === u.id);
+                const card = document.createElement('div');
+                card.className = `rounded-[2rem] border-2 ${state.theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`;
+                card.innerHTML = `
+                    <button onclick="toggleAccordion(${u.id})" class="w-full p-6 flex items-center justify-between text-left">
+                        <h3 class="font-black">${u.name}</h3>
+                        <i data-lucide="${isExp ? 'chevron-up' : 'chevron-down'}"></i>
+                    </button>
+                    ${isExp ? `<div class="p-6 pt-0 space-y-2">
+                        ${unitDefs.map(d => `<div class="text-sm font-medium py-2 opacity-60 border-b border-slate-50 last:border-0">${d.term}</div>`).join('')}
+                        <button onclick="toggleModal('definition', ${u.id})" class="text-teal-600 font-black text-[10px] mt-4 uppercase">Add Definition</button>
+                    </div>` : ''}
+                `;
+                list.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function toggleAccordion(id) {
+            state.expandedUnits[id] = !state.expandedUnits[id];
+            renderLibrary();
+        }
+
+        function renderStats() {
+            const list = document.getElementById('stats-list');
+            list.innerHTML = '';
+            const grouped = {};
+            state.progress.forEach(p => { if(!grouped[p.date]) grouped[p.date] = []; grouped[p.date].push(p); });
+            Object.keys(grouped).sort().reverse().forEach(date => {
+                const logs = grouped[date];
+                const card = document.createElement('div');
+                card.className = "p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm flex justify-between items-center";
+                card.innerHTML = `<div><h4 class="font-black">${date}</h4><p class="text-xs opacity-40">${logs.length} Reviews</p></div><i data-lucide="check-circle" class="text-teal-500"></i>`;
+                list.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function toggleModal(mode = 'unit', unitId = null) {
+            const overlay = document.getElementById('modal-overlay');
+            overlay.classList.toggle('hide');
+            if (!overlay.classList.contains('hide')) {
+                currentModalMode = mode;
+                currentModalUnitId = unitId;
+                const form = document.getElementById('modal-form');
+                form.innerHTML = mode === 'unit' ? 
+                    `<input id="input-unit" placeholder="Unit Name" class="w-full p-5 rounded-2xl bg-slate-100 outline-none font-bold" />` :
+                    `<input id="input-term" placeholder="Term" class="w-full p-5 rounded-2xl bg-slate-100 outline-none font-bold" />
+                     <textarea id="input-def" placeholder="Definition" class="w-full p-5 rounded-2xl bg-slate-100 outline-none font-medium"></textarea>`;
+            }
+        }
+
+        let currentModalMode = 'unit', currentModalUnitId = null;
+        function saveForm() {
+            if (currentModalMode === 'unit') {
+                state.units.push({ id: Date.now(), name: document.getElementById('input-unit').value });
+            } else {
+                state.definitions.push({ id: Date.now(), unitId: currentModalUnitId, term: document.getElementById('input-term').value, definition: document.getElementById('input-def').value });
+            }
+            localStorage.setItem('units', JSON.stringify(state.units));
+            localStorage.setItem('definitions', JSON.stringify(state.definitions));
+            toggleModal();
+            renderAll();
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === 'light' ? 'dark' : 'light';
+            document.body.classList.toggle('dark');
+            lucide.createIcons();
+        }
+
+        function generateSamples() {
+            state.units = [{id: 1, name: "Cell Biology"}];
+            state.definitions = [{id: 1, unitId: 1, term: "Mitochondria", definition: "Powerhouse of the cell."}, {id: 2, unitId: 1, term: "Ribosome", definition: "Protein factory."}];
+            localStorage.setItem('units', JSON.stringify(state.units));
+            localStorage.setItem('definitions', JSON.stringify(state.definitions));
+            initDailyBatch();
+            renderAll();
+        }
+
+        function renderAll() {
+            renderLibrary();
+            renderStats();
+        }
+    </script>
+</body>
+</html>
