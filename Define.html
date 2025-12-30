@@ -9,101 +9,84 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; overflow: hidden; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .fade-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .hide { display: none !important; }
-        
-        /* Focus Mode Transitions */
-        .focus-transition { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 transition-colors duration-300" id="body">
+<body class="bg-slate-50 text-slate-900 transition-colors duration-300">
+
+    <!-- Auth Screen -->
+    <div id="auth-screen" class="fixed inset-0 z-[200] bg-teal-600 flex flex-col items-center justify-center p-6 text-center">
+        <div class="w-24 h-24 bg-white/20 rounded-[2.5rem] flex items-center justify-center mb-8">
+            <i data-lucide="microscope" class="w-12 h-12 text-white"></i>
+        </div>
+        <h1 class="text-4xl font-black text-white mb-4">BioRecall</h1>
+        <p class="text-teal-100 font-bold mb-12 max-w-xs">Master your biology definitions with cloud-synced progress.</p>
+        
+        <button id="btn-login" class="w-full max-w-xs bg-white text-teal-700 py-5 rounded-[2rem] font-black flex items-center justify-center gap-3 shadow-xl hover:scale-105 transition-transform active:scale-95">
+            <svg class="w-5 h-5" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
+                <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+            </svg>
+            Sign in with Google
+        </button>
+        <p id="auth-status" class="mt-6 text-teal-100 text-sm font-bold min-h-[1.5rem]"></p>
+    </div>
 
     <!-- App Container -->
-    <div class="h-screen w-full flex flex-col relative">
-        
-        <!-- Main Content Area -->
+    <div id="app-container" class="h-screen w-full flex flex-col relative hide">
         <main id="content" class="flex-1 overflow-y-auto pb-24 p-6">
             
             <!-- Home View -->
             <section id="view-home">
-                
-                <!-- 1. Welcome / Pre-Start Screen -->
-                <div id="home-welcome" class="flex flex-col items-center justify-center min-h-[60vh] text-center animate-in fade-in">
+                <div id="home-welcome" class="flex flex-col items-center justify-center min-h-[60vh] text-center fade-in">
                     <div class="w-20 h-20 bg-teal-500/10 text-teal-600 rounded-[2rem] flex items-center justify-center mb-6">
                         <i data-lucide="book-open-check" class="w-10 h-10"></i>
                     </div>
-                    <h1 class="text-4xl font-black tracking-tight mb-2">Ready for today?</h1>
-                    <p class="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em] mb-10">30 NEW DEFINITIONS WAITING</p>
-                    
-                    <button onclick="startFocusMode()" class="group relative px-12 py-5 bg-teal-600 text-white rounded-[2rem] font-black shadow-xl shadow-teal-500/20 hover:scale-105 active:scale-95 transition-all">
+                    <h1 class="text-4xl font-black mb-2">Ready for today?</h1>
+                    <p id="batch-count-text" class="text-slate-400 font-bold uppercase text-[10px] tracking-widest mb-10">LOADING...</p>
+                    <button onclick="startFocusMode()" class="px-12 py-5 bg-teal-600 text-white rounded-[2rem] font-black shadow-xl hover:scale-105 active:scale-95 transition-all">
                         LET'S START
                     </button>
                 </div>
 
-                <!-- 2. Focus Mode Session Screen (Hidden by default) -->
-                <div id="home-session" class="hide flex flex-col items-center animate-in fade-in">
-                    
-                    <!-- Top Bar with Back Button and Progress -->
-                    <div class="w-full mb-10 flex flex-col gap-6">
+                <!-- Focus Session -->
+                <div id="home-session" class="hide flex flex-col items-center fade-in">
+                    <div class="w-full mb-10 space-y-4">
                         <div class="flex items-center justify-between">
-                            <button onclick="exitFocusMode()" class="flex items-center gap-2 text-slate-400 font-black text-xs hover:text-teal-600 transition-colors">
-                                <i data-lucide="arrow-left" class="w-4 h-4"></i> BACK HOME
+                            <button onclick="exitFocusMode()" class="flex items-center gap-2 text-slate-400 font-black text-xs">
+                                <i data-lucide="arrow-left" class="w-4 h-4"></i> BACK
                             </button>
-                            <span id="progress-text" class="text-sm font-black text-teal-600">0/30</span>
+                            <span id="progress-text" class="text-sm font-black text-teal-600">0/0</span>
                         </div>
-                        
                         <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
-                            <div id="progress-bar" class="h-full bg-teal-500 transition-all duration-700 w-0"></div>
+                            <div id="progress-bar" class="h-full bg-teal-500 transition-all duration-500 w-0"></div>
                         </div>
                     </div>
-
-                    <div id="card-container" class="w-full max-w-sm mx-auto flex flex-col items-center gap-6">
-                        <!-- Active Flashcard -->
-                        <div id="flashcard" class="w-full aspect-[4/5] p-10 rounded-[3rem] shadow-2xl flex flex-col items-center justify-center text-center border-b-[12px] bg-white border-slate-200 transform transition-all">
-                            <h2 id="card-term" class="text-4xl font-black mb-8 leading-tight text-slate-800">...</h2>
-                            <div class="min-h-[120px] flex items-center justify-center">
-                                <p id="card-def" class="text-lg font-medium text-slate-600 leading-relaxed fade-in hide">Definition content goes here.</p>
-                            </div>
+                    <div id="card-container" class="w-full max-w-sm mx-auto space-y-6">
+                        <div class="w-full aspect-[4/5] p-10 rounded-[3rem] shadow-2xl flex flex-col items-center justify-center text-center border-b-[12px] bg-white border-slate-200">
+                            <h2 id="card-term" class="text-3xl font-black mb-8 text-slate-800">...</h2>
+                            <p id="card-def" class="text-lg font-medium text-slate-600 hide">...</p>
                             <div class="mt-auto w-full space-y-3">
-                                <button id="btn-reveal" class="w-full py-5 bg-teal-600 text-white rounded-3xl font-black shadow-lg">REVEAL</button>
+                                <button id="btn-reveal" class="w-full py-5 bg-teal-600 text-white rounded-3xl font-black">REVEAL</button>
                                 <div id="choice-buttons" class="flex gap-3 hide">
-                                    <button onclick="handleLog('fail')" class="flex-1 py-5 bg-red-100 text-red-600 rounded-3xl font-black hover:bg-red-200 transition-colors">FORGOT</button>
-                                    <button onclick="handleLog('pass')" class="flex-1 py-5 bg-green-100 text-green-600 rounded-3xl font-black hover:bg-green-200 transition-colors">KNEW IT</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Next Up Preview -->
-                        <div id="next-up" class="w-full p-6 rounded-[2rem] border-2 border-dashed border-slate-200 bg-white/50 flex items-center justify-between opacity-60">
-                            <div class="flex items-center gap-4">
-                                <div class="p-3 bg-teal-500/10 rounded-2xl text-teal-600">
-                                    <i data-lucide="forward" class="w-5 h-5"></i>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] font-black uppercase tracking-widest opacity-50">Next Up</p>
-                                    <p id="next-term" class="text-lg font-black">Next Term</p>
+                                    <button onclick="handleLog('fail')" class="flex-1 py-5 bg-red-100 text-red-600 rounded-3xl font-black">FORGOT</button>
+                                    <button onclick="handleLog('pass')" class="flex-1 py-5 bg-green-100 text-green-600 rounded-3xl font-black">KNEW IT</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Completion State -->
-                    <div id="empty-state" class="mt-20 text-center flex flex-col items-center hide">
-                        <div class="w-24 h-24 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mb-6">
-                            <i data-lucide="party-popper" class="w-12 h-12"></i>
-                        </div>
-                        <h2 class="text-3xl font-black text-teal-500">Goal Reached!</h2>
-                        <p class="mt-2 opacity-50 font-bold uppercase text-xs tracking-widest mb-10">All 30 suggestions complete</p>
-                        <button onclick="exitFocusMode()" class="px-10 py-4 bg-slate-900 text-white rounded-2xl font-black">RETURN HOME</button>
+                    <div id="empty-state" class="mt-20 text-center hide">
+                        <h2 class="text-3xl font-black text-teal-500">All Done!</h2>
+                        <button onclick="exitFocusMode()" class="px-10 py-4 bg-slate-900 text-white rounded-2xl font-black mt-10">RETURN HOME</button>
                     </div>
                 </div>
-
             </section>
 
-            <!-- Library View (Static) -->
+            <!-- Library View -->
             <section id="view-definitions" class="hide">
                 <div class="flex justify-between items-center mb-8">
                     <h1 class="text-3xl font-black">Library</h1>
@@ -112,50 +95,52 @@
                 <div id="library-list" class="space-y-4"></div>
             </section>
 
-            <!-- Stats View (Static) -->
+            <!-- Stats View -->
             <section id="view-progress" class="hide">
-                <h1 class="text-3xl font-black mb-8">Performance</h1>
-                <div id="stats-list" class="space-y-6"></div>
+                <h1 class="text-3xl font-black mb-8">Stats</h1>
+                <div id="stats-list" class="space-y-4"></div>
             </section>
 
-            <!-- Profile View (Static) -->
+            <!-- Profile View -->
             <section id="view-settings" class="hide">
                 <h1 class="text-3xl font-black mb-10">Profile</h1>
                 <div class="p-8 rounded-[2.5rem] mb-6 flex items-center gap-6 bg-white shadow-md border border-slate-100">
-                    <div class="w-16 h-16 rounded-[1.5rem] bg-teal-500 flex items-center justify-center text-white"><i data-lucide="user" class="w-8 h-8"></i></div>
-                    <div><p class="text-xl font-black">Bio Scholar</p><p class="text-xs opacity-40">Elite Rank</p></div>
+                    <div id="user-avatar" class="w-16 h-16 rounded-[1.5rem] bg-teal-500 flex items-center justify-center text-white overflow-hidden">
+                        <i data-lucide="user" class="w-8 h-8"></i>
+                    </div>
+                    <div>
+                        <p id="user-name" class="text-xl font-black">...</p>
+                        <p id="user-email" class="text-xs opacity-40">...</p>
+                    </div>
                 </div>
-                <button onclick="toggleTheme()" class="w-full p-6 flex justify-between items-center rounded-3xl bg-white border border-slate-100 mb-3">
-                    <span class="font-black">Switch Theme</span>
-                    <i data-lucide="sun" id="theme-icon"></i>
-                </button>
-                <button onclick="generateSamples()" class="w-full p-6 flex justify-between items-center rounded-3xl bg-teal-600 text-white font-black">
-                    Generate Lesson Samples
+                <button onclick="logout()" class="w-full p-6 flex justify-between items-center rounded-3xl bg-red-50 text-red-600 font-black">
+                    <span>Sign Out</span>
+                    <i data-lucide="log-out"></i>
                 </button>
             </section>
         </main>
 
         <!-- Navbar -->
-        <nav id="bottom-nav" class="h-24 px-6 border-t-2 flex items-center justify-between bg-white border-slate-100 fixed bottom-0 left-0 w-full z-50 transition-transform duration-500">
+        <nav id="bottom-nav" class="h-24 px-6 border-t-2 flex items-center justify-between bg-white border-slate-100 fixed bottom-0 left-0 w-full z-50">
             <button onclick="switchTab('home')" class="nav-btn flex-1 flex flex-col items-center gap-1.5 text-teal-500">
-                <i data-lucide="home"></i> <span class="text-[9px] font-black uppercase tracking-tighter">Home</span>
+                <i data-lucide="home"></i> <span class="text-[9px] font-black uppercase">Home</span>
             </button>
             <button onclick="switchTab('definitions')" class="nav-btn flex-1 flex flex-col items-center gap-1.5 text-slate-400 opacity-60">
-                <i data-lucide="book-open"></i> <span class="text-[9px] font-black uppercase tracking-tighter">Library</span>
+                <i data-lucide="book-open"></i> <span class="text-[9px] font-black uppercase">Library</span>
             </button>
             <button onclick="switchTab('progress')" class="nav-btn flex-1 flex flex-col items-center gap-1.5 text-slate-400 opacity-60">
-                <i data-lucide="trending-up"></i> <span class="text-[9px] font-black uppercase tracking-tighter">Stats</span>
+                <i data-lucide="trending-up"></i> <span class="text-[9px] font-black uppercase">Stats</span>
             </button>
             <button onclick="switchTab('settings')" class="nav-btn flex-1 flex flex-col items-center gap-1.5 text-slate-400 opacity-60">
-                <i data-lucide="settings"></i> <span class="text-[9px] font-black uppercase tracking-tighter">Profile</span>
+                <i data-lucide="settings"></i> <span class="text-[9px] font-black uppercase">Profile</span>
             </button>
         </nav>
     </div>
 
-    <!-- Modal (Static) -->
+    <!-- Modal -->
     <div id="modal-overlay" class="fixed inset-0 z-[100] bg-black/70 backdrop-blur-md flex items-center justify-center p-6 hide">
         <div class="w-full max-w-sm p-8 rounded-[3rem] shadow-2xl bg-white text-slate-900">
-            <h2 id="modal-title" class="text-xl font-black text-teal-500 mb-6">New Lesson</h2>
+            <h2 id="modal-title" class="text-xl font-black text-teal-500 mb-6">New Item</h2>
             <div id="modal-form" class="space-y-4"></div>
             <div class="flex gap-4 pt-4">
                 <button onclick="toggleModal()" class="flex-1 py-5 font-black text-slate-400 uppercase">Cancel</button>
@@ -163,6 +148,233 @@
             </div>
         </div>
     </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, collection, onSnapshot, addDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Your specific configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyApLfVQ6hv0IAAN5ZkFlOQ-y5KXK-x1Q_M",
+          authDomain: "reminderapp-d84e9.firebaseapp.com",
+          databaseURL: "https://reminderapp-d84e9-default-rtdb.firebaseio.com",
+          projectId: "reminderapp-d84e9",
+          storageBucket: "reminderapp-d84e9.firebasestorage.app",
+          messagingSenderId: "312145339940",
+          appId: "1:312145339940:web:ade59de4d6de6cec221ab1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = 'bio-recall-app';
+
+        let state = {
+            user: null,
+            units: [],
+            definitions: [],
+            progress: [],
+            dailyBatch: [],
+            currentIndex: 0,
+            expandedUnits: {}
+        };
+
+        const getToday = () => new Date().toISOString().split('T')[0];
+
+        // --- AUTH ---
+        document.getElementById('btn-login').onclick = async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                document.getElementById('auth-status').innerText = "Opening Google Sign-in...";
+                await setPersistence(auth, browserLocalPersistence);
+                await signInWithPopup(auth, provider);
+            } catch (err) {
+                document.getElementById('auth-status').innerText = "Error: " + err.message;
+            }
+        };
+
+        window.logout = () => signOut(auth).then(() => window.location.reload());
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                state.user = user;
+                document.getElementById('auth-screen').classList.add('hide');
+                document.getElementById('app-container').classList.remove('hide');
+                document.getElementById('user-name').innerText = user.displayName;
+                document.getElementById('user-email').innerText = user.email;
+                if (user.photoURL) document.getElementById('user-avatar').innerHTML = `<img src="${user.photoURL}" class="w-full h-full object-cover">`;
+                initDataSync();
+            } else {
+                document.getElementById('auth-screen').classList.remove('hide');
+                document.getElementById('app-container').classList.add('hide');
+            }
+            lucide.createIcons();
+        });
+
+        // --- DATA ---
+        function initDataSync() {
+            const uid = state.user.uid;
+            // RULE 1: Strict paths
+            onSnapshot(collection(db, 'artifacts', appId, 'users', uid, 'units'), snap => {
+                state.units = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderLibrary();
+            });
+            onSnapshot(collection(db, 'artifacts', appId, 'users', uid, 'definitions'), snap => {
+                state.definitions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                initDailyBatch();
+                renderLibrary();
+            });
+            onSnapshot(collection(db, 'artifacts', appId, 'users', uid, 'progress'), snap => {
+                state.progress = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderStats();
+            });
+        }
+
+        function initDailyBatch() {
+            if (!state.definitions.length) {
+                document.getElementById('batch-count-text').innerText = "LIBRARY EMPTY";
+                return;
+            }
+            const today = getToday();
+            const todayLogs = state.progress.filter(p => p.date === today);
+            state.dailyBatch = [...state.definitions].sort(() => 0.5 - Math.random()).slice(0, 30);
+            state.currentIndex = state.dailyBatch.findIndex(d => !todayLogs.some(l => l.definitionId === d.id));
+            if (state.currentIndex === -1) state.currentIndex = state.dailyBatch.length;
+            document.getElementById('batch-count-text').innerText = `${state.dailyBatch.length} TERMS FOR TODAY`;
+            renderHome();
+        }
+
+        // --- UI RENDERERS ---
+        window.switchTab = (tab) => {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hide'));
+            document.getElementById(`view-${tab}`).classList.remove('hide');
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('text-teal-500');
+                b.classList.add('text-slate-400', 'opacity-60');
+            });
+            const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.innerText.toLowerCase().includes(tab));
+            if (btn) btn.classList.add('text-teal-500');
+            if (tab === 'home') exitFocusMode();
+            lucide.createIcons();
+        };
+
+        window.startFocusMode = () => {
+            if (!state.definitions.length) return;
+            document.getElementById('home-welcome').classList.add('hide');
+            document.getElementById('home-session').classList.remove('hide');
+            document.getElementById('bottom-nav').classList.add('translate-y-full');
+            renderHome();
+        };
+
+        window.exitFocusMode = () => {
+            document.getElementById('home-session').classList.add('hide');
+            document.getElementById('home-welcome').classList.remove('hide');
+            document.getElementById('bottom-nav').classList.remove('translate-y-full');
+        };
+
+        function renderHome() {
+            const total = state.dailyBatch.length;
+            document.getElementById('progress-bar').style.width = `${total ? (state.currentIndex/total)*100 : 0}%`;
+            document.getElementById('progress-text').innerText = `${state.currentIndex}/${total}`;
+            if (state.currentIndex >= total && total > 0) {
+                document.getElementById('card-container').classList.add('hide');
+                document.getElementById('empty-state').classList.remove('hide');
+                return;
+            }
+            const current = state.dailyBatch[state.currentIndex];
+            if (!current) return;
+            document.getElementById('card-term').innerText = current.term;
+            document.getElementById('card-def').innerText = current.definition;
+            document.getElementById('card-def').classList.add('hide');
+            document.getElementById('btn-reveal').classList.remove('hide');
+            document.getElementById('choice-buttons').classList.add('hide');
+        }
+
+        document.getElementById('btn-reveal').onclick = () => {
+            document.getElementById('card-def').classList.remove('hide');
+            document.getElementById('btn-reveal').classList.add('hide');
+            document.getElementById('choice-buttons').classList.remove('hide');
+        };
+
+        window.handleLog = async (status) => {
+            const current = state.dailyBatch[state.currentIndex];
+            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'progress'), {
+                date: getToday(), status, definitionId: current.id, term: current.term, createdAt: serverTimestamp()
+            });
+            state.currentIndex++;
+            renderHome();
+        };
+
+        function renderLibrary() {
+            const list = document.getElementById('library-list');
+            list.innerHTML = '';
+            state.units.forEach(u => {
+                const isExp = state.expandedUnits[u.id];
+                const unitDefs = state.definitions.filter(d => d.unitId === u.id);
+                const el = document.createElement('div');
+                el.className = "bg-white rounded-3xl border border-slate-100 overflow-hidden";
+                el.innerHTML = `
+                    <button onclick="toggleAccordion('${u.id}')" class="w-full p-6 flex justify-between font-black">
+                        ${u.name} <i data-lucide="${isExp ? 'chevron-up' : 'chevron-down'}"></i>
+                    </button>
+                    ${isExp ? `<div class="p-6 pt-0 space-y-3 bg-slate-50">
+                        ${unitDefs.map(d => `<div class="flex justify-between text-sm py-2 border-b">
+                            <span>${d.term}</span>
+                            <button onclick="deleteDef('${d.id}')" class="text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>`).join('')}
+                        <button onclick="toggleModal('definition', '${u.id}')" class="text-teal-600 text-xs font-black uppercase mt-4">+ Add Term</button>
+                    </div>` : ''}
+                `;
+                list.appendChild(el);
+            });
+            lucide.createIcons();
+        }
+
+        window.toggleAccordion = (id) => { state.expandedUnits[id] = !state.expandedUnits[id]; renderLibrary(); };
+        window.deleteDef = (id) => deleteDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'definitions', id));
+
+        function renderStats() {
+            const list = document.getElementById('stats-list');
+            list.innerHTML = '';
+            const counts = {};
+            state.progress.forEach(p => counts[p.date] = (counts[p.date] || 0) + 1);
+            Object.keys(counts).sort().reverse().forEach(date => {
+                const el = document.createElement('div');
+                el.className = "p-6 bg-white rounded-3xl border flex justify-between items-center";
+                el.innerHTML = `<div><p class="font-black">${date}</p><p class="text-xs opacity-40">${counts[date]} Reviews</p></div><i data-lucide="check" class="text-teal-500"></i>`;
+                list.appendChild(el);
+            });
+            lucide.createIcons();
+        }
+
+        let curMode, curUnit;
+        window.toggleModal = (mode, unitId) => {
+            curMode = mode; curUnit = unitId;
+            document.getElementById('modal-overlay').classList.toggle('hide');
+            if (mode) {
+                document.getElementById('modal-title').innerText = mode === 'unit' ? 'New Unit' : 'New Term';
+                document.getElementById('modal-form').innerHTML = mode === 'unit' ? 
+                    `<input id="mi-unit" class="w-full p-4 bg-slate-100 rounded-2xl outline-none" placeholder="Unit Name">` :
+                    `<input id="mi-term" class="w-full p-4 bg-slate-100 rounded-2xl outline-none mb-3" placeholder="Term">
+                     <textarea id="mi-def" class="w-full p-4 bg-slate-100 rounded-2xl outline-none h-32" placeholder="Definition"></textarea>`;
+            }
+        };
+
+        window.saveForm = async () => {
+            const uid = state.user.uid;
+            if (curMode === 'unit') {
+                const name = document.getElementById('mi-unit').value;
+                if (name) await addDoc(collection(db, 'artifacts', appId, 'users', uid, 'units'), { name, createdAt: serverTimestamp() });
+            } else {
+                const term = document.getElementById('mi-term').value;
+                const definition = document.getElementById('mi-def').value;
+                if (term && definition) await addDoc(collection(db, 'artifacts', appId, 'users', uid, 'definitions'), { term, definition, unitId: curUnit, createdAt: serverTimestamp() });
+            }
+            toggleModal();
+        };
+
+        lucide.createIcons()
 
     <script>
         // State
@@ -377,7 +589,7 @@
 
         function generateSamples() {
             state.units = [{id: 1, name: "Cell Biology"}];
-            state.definitions = [{id: 1, unitId: 1, term: "Mitochondria", definition: "Powerhouse of the cell."}, {id: 2, unitId: 1, term: "Ribosome", definition: "Protein factory."}];
+            state.definitions = [{id: 1, unitId: 1, term: "Mitochondria", definition: "Powerhouse of the cell."}, {id: Id: 1, term: "Ribosome", definition: "Protein factory."}];
             localStorage.setItem('units', JSON.stringify(state.units));
             localStorage.setItem('definitions', JSON.stringify(state.definitions));
             initDailyBatch();
