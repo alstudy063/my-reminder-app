@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biology Definition Reminder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #14b8a6; border-radius: 10px; }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Focus layout helpers */
+        .card-container {
+            perspective: 1000px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 transition-colors duration-300" id="body-root">
+
+    <div id="app" class="h-screen w-full flex flex-col overflow-hidden">
+        <!-- Content Area -->
+        <main id="main-content" class="flex-1 overflow-y-auto pb-24"></main>
+
+        <!-- Navigation -->
+        <nav id="navbar" class="h-24 px-6 border-t-2 flex items-center justify-between pb-6 pt-4 bg-white border-slate-100 dark:bg-slate-950 dark:border-slate-900 transition-colors">
+            <button onclick="changeTab('home')" class="nav-btn flex-1 flex flex-col items-center gap-1.5 text-teal-500" data-tab="home">
+                <i data-lucide="home"></i>
+                <span class="text-[9px] font-black uppercase tracking-tighter">Home</span>
+            </button>
+            <button onclick="changeTab('definitions')" class="nav-btn flex-1 flex flex-col items-center gap-1.5 text-slate-400 opacity-60" data-tab="definitions">
+                <i data-lucide="book-open"></i>
+                <span class="text-[9px] font-black uppercase tracking-tighter">Library</span>
+            </button>
+            <button onclick="changeTab('progress')" class="nav-btn flex-1 flex flex-col items-center gap-1.5 text-slate-400 opacity-60" data-tab="progress">
+                <i data-lucide="trending-up"></i>
+                <span class="text-[9px] font-black uppercase tracking-tighter">Stats</span>
+            </button>
+            <button onclick="changeTab('settings')" class="nav-btn flex-1 flex flex-col items-center gap-1.5 text-slate-400 opacity-60" data-tab="settings">
+                <i data-lucide="settings"></i>
+                <span class="text-[9px] font-black uppercase tracking-tighter">Profile</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="fixed inset-0 z-[100] bg-black/70 backdrop-blur-md hidden items-center justify-center p-6">
+        <div id="modal-content" class="w-full max-w-sm p-8 rounded-[3rem] shadow-2xl bg-white text-slate-900 dark:bg-slate-900 dark:text-white transition-colors">
+            <h2 id="modal-title" class="text-xl font-black text-teal-500 mb-6">New Item</h2>
+            <div id="modal-fields" class="space-y-4"></div>
+            <div class="flex gap-4 pt-4">
+                <button onclick="closeModal()" class="flex-1 py-5 font-black text-slate-400">CANCEL</button>
+                <button onclick="handleModalSubmit()" class="flex-[2] py-5 bg-teal-600 text-white rounded-3xl font-black shadow-lg hover:bg-teal-700 transition-colors">SAVE</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- State Management ---
+        let state = {
+            user: null,
+            theme: 'light',
+            currentTab: 'home',
+            units: [],
+            definitions: [],
+            progressLogs: [],
+            dailyBatch: [],
+            currentIndex: 0,
+            showAnswer: false,
+            expandedUnits: {},
+            modalMode: 'definition',
+            editingId: null
+        };
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'biology-reminder-v2';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        let db, auth;
+
+        async function initFirebase() {
+            if (!firebaseConfig) return;
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            auth = firebase.auth();
+
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await auth.signInWithCustomToken(__initial_auth_token);
+            } else {
+                await auth.signInAnonymously();
+            }
+
+            auth.onAuthStateChanged(user => {
+                state.user = user;
+                if (user) syncData();
+            });
+        }
+
+        function syncData() {
+            const userRef = `artifacts/${appId}/users/${state.user.uid}`;
+            db.collection(`${userRef}/units`).onSnapshot(s => {
+                state.units = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                render();
+            }, err => console.error(err));
+            db.collection(`${userRef}/definitions`).onSnapshot(s => {
+                state.definitions = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                updateDailyBatch();
+                render();
+            }, err => console.error(err));
+            db.collection(`${userRef}/progress`).onSnapshot(s => {
+                state.progressLogs = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                updateDailyBatch();
+                render();
+            }, err => console.error(err));
+        }
+
+        function updateDailyBatch() {
+            if (state.definitions.length === 0) return;
+            const today = new Date().toISOString().split('T')[0];
+            const todaysLogs = state.progressLogs.filter(l => l.date === today);
+            const seed = parseInt(today.split('-').join(''));
+            const seededRandom = (s) => {
+                const x = Math.sin(s++) * 10000;
+                return x - Math.floor(x);
+            };
+            const shuffled = [...state.definitions].sort((a, b) => 
+                seededRandom(seed + state.definitions.indexOf(a)) - 0.5
+            );
+            state.dailyBatch = shuffled.slice(0, 30);
+            const firstUnread = state.dailyBatch.findIndex(def => !todaysLogs.some(log => log.definitionId === def.id));
+            state.currentIndex = firstUnread === -1 ? state.dailyBatch.length : firstUnread;
+        }
+
+        async function handleLog(status) {
+            if (!state.user || state.currentIndex >= state.dailyBatch.length) return;
+            const def = state.dailyBatch[state.currentIndex];
+            const today = new Date().toISOString().split('T')[0];
+            await db.collection(`artifacts/${appId}/users/${state.user.uid}/progress`).add({
+                date: today, status, definitionId: def.id, term: def.term,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            state.showAnswer = false;
+            render();
+        }
+
+        async function seedSampleData() {
+            if (!state.user) return;
+            const samples = [
+                { name: "Cell Biology", items: [
+                    { t: "Mitochondria", d: "Powerhouse of the cell, where ATP energy is produced through respiration." },
+                    { t: "Ribosome", d: "Complex of RNA and protein that serves as the site of protein synthesis." },
+                    { t: "Osmosis", d: "The movement of water across a selectively permeable membrane." },
+                    { t: "Mitosis", d: "Cell division resulting in two identical daughter cells." }
+                ]},
+                { name: "Genetics", items: [
+                    { t: "Allele", d: "One of a number of different forms of a gene." },
+                    { t: "Phenotype", d: "The physical characteristics of an organism." }
+                ]}
+            ];
+            const userRef = `artifacts/${appId}/users/${state.user.uid}`;
+            for (const unit of samples) {
+                const uRef = await db.collection(`${userRef}/units`).add({ name: unit.name });
+                for (const item of unit.items) {
+                    await db.collection(`${userRef}/definitions`).add({
+                        unitId: uRef.id, term: item.t, definition: item.d, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            }
+        }
+
+        function render() {
+            const main = document.getElementById('main-content');
+            const body = document.getElementById('body-root');
+            if (state.theme === 'dark') {
+                body.classList.add('bg-slate-950', 'text-white');
+                body.classList.remove('bg-slate-50', 'text-slate-900');
+            } else {
+                body.classList.remove('bg-slate-950', 'text-white');
+                body.classList.add('bg-slate-50', 'text-slate-900');
+            }
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const isActive = btn.dataset.tab === state.currentTab;
+                btn.className = `nav-btn flex-1 flex flex-col items-center gap-1.5 transition-all ${isActive ? 'text-teal-500 scale-110' : 'text-slate-400 opacity-60'}`;
+            });
+            if (state.currentTab === 'home') renderHome(main);
+            else if (state.currentTab === 'definitions') renderLibrary(main);
+            else if (state.currentTab === 'progress') renderProgress(main);
+            else if (state.currentTab === 'settings') renderSettings(main);
+            lucide.createIcons();
+        }
+
+        function renderHome(container) {
+            const progress = (state.currentIndex / 30) * 100;
+            const currentItem = state.dailyBatch[state.currentIndex];
+            const upcoming = state.dailyBatch.slice(state.currentIndex + 1, state.currentIndex + 6);
+
+            let content = `
+                <div class="h-full flex flex-col overflow-hidden">
+                    <!-- Progress Header -->
+                    <div class="p-6 pb-0 flex-shrink-0">
+                        <div class="flex justify-between items-end mb-2">
+                            <h1 class="text-2xl font-black tracking-tight">Focus Mode</h1>
+                            <span class="text-xs font-black text-teal-600 dark:text-teal-400">${state.currentIndex} / 30</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-teal-500 transition-all duration-700 ease-out" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Centered Flashcard -->
+                    <div class="flex-1 flex items-center justify-center p-6 min-h-0">
+            `;
+
+            if (state.definitions.length === 0) {
+                content += `
+                    <div class="text-center px-10">
+                        <i data-lucide="sparkles" class="text-teal-600 mx-auto mb-6 w-12 h-12"></i>
+                        <h2 class="text-2xl font-bold mb-4">Ready to learn?</h2>
+                        <button onclick="changeTab('settings')" class="px-10 py-4 bg-teal-600 text-white rounded-3xl font-black shadow-xl">Get Started</button>
+                    </div>
+                `;
+            } else if (currentItem) {
+                content += `
+                    <div class="w-full max-w-sm aspect-[5/6] p-8 rounded-[3.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] flex flex-col items-center justify-center text-center border-b-[12px] transform transition-all duration-300 ${state.theme === 'dark' ? 'bg-slate-900 border-slate-950' : 'bg-white border-slate-200'}">
+                         <span class="text-[10px] font-black uppercase tracking-[0.2em] text-teal-500 mb-6">Active Term</span>
+                         <h2 class="text-3xl font-black mb-6 leading-tight flex-1 flex items-center">${currentItem.term}</h2>
+                         
+                         <div class="min-h-[120px] w-full flex items-center justify-center mb-6">
+                            ${state.showAnswer ? `<p class="text-base font-medium opacity-80 fade-in leading-relaxed">${currentItem.definition}</p>` : 
+                            `<div class="w-12 h-1 bg-slate-100 dark:bg-slate-800 rounded-full animate-pulse"></div>`}
+                         </div>
+
+                         <div class="w-full space-y-3">
+                            ${!state.showAnswer ? 
+                                `<button onclick="toggleAnswer()" class="w-full py-5 bg-teal-600 text-white rounded-[2rem] font-black shadow-lg shadow-teal-500/20 active:scale-95 transition-transform">REVEAL DEFINITION</button>` :
+                                `<div class="flex gap-3">
+                                    <button onclick="handleLog('fail')" class="flex-1 py-5 bg-red-100 text-red-600 dark:bg-red-900/30 rounded-[2rem] font-black text-sm active:scale-95 transition-transform">FORGOT</button>
+                                    <button onclick="handleLog('pass')" class="flex-1 py-5 bg-green-100 text-green-600 dark:bg-green-900/30 rounded-[2rem] font-black text-sm active:scale-95 transition-transform">MASTERED</button>
+                                </div>`
+                            }
+                         </div>
+                    </div>
+                `;
+            } else {
+                content += `<div class="text-center"><i data-lucide="check-circle" class="w-16 h-16 text-teal-500 mx-auto mb-4"></i><h2 class="text-2xl font-black">All Caught Up!</h2></div>`;
+            }
+
+            content += `</div>`;
+
+            // Upcoming List Section
+            if (currentItem && upcoming.length > 0) {
+                content += `
+                    <div class="px-8 pb-8 flex-shrink-0">
+                        <h3 class="text-[10px] font-black uppercase tracking-widest opacity-40 mb-4 ml-1">Coming up next</h3>
+                        <div class="flex gap-3 overflow-x-auto pb-4 custom-scrollbar no-scrollbar">
+                            ${upcoming.map((u, i) => `
+                                <div class="flex-shrink-0 w-32 p-4 rounded-2xl border-2 ${state.theme === 'dark' ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-100'} opacity-${80 - (i * 15)}">
+                                    <p class="font-bold text-xs truncate">${u.term}</p>
+                                    <div class="mt-2 h-1 w-8 bg-teal-500/30 rounded-full"></div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            content += `</div>`;
+            container.innerHTML = content;
+        }
+
+        function renderLibrary(container) {
+            let content = `
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-8">
+                        <h1 class="text-3xl font-black">Library</h1>
+                        <div class="flex gap-2">
+                            <button onclick="openModal('unit')" class="p-3 bg-slate-200 dark:bg-slate-800 rounded-2xl"><i data-lucide="plus"></i></button>
+                            <button onclick="openModal('definition')" class="p-3 bg-teal-600 text-white rounded-2xl shadow-lg"><i data-lucide="plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+            `;
+            state.units.forEach(u => {
+                const isExpanded = state.expandedUnits[u.id];
+                const unitDefs = state.definitions.filter(d => d.unitId === u.id);
+                content += `
+                    <div class="rounded-[2rem] border-2 transition-colors ${state.theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100 shadow-sm'}">
+                        <button onclick="toggleUnit('${u.id}')" class="w-full p-6 flex items-center justify-between text-left">
+                            <div>
+                                <h3 class="text-lg font-black leading-none">${u.name}</h3>
+                                <p class="text-[10px] font-black opacity-30 uppercase tracking-widest mt-2">${unitDefs.length} items</p>
+                            </div>
+                            <i data-lucide="${isExpanded ? 'chevron-up' : 'chevron-down'}"></i>
+                        </button>
+                        ${isExpanded ? `
+                            <div class="px-6 pb-6 space-y-2 border-t border-slate-50 dark:border-slate-800 pt-4 fade-in">
+                                ${unitDefs.map(d => `
+                                    <div class="flex justify-between items-center py-3 border-b border-slate-50 dark:border-slate-800 last:border-0">
+                                        <div class="flex-1 pr-4">
+                                            <p class="font-black">${d.term}</p>
+                                            <p class="text-xs opacity-50 line-clamp-1">${d.definition}</p>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button onclick="editDef('${d.id}')" class="p-2 text-slate-400 hover:text-teal-500"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                            <button onclick="deleteDef('${d.id}')" class="p-2 text-slate-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            content += `</div></div>`;
+            container.innerHTML = content;
+        }
+
+        function renderProgress(container) {
+            const groups = {};
+            state.progressLogs.forEach(l => {
+                if (!groups[l.date]) groups[l.date] = [];
+                groups[l.date].push(l);
+            });
+            const sorted = Object.entries(groups).sort((a,b) => b[0].localeCompare(a[0]));
+            let content = `<div class="p-6"><h1 class="text-3xl font-black mb-8">Performance</h1>`;
+            if (sorted.length === 0) content += `<div class="text-center py-20 opacity-30 font-black uppercase text-xs">No records found</div>`;
+            else {
+                content += `<div class="space-y-6">`;
+                sorted.forEach(([date, logs]) => {
+                    const passed = logs.filter(l => l.status === 'pass').length;
+                    const failed = logs.filter(l => l.status === 'fail').length;
+                    const percent = Math.round((passed / logs.length) * 100);
+                    content += `
+                        <div class="rounded-[2.5rem] p-6 border-2 transition-colors ${state.theme === 'dark' ? 'bg-slate-900 border-slate-800 shadow-xl' : 'bg-white border-slate-100 shadow-md'}">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-3 bg-teal-500/10 rounded-2xl text-teal-600"><i data-lucide="calendar"></i></div>
+                                    <h3 class="font-black text-lg">${date}</h3>
+                                </div>
+                                <div class="text-right"><div class="text-2xl font-black text-teal-500">${percent}%</div></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3 mb-6">
+                                <div class="p-4 rounded-2xl bg-green-500/5 border border-green-500/10 flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-500"></i><span class="font-black text-green-600 text-xs">${passed} Passed</span></div>
+                                <div class="p-4 rounded-2xl bg-red-500/5 border border-red-500/10 flex items-center gap-2"><i data-lucide="x-circle" class="w-4 h-4 text-red-500"></i><span class="font-black text-red-600 text-xs">${failed} Failed</span></div>
+                            </div>
+                            <div class="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                                ${logs.map(log => `<div class="flex justify-between text-xs py-2 border-b border-slate-100 dark:border-slate-800 last:border-0 opacity-80"><span class="font-bold">${log.term}</span><span class="${log.status === 'pass' ? 'text-green-500' : 'text-red-500'} font-bold">${log.status}</span></div>`).join('')}
+                            </div>
+                        </div>`;
+                });
+                content += `</div>`;
+            }
+            container.innerHTML = content + `</div>`;
+        }
+
+        function renderSettings(container) {
+            container.innerHTML = `
+                <div class="p-6">
+                    <h1 class="text-3xl font-black mb-10">Profile</h1>
+                    <div class="p-8 rounded-[2.5rem] mb-6 flex items-center gap-6 transition-colors ${state.theme === 'dark' ? 'bg-slate-900 shadow-xl' : 'bg-white shadow-md border border-slate-100'}">
+                        <div class="w-16 h-16 rounded-[1.5rem] bg-teal-500 flex items-center justify-center text-white"><i data-lucide="user" class="w-8 h-8"></i></div>
+                        <div><p class="text-xl font-black">Bio Scholar</p><p class="text-xs opacity-40">Active Member</p></div>
+                    </div>
+                    <div class="space-y-3">
+                        <button onclick="toggleTheme()" class="w-full p-6 flex justify-between items-center rounded-3xl transition-colors ${state.theme === 'dark' ? 'bg-slate-900' : 'bg-white border border-slate-100'}">
+                            <span class="font-black">Dark Mode</span> <i data-lucide="${state.theme === 'dark' ? 'moon' : 'sun'}"></i>
+                        </button>
+                        <button onclick="seedSampleData()" class="w-full p-6 flex justify-between items-center rounded-3xl bg-teal-600 text-white font-black shadow-lg">Generate Lesson Samples</button>
+                    </div>
+                </div>`;
+        }
+
+        window.changeTab = (tab) => { state.currentTab = tab; render(); };
+        window.toggleTheme = () => { state.theme = state.theme === 'light' ? 'dark' : 'light'; render(); };
+        window.toggleAnswer = () => { state.showAnswer = !state.showAnswer; render(); };
+        window.toggleUnit = (id) => { state.expandedUnits[id] = !state.expandedUnits[id]; render(); };
+        window.closeModal = () => { document.getElementById('modal-overlay').classList.add('hidden'); };
+        window.openModal = (mode, id = null) => {
+            state.modalMode = mode; state.editingId = id;
+            const overlay = document.getElementById('modal-overlay');
+            overlay.classList.remove('hidden'); overlay.classList.add('flex');
+            const fields = document.getElementById('modal-fields');
+            if (mode === 'unit') {
+                document.getElementById('modal-title').innerText = 'New Lesson';
+                fields.innerHTML = `<input id="unit-name" placeholder="e.g., Anatomy" class="w-full p-5 rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none font-bold" />`;
+            } else {
+                document.getElementById('modal-title').innerText = mode === 'edit-definition' ? 'Edit Item' : 'New Item';
+                const currentDef = id ? state.definitions.find(d => d.id === id) : null;
+                fields.innerHTML = `
+                    <select id="def-unit" class="w-full p-5 rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none font-bold">
+                        <option value="">Select Lesson</option>
+                        ${state.units.map(u => `<option value="${u.id}" ${currentDef?.unitId === u.id ? 'selected' : ''}>${u.name}</option>`).join('')}
+                    </select>
+                    <input id="def-term" placeholder="Scientific Term" value="${currentDef?.term || ''}" class="w-full p-5 rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none font-bold" />
+                    <textarea id="def-text" placeholder="Scientific Definition" rows="4" class="w-full p-5 rounded-2xl bg-slate-100 dark:bg-slate-800 outline-none font-medium">${currentDef?.definition || ''}</textarea>`;
+            }
+        };
+        window.handleModalSubmit = async () => {
+            const userRef = `artifacts/${appId}/users/${state.user.uid}`;
+            if (state.modalMode === 'unit') {
+                const name = document.getElementById('unit-name').value;
+                if (name) await db.collection(`${userRef}/units`).add({ name });
+            } else {
+                const unitId = document.getElementById('def-unit').value, term = document.getElementById('def-term').value, definition = document.getElementById('def-text').value;
+                if (unitId && term) {
+                    if (state.modalMode === 'edit-definition') await db.collection(`${userRef}/definitions`).doc(state.editingId).update({ unitId, term, definition });
+                    else await db.collection(`${userRef}/definitions`).add({ unitId, term, definition });
+                }
+            }
+            closeModal();
+        };
+        window.deleteDef = async (id) => { await db.collection(`artifacts/${appId}/users/${state.user.uid}/definitions`).doc(id).delete(); };
+        window.editDef = (id) => { openModal('edit-definition', id); };
+        window.onload = () => { initFirebase(); render(); };
+    </script>
+</body>
+</html>
