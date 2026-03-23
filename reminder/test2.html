@@ -30,460 +30,937 @@
         .glass {
             background: var(--card-light);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 24px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
         }
 
         .dark-mode {
             background-color: var(--bg-dark);
             color: #f1f5f9;
         }
-
+        
         .dark-mode .glass {
             background: var(--card-dark);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
         }
 
-        .nav-item {
+        .sidebar-item {
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
+            color: #64748b;
         }
 
-        .nav-item.active {
-            color: var(--primary);
-            background: rgba(79, 70, 229, 0.1);
-        }
-
-        .nav-item.active::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 4px;
-            height: 20px;
+        .sidebar-item.active {
             background: var(--primary);
-            border-radius: 0 4px 4px 0;
+            color: white !important;
+            box-shadow: 0 8px 20px -6px rgba(79, 70, 229, 0.5);
         }
 
-        .animate-pop { animation: pop 0.3s ease-out; }
-        @keyframes pop {
-            0% { transform: scale(0.95); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+        .bottom-nav-item { color: #94a3b8; transition: all 0.2s; }
+        .bottom-nav-item.active { color: var(--primary); }
+
+        @media (min-width: 768px) {
+            .mobile-nav { display: none !important; }
+            .desktop-sidebar { display: flex !important; }
+            .main-content { margin-left: 260px; padding: 2.5rem; }
+        }
+        @media (max-width: 767px) {
+            .mobile-nav { display: flex !important; }
+            .desktop-sidebar { display: none !important; }
+            .main-content { margin-left: 0; padding: 1.25rem; margin-bottom: 5rem; }
         }
 
-        .lesson-card:hover .play-btn { transform: scale(1.1); }
-        
-        /* Mobile Navbar Positioning */
-        @media (max-width: 768px) {
-            .mobile-nav {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                z-index: 50;
-                border-radius: 24px 24px 0 0;
-            }
-            .sidebar { display: none; }
+        .btn-primary {
+            background: var(--primary);
+            transition: all 0.2s;
         }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .google-btn {
+            background: #ffffff;
+            color: #3c4043;
+            border: 1px solid #dadce0;
+            transition: background-color .218s, border-color .218s, box-shadow .218s;
+        }
+        .google-btn:hover {
+            background-color: #f8f9fa;
+            border-color: #d2e3fc;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.30), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+        .dark-mode .google-btn {
+            background: #1e293b;
+            color: #f1f5f9;
+            border: 1px solid #334155;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body>
-    <!-- Main UI Code Remains Unchanged as per Request to only focus on Firebase/Logic fixes -->
-    <div id="app" class="flex min-h-screen">
-        <!-- Sidebar -->
-        <aside class="sidebar w-64 glass m-4 mr-0 p-6 flex flex-col h-[calc(100vh-2rem)]">
-            <div class="flex items-center gap-3 mb-10 px-2">
-                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-                    <i data-lucide="graduation-cap" class="w-6 h-6"></i>
-                </div>
-                <h1 class="font-bold text-xl tracking-tight">Study Master</h1>
-            </div>
+<body class="transition-colors duration-300">
 
-            <nav class="flex-1 space-y-2">
-                <button onclick="navigate('dashboard')" class="nav-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" data-page="dashboard">
-                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-                    <span class="font-medium">Dashboard</span>
-                </button>
-                <button onclick="navigate('lessons')" class="nav-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" data-page="lessons">
-                    <i data-lucide="book-open" class="w-5 h-5"></i>
-                    <span class="font-medium">Lessons</span>
-                </button>
-                <button onclick="navigate('flashcards')" class="nav-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" data-page="flashcards">
-                    <i data-lucide="layers" class="w-5 h-5"></i>
-                    <span class="font-medium">Flashcards</span>
-                </button>
-                <button onclick="navigate('calendar')" class="nav-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" data-page="calendar">
-                    <i data-lucide="calendar" class="w-5 h-5"></i>
-                    <span class="font-medium">Schedule</span>
-                </button>
-                <button onclick="navigate('analytics')" class="nav-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" data-page="analytics">
-                    <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
-                    <span class="font-medium">Progress</span>
-                </button>
-            </nav>
-
-            <div class="mt-auto space-y-2 pt-6 border-t border-slate-200 dark:border-slate-800">
-                <button onclick="toggleDarkMode()" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                    <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
-                    <span class="font-medium">Theme</span>
-                </button>
-                <div id="auth-section">
-                    <!-- Auth Button Injected Here -->
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="flex-1 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8">
-            <header class="flex justify-between items-center mb-8">
-                <div>
-                    <h2 id="greeting" class="text-3xl font-bold">Hello, Scholar!</h2>
-                    <p class="text-slate-500 mt-1">Ready to master your subjects today?</p>
-                </div>
-                <div class="flex items-center gap-4">
-                    <button class="p-3 glass rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                        <i data-lucide="bell" class="w-6 h-6"></i>
-                    </button>
-                    <div id="user-profile-img" class="w-12 h-12 bg-indigo-100 rounded-full border-2 border-white shadow-sm flex items-center justify-center overflow-hidden">
-                        <i data-lucide="user" class="w-6 h-6 text-indigo-600"></i>
-                    </div>
-                </div>
-            </header>
-
-            <div id="page-content" class="animate-pop">
-                <!-- Page Content Injected Here -->
-            </div>
-        </main>
-
-        <!-- Mobile Nav Bar -->
-        <nav class="mobile-nav md:hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 flex justify-around p-4">
-            <button onclick="navigate('dashboard')" class="p-2 text-slate-400" data-mobile-page="dashboard"><i data-lucide="layout-dashboard"></i></button>
-            <button onclick="navigate('lessons')" class="p-2 text-slate-400" data-mobile-page="lessons"><i data-lucide="book-open"></i></button>
-            <button onclick="navigate('flashcards')" class="p-2 text-slate-400" data-mobile-page="flashcards"><i data-lucide="layers"></i></button>
-            <button onclick="navigate('calendar')" class="p-2 text-slate-400" data-mobile-page="calendar"><i data-lucide="calendar"></i></button>
-        </nav>
+    <!-- Login Reminder Banner -->
+    <div id="login-reminder" class="fixed top-0 left-0 w-full bg-indigo-600 text-white text-center py-2 text-xs font-bold z-[100] transform transition-transform duration-500 translate-y-[-100%]">
+        Log in via Settings to enable Cloud Sync! <button onclick="hideLoginReminder()" class="ml-4 underline">Close</button>
     </div>
 
-    <!-- Notification Toast -->
-    <div id="notification-container" class="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[100] pointer-events-none"></div>
+    <!-- Desktop Sidebar -->
+    <aside class="desktop-sidebar fixed left-0 top-0 h-screen w-64 glass flex-col p-5 z-50 shadow-sm hidden">
+        <div class="flex items-center gap-3 px-2 mb-8">
+            <div class="bg-indigo-600 p-2.5 rounded-2xl text-white">
+                <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+            </div>
+            <h1 class="font-bold text-xl tracking-tight">StudyMaster <span class="text-indigo-600">Pro</span></h1>
+        </div>
 
-    <!-- Firebase Script Module -->
+        <nav class="flex-1 space-y-1.5 overflow-y-auto pr-2 no-scrollbar">
+            <button onclick="showTab('dashboard')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium active" data-tab="dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+            </button>
+            <button onclick="showTab('lessons')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium" data-tab="lessons">
+                <i data-lucide="book-open" class="w-5 h-5"></i> Lessons
+            </button>
+            <button onclick="showTab('flashcards')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium" data-tab="flashcards">
+                <i data-lucide="layers" class="w-5 h-5"></i> Flashcards
+            </button>
+            <button onclick="showTab('equations')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium" data-tab="equations">
+                <i data-lucide="binary" class="w-5 h-5"></i> Equations
+            </button>
+            <button onclick="showTab('definitions')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium" data-tab="definitions">
+                <i data-lucide="message-square" class="w-5 h-5"></i> Definitions
+            </button>
+            <button onclick="showTab('papers')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium" data-tab="papers">
+                <i data-lucide="file-text" class="w-5 h-5"></i> Past Papers
+            </button>
+            <button onclick="showTab('pomodoro')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium" data-tab="pomodoro">
+                <i data-lucide="timer" class="w-5 h-5"></i> Pomodoro
+            </button>
+        </nav>
+
+        <div class="mt-4 pt-4 border-t dark:border-slate-800">
+            <button onclick="showTab('settings')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium" data-tab="settings">
+                <i data-lucide="settings" class="w-5 h-5"></i> Settings
+            </button>
+        </div>
+    </aside>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav fixed bottom-0 left-0 w-full glass h-20 px-4 flex items-center justify-between z-50 shadow-2xl border-t overflow-x-auto no-scrollbar gap-4">
+        <button onclick="showTab('dashboard')" class="bottom-nav-item flex flex-col items-center gap-1 active min-w-[50px]" data-tab="dashboard">
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold">Home</span>
+        </button>
+        <button onclick="showTab('lessons')" class="bottom-nav-item flex flex-col items-center gap-1 min-w-[50px]" data-tab="lessons">
+            <i data-lucide="book-open" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold">Lessons</span>
+        </button>
+        <button onclick="showTab('equations')" class="bottom-nav-item flex flex-col items-center gap-1 min-w-[50px]" data-tab="equations">
+            <i data-lucide="binary" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold">Eqs</span>
+        </button>
+        <button onclick="showTab('papers')" class="bottom-nav-item flex flex-col items-center gap-1 min-w-[50px]" data-tab="papers">
+            <i data-lucide="file-text" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold">Papers</span>
+        </button>
+        <button onclick="showTab('pomodoro')" class="bottom-nav-item flex flex-col items-center gap-1 min-w-[50px]" data-tab="pomodoro">
+            <i data-lucide="timer" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold">Focus</span>
+        </button>
+        <button onclick="showTab('settings')" class="bottom-nav-item flex flex-col items-center gap-1 min-w-[50px]" data-tab="settings">
+            <i data-lucide="settings" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold">More</span>
+        </button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content min-h-screen relative">
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight">Welcome Back! 👋</h2>
+                <p class="text-slate-500 font-medium mt-1 text-sm md:text-base">Ready for your next study session?</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="toggleDarkMode()" class="p-3 rounded-2xl glass hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm">
+                    <i data-lucide="moon" id="theme-icon" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Global Subject Selector -->
+        <div id="global-subject-selector" class="mb-8 hidden fade-in">
+            <div class="flex gap-2 overflow-x-auto p-1 bg-slate-50 dark:bg-slate-900 rounded-2xl no-scrollbar border dark:border-slate-800 w-full" id="subject-filters-container">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <section id="tab-dashboard" class="tab-content fade-in space-y-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[2rem] p-6 text-white shadow-xl relative overflow-hidden col-span-2 md:col-span-1">
+                    <p class="text-indigo-100 text-xs font-semibold mb-1 uppercase tracking-wider">Total Work Time</p>
+                    <h3 id="stat-total-time" class="text-3xl font-black">0h 0m</h3>
+                    <i data-lucide="clock" class="absolute -right-4 -bottom-4 w-24 h-24 opacity-10"></i>
+                </div>
+                <div class="glass rounded-[2rem] p-6 relative overflow-hidden">
+                    <p class="text-slate-500 text-xs font-semibold mb-1 uppercase tracking-wider">Lessons Done</p>
+                    <h3 id="stat-lessons-done" class="text-3xl font-black text-indigo-600">0</h3>
+                </div>
+                <div class="glass rounded-[2rem] p-6 relative overflow-hidden">
+                    <p class="text-slate-500 text-xs font-semibold mb-1 uppercase tracking-wider">Papers Done</p>
+                    <h3 id="stat-papers-done" class="text-3xl font-black text-emerald-600">0</h3>
+                </div>
+                <div class="bg-slate-900 rounded-[2rem] p-6 text-white relative overflow-hidden">
+                    <p class="text-slate-400 text-xs font-semibold mb-1 uppercase tracking-wider">Pomodoros</p>
+                    <h3 id="stat-pomodoro" class="text-3xl font-black">0</h3>
+                </div>
+            </div>
+
+            <!-- Random Revision Section -->
+            <div class="glass rounded-[2.5rem] p-6 md:p-8 border-t-4 border-indigo-500">
+                <h3 class="text-xl font-black mb-4 flex items-center gap-2"><i data-lucide="refresh-cw" class="text-indigo-500"></i> Today's Revision</h3>
+                <div id="revision-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Lessons Section -->
+        <section id="tab-lessons" class="tab-content fade-in hidden space-y-6">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-xl font-bold">Lessons</h3>
+                <button onclick="openModal('addLessonModal')" class="btn-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> New Lesson</button>
+            </div>
+            <div id="lessons-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        </section>
+
+        <!-- Flashcards Section -->
+        <section id="tab-flashcards" class="tab-content fade-in hidden space-y-6">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-xl font-bold">Flashcards</h3>
+                <button onclick="openModal('addFlashcardModal')" class="btn-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> New Card</button>
+            </div>
+            <div id="flashcards-container" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+        </section>
+
+        <!-- Equations Section -->
+        <section id="tab-equations" class="tab-content fade-in hidden space-y-6">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-xl font-bold">Equations</h3>
+                <button onclick="openModal('addEquationModal')" class="btn-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> New Equation</button>
+            </div>
+            <div id="equations-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <!-- Definitions Section -->
+        <section id="tab-definitions" class="tab-content fade-in hidden space-y-6">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-xl font-bold">Definitions</h3>
+                <button onclick="openModal('addDefinitionModal')" class="btn-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> New Definition</button>
+            </div>
+            <div id="definitions-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        </section>
+
+        <!-- Papers Section -->
+        <section id="tab-papers" class="tab-content fade-in hidden space-y-6">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-xl font-bold">Past Papers</h3>
+                <button onclick="openModal('addPaperModal')" class="btn-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Add Paper</button>
+            </div>
+            <div id="papers-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <!-- Pomodoro Section -->
+        <section id="tab-pomodoro" class="tab-content fade-in hidden">
+            <div class="max-w-xl mx-auto glass rounded-[3rem] p-12 text-center shadow-2xl relative overflow-hidden">
+                <div class="absolute inset-0 bg-indigo-50 dark:bg-indigo-900/10 transform scale-0 rounded-full transition-transform duration-1000 origin-center" id="pomodoro-bg"></div>
+                <h3 id="timer-display" class="text-8xl font-black mb-12 tracking-tighter relative z-10">25:00</h3>
+                <div class="flex justify-center gap-6 relative z-10">
+                    <button onclick="toggleTimer()" id="timer-btn" class="bg-indigo-600 hover:bg-indigo-700 transition-colors text-white w-20 h-20 rounded-[2rem] flex items-center justify-center shadow-lg"><i data-lucide="play" class="w-8 h-8"></i></button>
+                    <button onclick="resetTimer()" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-slate-500 w-20 h-20 rounded-[2rem] flex items-center justify-center"><i data-lucide="rotate-ccw" class="w-6 h-6"></i></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section id="tab-settings" class="tab-content fade-in hidden max-w-2xl mx-auto space-y-8 pb-10">
+            <div class="glass rounded-[2.5rem] p-8 space-y-8 shadow-sm">
+                <h3 class="text-2xl font-black mb-6">Settings</h3>
+                
+                <!-- Subject Management -->
+                <div class="p-5 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border dark:border-slate-800">
+                    <p class="font-bold mb-4">Manage Subjects</p>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="new-subject-input" placeholder="New Subject..." class="flex-1 p-3 rounded-xl bg-white dark:bg-slate-800 border dark:border-slate-700 outline-none text-sm font-medium">
+                        <button onclick="addSubject()" class="bg-indigo-600 text-white px-4 rounded-xl font-bold text-sm">Add</button>
+                    </div>
+                    <div id="settings-subjects-list" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Theme -->
+                <div class="flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border dark:border-slate-800">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-indigo-100 dark:bg-indigo-900/30 p-2.5 rounded-xl text-indigo-600"><i data-lucide="sparkles" class="w-5 h-5"></i></div>
+                        <div>
+                            <p class="font-bold">Dark Theme</p>
+                            <p class="text-xs text-slate-500">Toggle dark mode for eye comfort</p>
+                        </div>
+                    </div>
+                    <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl glass hover:bg-white dark:hover:bg-slate-800 border"><i data-lucide="repeat" class="w-5 h-5"></i></button>
+                </div>
+
+                <!-- Backup / Restore -->
+                <div class="p-5 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border dark:border-slate-800">
+                     <p class="font-bold mb-4 flex items-center gap-2"><i data-lucide="download-cloud" class="w-5 h-5 text-emerald-500"></i> Local Backup & Import</p>
+                     <div class="flex gap-4">
+                         <button onclick="exportData()" class="flex-1 bg-white dark:bg-slate-800 p-3 rounded-xl border dark:border-slate-700 font-bold text-sm hover:border-indigo-500 transition-colors">Export Data</button>
+                         <label class="flex-1 bg-white dark:bg-slate-800 p-3 rounded-xl border dark:border-slate-700 font-bold text-sm text-center hover:border-indigo-500 transition-colors cursor-pointer">
+                             Import Data
+                             <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(event)">
+                         </label>
+                     </div>
+                </div>
+
+                <!-- Account / Cloud Section -->
+                <div class="p-5 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border dark:border-slate-800">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="bg-emerald-100 dark:bg-emerald-900/30 p-2.5 rounded-xl text-emerald-600"><i data-lucide="cloud" class="w-5 h-5"></i></div>
+                        <div>
+                            <p class="font-bold">Cloud Synchronization</p>
+                            <p class="text-xs text-slate-500" id="sync-status-text">Save your progress across devices</p>
+                        </div>
+                    </div>
+                    <button onclick="handleGoogleSignIn()" id="auth-btn" class="google-btn w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-sm">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335"/>
+                        </svg>
+                        Sign in with Google
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Generic Modal Structure -->
+    <div id="unifiedModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
+        <div class="glass w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl relative">
+            <button onclick="closeModal('unifiedModal')" class="absolute top-6 right-6 text-slate-400 hover:text-rose-500"><i data-lucide="x"></i></button>
+            <div id="modal-content-area"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK Setup -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { 
-            getAuth, 
-            GoogleAuthProvider, 
-            signInWithPopup, 
-            onAuthStateChanged, 
-            signOut 
-        } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-        import { 
-            getDatabase, 
-            ref, 
-            set, 
-            onValue, 
-            push 
-        } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 
-        // --- Updated Firebase Config (Your New Project) ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyD6uwDAEFAbGTBY4-hckibbvscwXYW0CXY", // Ensure this is from Project Settings
-            authDomain: "studymaster-919ba.firebaseapp.com",
-            databaseURL: "https://studymaster-919ba-default-rtdb.firebaseio.com/",
-            projectId: "studymaster-919ba",
-            storageBucket: "studymaster-919ba.firebasestorage.app",
-            messagingSenderId: "312145339940",
-            appId: "1:312145339940:web:866236b281f6d3f2b1ab1"
-        };
-
-        // Initialize Firebase
-        let finalConfig = firebaseConfig;
-        try {
-            // Environment override if available
-            const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-            finalConfig = (envConfig && envConfig.apiKey) ? envConfig : firebaseConfig;
-        } catch(e) { 
-            finalConfig = firebaseConfig; 
-        }
-
-        const app = initializeApp(finalConfig);
-        window.auth = getAuth(app);
-        window.db = getDatabase(app, finalConfig.databaseURL);
-        
-        console.log("Study Master: Firebase Initialized Successfully");
-
-        // --- App State ---
+        // State Structure
         window.appState = {
-            currentPage: 'dashboard',
-            currentUser: null,
-            data: {
-                lessons: [],
-                flashcards: [],
-                sessions: []
-            },
+            subjects: ['Biology', 'Chemistry', 'Physics'],
+            activeSubject: 'Biology',
+            lessons: [], 
+            flashcards: [], 
+            equations: [], 
+            definitions: [], 
+            papers: [], 
+            stats: { totalTime: 0, pomodoros: 0, firstLoad: true },
             config: { darkMode: false }
         };
 
-        // --- Auth Implementation ---
-        window.handleGoogleSignIn = async function() {
-            const provider = new GoogleAuthProvider();
-            try {
-                const result = await signInWithPopup(window.auth, provider);
-                window.appState.currentUser = result.user;
-                showNotification("Success", `Welcome, ${result.user.displayName}!`, "success");
-            } catch (error) {
-                console.error("Auth Error:", error);
-                showNotification("Error", "Authentication failed. Check if Authorized Domains includes your current site URL.", "error");
-            }
-        };
+        window.db = null;
+        window.auth = null;
+        window.currentUser = null;
+        window.analytics = null;
 
-        window.handleSignOut = async function() {
-            try {
-                await signOut(window.auth);
-                window.appState.currentUser = null;
-                showNotification("Logged Out", "Successfully signed out.", "info");
-            } catch (error) {
-                console.error("Sign Out Error:", error);
-            }
-        };
+        // Load Local state first
+        const saved = localStorage.getItem('study_master_pro_data');
+        if(saved) {
+            let parsed = JSON.parse(saved);
+            window.appState = {...window.appState, ...parsed};
+        }
 
-        // Auth Observer
-        onAuthStateChanged(window.auth, (user) => {
-            window.appState.currentUser = user;
-            updateAuthUI();
-            if (user) {
-                setupCloudSync();
-                document.getElementById('greeting').innerText = `Hello, ${user.displayName.split(' ')[0]}!`;
-                if(user.photoURL) {
-                    document.getElementById('user-profile-img').innerHTML = `<img src="${user.photoURL}" class="w-full h-full object-cover">`;
+        // Initialize App UI
+        window.addEventListener('load', () => {
+            applyTheme();
+            renderSubjectFilters();
+            showTab('dashboard'); 
+            checkFirstLoad();
+            
+            // Setup User's specific Firebase config
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyA9DLfAHTUUGxCPn2j_k6godoTEopzaFAU",
+                    authDomain: "studymaster-919ba.firebaseapp.com",
+                    projectId: "studymaster-919ba",
+                    storageBucket: "studymaster-919ba.firebasestorage.app",
+                    messagingSenderId: "426684063256",
+                    appId: "1:426684063256:web:52c17625a9450ea9662d6d",
+                    measurementId: "G-CWQB2330GF"
+                };
+
+                const app = initializeApp(firebaseConfig);
+                window.db = getDatabase(app, "https://studymaster-919ba-default-rtdb.firebaseio.com/"); 
+                window.auth = getAuth(app);
+                console.log("Firebase initialized with Realtime Database");
+                
+                // Initialize analytics safely
+                try {
+                    window.analytics = getAnalytics(app);
+                } catch(analyticsErr) {
+                    console.log("Analytics initialization skipped.", analyticsErr);
                 }
-            } else {
-                document.getElementById('greeting').innerText = `Hello, Scholar!`;
-                document.getElementById('user-profile-img').innerHTML = `<i data-lucide="user" class="w-6 h-6 text-indigo-600"></i>`;
-                initLucide();
+
+                // Auth state listener
+                onAuthStateChanged(window.auth, (user) => {
+                    window.currentUser = user;
+                    updateAuthUI();
+                    
+                    if(user && !user.isAnonymous) {
+                        setupCloudSync();
+                    } else if (!user) {
+                        // Fallback to anonymous if no user is signed in
+                        signInAnonymously(window.auth).catch(e => console.error("Anonymous auth failed", e));
+                    }
+                });
+            } catch(e) { 
+                console.log("Firebase not available in this env, using local storage.", e); 
             }
         });
 
-        // --- Cloud Sync Implementation ---
-        window.setupCloudSync = function() {
-            if (!window.appState.currentUser) return;
-            const userRef = ref(window.db, 'users/' + window.appState.currentUser.uid);
-            
-            onValue(userRef, (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    console.log("Data Synced from Cloud");
-                    window.appState.data = data.data || window.appState.data;
-                    window.appState.config = data.config || window.appState.config;
-                    renderCurrentPage();
-                }
-            }, (error) => {
-                console.error("Sync Read Error:", error);
-                if(error.message.includes("permission_denied")) {
-                    console.warn("Permission denied. Ensure Firebase Rules are set to: allow read/write if auth != null");
-                }
-            });
-        };
+        window.checkFirstLoad = function() {
+            if(window.appState.stats.firstLoad) {
+                setTimeout(() => {
+                    const banner = document.getElementById('login-reminder');
+                    if(banner) banner.classList.remove('translate-y-[-100%]');
+                }, 2000);
+                window.appState.stats.firstLoad = false;
+                saveData();
+            }
+        }
 
-        window.saveData = function() {
-            if (!window.appState.currentUser) {
-                // Save to local storage if not logged in
-                localStorage.setItem('study_master_local_data', JSON.stringify(window.appState));
+        window.hideLoginReminder = function() {
+            const banner = document.getElementById('login-reminder');
+            if(banner) banner.classList.add('translate-y-[-100%]');
+        }
+
+        // UPDATED: Real Google Sign-In with Popup
+        window.handleGoogleSignIn = async function() {
+            if (!window.auth) {
+                alert("Firebase Authentication is not initialized properly.");
                 return;
             }
 
-            const userRef = ref(window.db, 'users/' + window.appState.currentUser.uid);
-            set(userRef, {
-                data: window.appState.data,
-                config: window.appState.config,
-                lastUpdated: new Date().toISOString()
-            }).catch(error => {
-                console.error("Cloud Save Error:", error);
-                showNotification("Sync Error", "Could not save to cloud.", "error");
-            });
-        };
+            const statusText = document.getElementById('sync-status-text');
+            statusText.innerText = "Opening Google Sign-In...";
+            
+            const provider = new GoogleAuthProvider();
+            
+            try {
+                const result = await signInWithPopup(window.auth, provider);
+                window.currentUser = result.user;
+                
+                statusText.innerText = `Synced as ${result.user.displayName || result.user.email}`;
+                alert(`Successfully signed in as ${result.user.displayName || result.user.email}! Cloud Sync started.`);
+                
+                updateAuthUI();
+                setupCloudSync();
+            } catch (error) {
+                console.error("Google Sign-In Error", error);
+                statusText.innerText = "Sign-in failed. Try again.";
+                alert("Error signing in with Google: " + error.message);
+            }
+        }
+
+        window.updateAuthUI = function() {
+            if(window.currentUser && !window.currentUser.isAnonymous) {
+                const authBtn = document.getElementById('auth-btn');
+                const statusText = document.getElementById('sync-status-text');
+                
+                if(authBtn) {
+                    authBtn.innerHTML = `<i data-lucide="check-circle" class="text-emerald-500 w-5 h-5"></i> Synced to Account`;
+                    authBtn.classList.add('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-200');
+                }
+                if(statusText) {
+                    statusText.innerText = `Synced as ${window.currentUser.displayName || window.currentUser.email || 'User'}`;
+                }
+                initLucide();
+            }
+        }
+
+        window.setupCloudSync = function() {
+            if(!window.currentUser || !window.db) return;
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'study-master';
+            
+            // Path structure ensuring proper data scoping
+            const docRef = doc(window.db, 'artifacts', appId, 'users', window.currentUser.uid, 'appData', 'mainState');
+            
+            setDoc(docRef, window.appState, {merge: true}).catch(e => console.error("Initial write failed", e));
+
+            onSnapshot(docRef, (snap) => {
+                if(snap.exists()) {
+                    window.appState = {...window.appState, ...snap.data()};
+                    localStorage.setItem('study_master_pro_data', JSON.stringify(window.appState));
+                    renderUI();
+                }
+            }, (err) => console.error("Sync Error", err));
+        }
 
         // --- Core UI Functions ---
-        window.updateAuthUI = function() {
-            const authSection = document.getElementById('auth-section');
-            if (window.appState.currentUser) {
-                authSection.innerHTML = `
-                    <button onclick="handleSignOut()" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 text-red-600 transition-colors">
-                        <i data-lucide="log-out" class="w-5 h-5"></i>
-                        <span class="font-medium">Sign Out</span>
-                    </button>
-                `;
+
+        window.showTab = function(id) {
+            document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
+            const target = document.getElementById(`tab-${id}`);
+            if(target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.sidebar-item, .bottom-nav-item').forEach(el => {
+                el.classList.toggle('active', el.dataset.tab === id);
+            });
+
+            const globalSelector = document.getElementById('global-subject-selector');
+            if(id === 'dashboard' || id === 'settings' || id === 'pomodoro') {
+                globalSelector.classList.add('hidden');
             } else {
-                authSection.innerHTML = `
-                    <button onclick="handleGoogleSignIn()" class="w-full flex items-center gap-3 p-3 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100">
-                        <i data-lucide="log-in" class="w-5 h-5"></i>
-                        <span class="font-medium">Sync with Google</span>
-                    </button>
+                globalSelector.classList.remove('hidden');
+            }
+
+            renderUI();
+        }
+
+        window.renderUI = function() {
+            renderSubjectFilters();
+            renderDashboard();
+            renderLessons();
+            renderFlashcards();
+            renderEquations();
+            renderDefinitions();
+            renderPapers();
+            renderSettingsSubjects();
+            initLucide();
+        }
+
+        window.saveData = function() {
+            localStorage.setItem('study_master_pro_data', JSON.stringify(window.appState));
+            if(window.currentUser && !window.currentUser.isAnonymous && window.db) {
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'study-master';
+                const docRef = doc(window.db, 'artifacts', appId, 'users', window.currentUser.uid, 'appData', 'mainState');
+                setDoc(docRef, window.appState, {merge: true});
+            }
+            renderUI();
+        }
+
+        window.filterBySubject = function(sub) {
+            window.appState.activeSubject = sub;
+            saveData();
+        }
+
+        window.renderSubjectFilters = function() {
+            const container = document.getElementById('subject-filters-container');
+            if(!container) return;
+            container.innerHTML = window.appState.subjects.map(s => `
+                <button onclick="filterBySubject('${s}')" class="px-5 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${window.appState.activeSubject === s ? 'bg-white dark:bg-slate-800 shadow-sm text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}">${s}</button>
+            `).join('');
+        }
+
+        // --- Dashboard & Spaced Repetition ---
+        window.renderDashboard = function() {
+            const lessonsDone = window.appState.lessons.filter(l => l.done).length;
+            document.getElementById('stat-lessons-done').innerText = lessonsDone;
+            document.getElementById('stat-papers-done').innerText = window.appState.papers.length;
+            document.getElementById('stat-total-time').innerText = Math.floor(window.appState.stats.totalTime / 60) + 'h ' + (window.appState.stats.totalTime % 60) + 'm';
+            document.getElementById('stat-pomodoro').innerText = window.appState.stats.pomodoros;
+
+            // Random Revision Items
+            const now = Date.now();
+            let toRevise = [];
+            
+            const grab = (arr, type, icon, color) => {
+                arr.forEach(item => {
+                    if(item.nextRev && item.nextRev <= now) {
+                        toRevise.push({ ...item, type, icon, color });
+                    }
+                });
+            }
+
+            grab(window.appState.lessons, 'Lesson', 'book-open', 'indigo');
+            grab(window.appState.flashcards, 'Flashcard', 'layers', 'emerald');
+            grab(window.appState.equations, 'Equation', 'binary', 'amber');
+            grab(window.appState.definitions, 'Definition', 'message-square', 'rose');
+
+            toRevise.sort((a,b) => a.nextRev - b.nextRev);
+            toRevise = toRevise.slice(0, 6);
+
+            const revContainer = document.getElementById('revision-container');
+            if(toRevise.length === 0) {
+                revContainer.innerHTML = `<div class="col-span-full py-6 text-center text-slate-400 text-sm font-medium">No revisions pending today! Great job! 🎉</div>`;
+            } else {
+                revContainer.innerHTML = toRevise.map(item => `
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 flex justify-between items-center group">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-${item.color}-100 dark:bg-${item.color}-900/30 text-${item.color}-600 rounded-lg">
+                                <i data-lucide="${item.icon}" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black uppercase text-slate-400 mb-0.5">${item.subject} • ${item.type}</p>
+                                <p class="font-bold text-sm truncate max-w-[120px] md:max-w-[150px]">${item.title || item.q || item.eq || item.term}</p>
+                            </div>
+                        </div>
+                        <button onclick="markReviewed('${item.id}', '${item.type.toLowerCase()}')" class="p-2 text-slate-300 hover:text-emerald-500 transition-colors" title="Mark as Reviewed">
+                            <i data-lucide="check-circle"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        window.markReviewed = function(id, type) {
+            let collection = [];
+            if(type === 'lesson') collection = window.appState.lessons;
+            if(type === 'flashcard') collection = window.appState.flashcards;
+            if(type === 'equation') collection = window.appState.equations;
+            if(type === 'definition') collection = window.appState.definitions;
+
+            const item = collection.find(x => x.id === id);
+            if(item) {
+                item.level = (item.level || 0) + 1;
+                // Spaced repetition gaps
+                const gaps = [1, 3, 7, 14, 30];
+                const daysToAdd = gaps[Math.min(item.level - 1, gaps.length - 1)];
+                item.nextRev = Date.now() + (daysToAdd * 24 * 60 * 60 * 1000);
+                saveData();
+            }
+        }
+
+        // --- Data Rendering ---
+        
+        window.renderLessons = function() {
+            const container = document.getElementById('lessons-container');
+            const items = window.appState.lessons.filter(x => x.subject === window.appState.activeSubject).sort((a,b) => a.priority - b.priority);
+            if(!items.length) { container.innerHTML = `<div class="col-span-full py-10 text-center glass rounded-2xl text-slate-400">No lessons added yet.</div>`; return; }
+            
+            container.innerHTML = items.map(l => `
+                <div class="glass p-5 rounded-[2rem] border-l-4 ${l.priority == 1 ? 'border-rose-500' : l.priority == 2 ? 'border-amber-500' : 'border-emerald-500'} relative">
+                    <button onclick="deleteItem('lessons', '${l.id}')" class="absolute top-4 right-4 text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <span class="text-[10px] font-black uppercase text-slate-400 mb-2 block">Priority ${l.priority}</span>
+                    <h4 class="font-bold text-lg mb-4 ${l.done ? 'line-through text-slate-400' : ''}">${l.title}</h4>
+                    
+                    <div class="space-y-2 mb-4">
+                        ${(l.subLessons || []).map(sl => `
+                            <div class="flex items-center gap-2 text-sm bg-white/50 dark:bg-slate-900/50 p-2 rounded-xl">
+                                <input type="checkbox" ${sl.done ? 'checked' : ''} onchange="toggleSubLesson('${l.id}', '${sl.id}')" class="w-4 h-4 accent-indigo-600">
+                                <span class="${sl.done ? 'line-through text-slate-400' : ''}">${sl.title}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button onclick="promptSubLesson('${l.id}')" class="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300"><i data-lucide="plus" class="w-3 h-3 inline mr-1"></i> Sub-lesson</button>
+                        <button onclick="toggleLesson('${l.id}')" class="flex-1 py-2 rounded-xl text-xs font-bold ${l.done ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-indigo-600 text-white'}">
+                            ${l.done ? 'Completed' : 'Mark Done'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.renderFlashcards = function() {
+            const container = document.getElementById('flashcards-container');
+            const items = window.appState.flashcards.filter(x => x.subject === window.appState.activeSubject);
+            if(!items.length) { container.innerHTML = `<div class="col-span-full py-10 text-center glass rounded-2xl text-slate-400">No flashcards added yet.</div>`; return; }
+            
+            container.innerHTML = items.map(f => `
+                <div class="glass p-6 rounded-3xl text-center relative group min-h-[150px] flex flex-col justify-center cursor-pointer" onclick="this.classList.toggle('flipped')">
+                    <button onclick="event.stopPropagation(); deleteItem('flashcards', '${f.id}')" class="absolute top-3 right-3 text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <div class="front block">
+                        <span class="text-[10px] font-bold uppercase text-indigo-500 mb-2 block">Question</span>
+                        <p class="font-bold text-lg">${f.q}</p>
+                    </div>
+                    <div class="back hidden mt-4 pt-4 border-t dark:border-slate-700">
+                        <span class="text-[10px] font-bold uppercase text-emerald-500 mb-2 block">Answer</span>
+                        <p class="font-medium text-slate-600 dark:text-slate-300">${f.a}</p>
+                    </div>
+                </div>
+                <style>
+                    .flipped .front { display: none; }
+                    .flipped .back { display: block; }
+                </style>
+            `).join('');
+        }
+
+        window.renderEquations = function() {
+            const container = document.getElementById('equations-container');
+            const items = window.appState.equations.filter(x => x.subject === window.appState.activeSubject);
+            if(!items.length) { container.innerHTML = `<div class="col-span-full py-10 text-center glass rounded-2xl text-slate-400">No equations added yet.</div>`; return; }
+            
+            container.innerHTML = items.map(e => `
+                <div class="glass p-5 rounded-3xl relative">
+                    <button onclick="deleteItem('equations', '${e.id}')" class="absolute top-4 right-4 text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <div class="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-2xl mb-3 text-center overflow-x-auto">
+                        <code class="font-mono text-lg font-bold text-indigo-600 dark:text-indigo-400">${e.eq}</code>
+                    </div>
+                    <p class="text-sm font-medium text-slate-600 dark:text-slate-300 text-center">${e.desc}</p>
+                </div>
+            `).join('');
+        }
+
+        window.renderDefinitions = function() {
+            const container = document.getElementById('definitions-container');
+            const items = window.appState.definitions.filter(x => x.subject === window.appState.activeSubject);
+            if(!items.length) { container.innerHTML = `<div class="col-span-full py-10 text-center glass rounded-2xl text-slate-400">No definitions added yet.</div>`; return; }
+            
+            container.innerHTML = items.map(d => `
+                <div class="glass p-5 rounded-3xl relative flex gap-4">
+                    <div class="w-1 h-full bg-rose-400 rounded-full absolute left-0 top-0"></div>
+                    <div class="flex-1 pl-2">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-lg text-rose-600 dark:text-rose-400">${d.term}</h4>
+                            <button onclick="deleteItem('definitions', '${d.id}')" class="text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                        <p class="text-sm text-slate-600 dark:text-slate-300">${d.def}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.renderPapers = function() {
+            const container = document.getElementById('papers-container');
+            const items = window.appState.papers.filter(x => x.subject === window.appState.activeSubject).sort((a,b) => new Date(b.date) - new Date(a.date));
+            if(!items.length) { container.innerHTML = `<div class="col-span-full py-10 text-center glass rounded-2xl text-slate-400">No past papers logged yet.</div>`; return; }
+            
+            container.innerHTML = items.map(p => `
+                <div class="glass p-5 rounded-3xl relative flex items-center gap-4">
+                    <button onclick="deleteItem('papers', '${p.id}')" class="absolute top-4 right-4 text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 text-white flex items-center justify-center font-black text-xl shadow-lg">
+                        ${p.marks}
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-md mb-1">${p.title}</h4>
+                        <p class="text-xs text-slate-500 font-medium"><i data-lucide="calendar" class="w-3 h-3 inline"></i> ${p.date}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- Modals & Data Entry ---
+        
+        window.openModal = function(type) {
+            const contentArea = document.getElementById('modal-content-area');
+            const subOptions = window.appState.subjects.map(s => `<option value="${s}" ${window.appState.activeSubject === s ? 'selected' : ''}>${s}</option>`).join('');
+            
+            let html = '';
+            if(type === 'addLessonModal') {
+                html = `
+                    <h3 class="text-xl font-black mb-6">Add New Lesson</h3>
+                    <input type="text" id="m-title" placeholder="Lesson Name" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 border-none outline-none font-bold">
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <select id="m-sub" class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 font-bold border-none outline-none">${subOptions}</select>
+                        <select id="m-pri" class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 font-bold border-none outline-none">
+                            <option value="1">High Priority</option><option value="2">Medium</option><option value="3">Low</option>
+                        </select>
+                    </div>
+                    <button onclick="saveNewItem('lesson')" class="w-full btn-primary text-white py-4 rounded-2xl font-bold shadow-lg">Save</button>
+                `;
+            } else if (type === 'addFlashcardModal') {
+                html = `
+                    <h3 class="text-xl font-black mb-6">Add Flashcard</h3>
+                    <select id="m-sub" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 font-bold border-none outline-none">${subOptions}</select>
+                    <textarea id="m-q" placeholder="Question..." class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 border-none outline-none font-bold resize-none h-24"></textarea>
+                    <textarea id="m-a" placeholder="Answer..." class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-6 border-none outline-none font-bold resize-none h-24"></textarea>
+                    <button onclick="saveNewItem('flashcard')" class="w-full btn-primary text-white py-4 rounded-2xl font-bold shadow-lg">Save</button>
+                `;
+            } else if (type === 'addEquationModal') {
+                html = `
+                    <h3 class="text-xl font-black mb-6">Add Equation</h3>
+                    <select id="m-sub" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 font-bold border-none outline-none">${subOptions}</select>
+                    <input type="text" id="m-eq" placeholder="e.g. E = mc²" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 border-none outline-none font-mono font-bold">
+                    <input type="text" id="m-desc" placeholder="Brief description" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-6 border-none outline-none font-medium text-sm">
+                    <button onclick="saveNewItem('equation')" class="w-full btn-primary text-white py-4 rounded-2xl font-bold shadow-lg">Save</button>
+                `;
+            } else if (type === 'addDefinitionModal') {
+                html = `
+                    <h3 class="text-xl font-black mb-6">Add Definition</h3>
+                    <select id="m-sub" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 font-bold border-none outline-none">${subOptions}</select>
+                    <input type="text" id="m-term" placeholder="Term / Keyword" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 border-none outline-none font-bold">
+                    <textarea id="m-def" placeholder="Definition..." class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-6 border-none outline-none font-medium resize-none h-24"></textarea>
+                    <button onclick="saveNewItem('definition')" class="w-full btn-primary text-white py-4 rounded-2xl font-bold shadow-lg">Save</button>
+                `;
+            } else if (type === 'addPaperModal') {
+                html = `
+                    <h3 class="text-xl font-black mb-6">Log Past Paper</h3>
+                    <select id="m-sub" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 font-bold border-none outline-none">${subOptions}</select>
+                    <input type="text" id="m-title" placeholder="e.g. 2023 A/L Paper" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 border-none outline-none font-bold">
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <input type="number" id="m-marks" placeholder="Marks (%)" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none font-bold">
+                        <input type="date" id="m-date" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none font-bold text-sm">
+                    </div>
+                    <button onclick="saveNewItem('paper')" class="w-full btn-primary text-white py-4 rounded-2xl font-bold shadow-lg">Save</button>
                 `;
             }
-            initLucide();
-        };
-
-        window.navigate = function(page) {
-            window.appState.currentPage = page;
-            document.querySelectorAll('.nav-item').forEach(el => {
-                el.classList.toggle('active', el.dataset.page === page);
-            });
-            document.querySelectorAll('.mobile-nav button').forEach(el => {
-                el.classList.toggle('text-indigo-600', el.dataset.mobilePage === page);
-                el.classList.toggle('text-slate-400', el.dataset.mobilePage !== page);
-            });
-            renderCurrentPage();
-        };
-
-        window.renderCurrentPage = function() {
-            const container = document.getElementById('page-content');
             
-            switch(window.appState.currentPage) {
-                case 'dashboard':
-                    renderDashboard(container);
-                    break;
-                case 'lessons':
-                    renderLessons(container);
-                    break;
-                case 'flashcards':
-                    renderFlashcards(container);
-                    break;
-                default:
-                    container.innerHTML = `<div class="p-12 text-center glass"><h3 class="text-xl font-bold">Page coming soon!</h3></div>`;
-            }
+            contentArea.innerHTML = html;
+            document.getElementById('unifiedModal').classList.remove('hidden');
             initLucide();
-        };
+        }
 
-        // Simple Notification Logic
-        window.showNotification = function(title, message, type) {
-            const container = document.getElementById('notification-container');
-            const toast = document.createElement('div');
-            const bgColor = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-indigo-500');
+        window.closeModal = function(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        window.saveNewItem = function(type) {
+            const id = Date.now().toString();
+            const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : null;
             
-            toast.className = `${bgColor} text-white p-4 rounded-2xl shadow-xl mb-4 pointer-events-auto animate-pop flex items-center gap-3 min-w-[300px]`;
-            toast.innerHTML = `
-                <div class="flex-1">
-                    <h4 class="font-bold">${title}</h4>
-                    <p class="text-sm opacity-90">${message}</p>
-                </div>
-                <button onclick="this.parentElement.remove()" class="opacity-70 hover:opacity-100"><i data-lucide="x" class="w-4 h-4"></i></button>
-            `;
-            container.appendChild(toast);
-            initLucide();
-            setTimeout(() => { if(toast.parentElement) toast.remove(); }, 4000);
-        };
-
-        // Initial Page Render
-        window.onload = () => {
-            navigate('dashboard');
-            // Try load local data if exists
-            const local = localStorage.getItem('study_master_local_data');
-            if(local) {
-                const parsed = JSON.parse(local);
-                window.appState.data = parsed.data || window.appState.data;
+            if(type === 'lesson') {
+                if(!getVal('m-title')) return;
+                window.appState.lessons.push({ id, title: getVal('m-title'), subject: getVal('m-sub'), priority: parseInt(getVal('m-pri')), done: false, subLessons: [], level: 0 });
+            } else if(type === 'flashcard') {
+                if(!getVal('m-q') || !getVal('m-a')) return;
+                window.appState.flashcards.push({ id, q: getVal('m-q'), a: getVal('m-a'), subject: getVal('m-sub'), level: 0 });
+            } else if(type === 'equation') {
+                if(!getVal('m-eq')) return;
+                window.appState.equations.push({ id, eq: getVal('m-eq'), desc: getVal('m-desc'), subject: getVal('m-sub'), level: 0 });
+            } else if(type === 'definition') {
+                if(!getVal('m-term')) return;
+                window.appState.definitions.push({ id, term: getVal('m-term'), def: getVal('m-def'), subject: getVal('m-sub'), level: 0 });
+            } else if(type === 'paper') {
+                if(!getVal('m-marks')) return;
+                window.appState.papers.push({ id, title: getVal('m-title') || 'Practice Paper', marks: getVal('m-marks'), date: getVal('m-date') || new Date().toISOString().split('T')[0], subject: getVal('m-sub') });
             }
-        };
 
-        // Placeholder Render Functions
-        function renderDashboard(container) {
-            container.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="md:col-span-2 space-y-6">
-                        <div class="glass p-8 bg-indigo-600 text-white relative overflow-hidden">
-                            <div class="relative z-10">
-                                <h3 class="text-2xl font-bold">Exam Countdown</h3>
-                                <p class="opacity-80 mt-1">GCE A/L Examination 2026</p>
-                                <div class="flex gap-4 mt-6">
-                                    <div class="text-center"><span class="block text-3xl font-bold">184</span><span class="text-xs uppercase opacity-60">Days</span></div>
-                                    <div class="text-center"><span class="block text-3xl font-bold">12</span><span class="text-xs uppercase opacity-60">Hrs</span></div>
-                                </div>
-                            </div>
-                            <i data-lucide="clock" class="absolute right-[-20px] bottom-[-20px] w-48 h-48 opacity-10 rotate-12"></i>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="glass p-6"><h4 class="text-slate-500 text-sm mb-1 font-medium">Study Streak</h4><p class="text-3xl font-bold">7 Days 🔥</p></div>
-                            <div class="glass p-6"><h4 class="text-slate-500 text-sm mb-1 font-medium">Completed</h4><p class="text-3xl font-bold">12 Lessons</p></div>
-                        </div>
-                    </div>
-                    <div class="glass p-6 flex flex-col items-center justify-center text-center space-y-4">
-                        <div id="pomodoro-bg" class="w-40 h-40 rounded-full border-4 border-indigo-100 flex items-center justify-center transition-all duration-1000">
-                            <div class="text-3xl font-bold" id="timer-display">25:00</div>
-                        </div>
-                        <h4 class="font-bold">Focus Mode</h4>
-                        <div class="flex gap-2">
-                            <button id="timer-btn" onclick="toggleTimer()" class="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center hover:scale-105 transition-transform">
-                                <i data-lucide="play" class="w-6 h-6"></i>
-                            </button>
-                            <button onclick="resetTimer()" class="w-12 h-12 glass rounded-full flex items-center justify-center hover:bg-slate-100">
-                                <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
+            saveData();
+            closeModal('unifiedModal');
         }
 
-        function renderLessons(container) {
-            container.innerHTML = `
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold">Active Subjects</h3>
-                    <button class="flex items-center gap-2 text-indigo-600 font-bold hover:underline">
-                        <i data-lucide="plus-circle" class="w-5 h-5"></i> Add Subject
-                    </button>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    ${['Biology', 'Chemistry', 'Physics'].map(sub => `
-                        <div class="glass p-6 lesson-card group cursor-pointer">
-                            <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
-                                <i data-lucide="book" class="w-6 h-6"></i>
-                            </div>
-                            <h4 class="font-bold text-lg">${sub}</h4>
-                            <p class="text-slate-500 text-sm mt-1">4 units remaining</p>
-                            <div class="mt-4 bg-slate-100 h-2 rounded-full overflow-hidden">
-                                <div class="bg-indigo-600 h-full w-[65%]"></div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
+        window.deleteItem = function(collectionName, id) {
+            if(confirm("Are you sure you want to delete this item?")) {
+                window.appState[collectionName] = window.appState[collectionName].filter(x => x.id !== id);
+                saveData();
+            }
         }
 
-        function renderFlashcards(container) {
-            container.innerHTML = `
-                <div class="max-w-xl mx-auto py-12 text-center">
-                    <div class="glass p-12 mb-8 relative group cursor-pointer hover:rotate-2 transition-all">
-                        <span class="text-xs uppercase tracking-widest text-slate-400 mb-4 block">Chemistry • Organic</span>
-                        <h3 class="text-2xl font-bold italic">"What is the general formula for Alkanes?"</h3>
-                        <div class="mt-8 text-indigo-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">Click to flip</div>
-                    </div>
-                    <div class="flex justify-center gap-6">
-                        <button class="w-16 h-16 glass rounded-full text-red-500 flex items-center justify-center hover:bg-red-50"><i data-lucide="x" class="w-8 h-8"></i></button>
-                        <button class="w-16 h-16 glass rounded-full text-green-500 flex items-center justify-center hover:bg-green-50"><i data-lucide="check" class="w-8 h-8"></i></button>
-                    </div>
-                </div>
-            `;
+        window.toggleLesson = function(id) {
+            const l = window.appState.lessons.find(x => x.id === id);
+            if(l) {
+                l.done = !l.done;
+                if(l.done) l.nextRev = Date.now() + 86400000; // Next day schedule
+            }
+            saveData();
         }
 
-        // --- Timer Logic ---
-        let timerObj = { remaining: 1500, running: false, interval: null };
+        window.promptSubLesson = function(id) {
+            const title = prompt("Enter sub-lesson name:");
+            if(title) {
+                const l = window.appState.lessons.find(x => x.id === id);
+                if(l) {
+                    if(!l.subLessons) l.subLessons = [];
+                    l.subLessons.push({ id: Date.now().toString(), title, done: false });
+                    saveData();
+                }
+            }
+        }
+
+        window.toggleSubLesson = function(lessonId, subId) {
+            const l = window.appState.lessons.find(x => x.id === lessonId);
+            if(l && l.subLessons) {
+                const sl = l.subLessons.find(x => x.id === subId);
+                if(sl) sl.done = !sl.done;
+                saveData();
+            }
+        }
+
+        // --- Settings / Subject Management ---
+        window.renderSettingsSubjects = function() {
+            const list = document.getElementById('settings-subjects-list');
+            if(!list) return;
+            list.innerHTML = window.appState.subjects.map(s => `
+                <div class="bg-white dark:bg-slate-800 border dark:border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm font-bold shadow-sm">
+                    ${s} 
+                    ${window.appState.subjects.length > 1 ? `<button onclick="deleteSubject('${s}')" class="text-slate-400 hover:text-rose-500 ml-2"><i data-lucide="x" class="w-3 h-3"></i></button>` : ''}
+                </div>
+            `).join('');
+            initLucide();
+        }
+
+        window.addSubject = function() {
+            const val = document.getElementById('new-subject-input').value.trim();
+            if(val && !window.appState.subjects.includes(val)) {
+                window.appState.subjects.push(val);
+                document.getElementById('new-subject-input').value = '';
+                saveData();
+            }
+        }
+
+        window.deleteSubject = function(s) {
+            if(confirm(`Are you sure you want to remove '${s}'?`)) {
+                window.appState.subjects = window.appState.subjects.filter(x => x !== s);
+                if(window.appState.activeSubject === s) window.appState.activeSubject = window.appState.subjects[0];
+                saveData();
+            }
+        }
+
+        // --- Backup & Restore ---
+        window.exportData = function() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.appState));
+            const node = document.createElement('a');
+            node.setAttribute("href", dataStr);
+            node.setAttribute("download", "studymaster_backup_" + new Date().toISOString().split('T')[0] + ".json");
+            document.body.appendChild(node);
+            node.click();
+            node.remove();
+        }
+
+        window.importData = function(event) {
+            const file = event.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const parsed = JSON.parse(e.target.result);
+                        if(parsed && parsed.subjects) {
+                            window.appState = parsed;
+                            saveData();
+                            alert("Data imported successfully!");
+                        } else { alert("Invalid backup file format."); }
+                    } catch(err) { alert("Could not read file."); }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        // --- Pomodoro ---
+        let timerObj = { interval: null, remaining: 1500, running: false };
         window.toggleTimer = function() {
-            if(timerObj.running) {
-                clearInterval(timerObj.interval);
-                timerObj.running = false;
-                document.getElementById('pomodoro-bg').classList.remove('scale-150');
-            } else {
+            const bg = document.getElementById('pomodoro-bg');
+            if(timerObj.running) { 
+                clearInterval(timerObj.interval); timerObj.running = false; 
+                bg.classList.remove('scale-150');
+            }
+            else {
                 timerObj.running = true;
-                document.getElementById('pomodoro-bg').classList.add('scale-150');
+                bg.classList.add('scale-150');
                 timerObj.interval = setInterval(() => {
                     timerObj.remaining--;
-                    if(timerObj.remaining <= 0) {
-                        clearInterval(timerObj.interval);
-                        timerObj.running = false;
-                        showNotification("Time Up!", "Take a short break.", "info");
-                    }
+                    window.appState.stats.totalTime++;
                     updateTimerUI();
+                    if(timerObj.remaining <= 0) { 
+                        clearInterval(timerObj.interval); 
+                        timerObj.running = false;
+                        window.appState.stats.pomodoros++;
+                        saveData();
+                        alert("Pomodoro complete! Take a break.");
+                        resetTimer();
+                    }
                     if(timerObj.remaining % 60 === 0) saveData();
                 }, 1000);
             }
@@ -493,30 +970,20 @@
         window.updateTimerUI = function() {
             const m = Math.floor(timerObj.remaining/60).toString().padStart(2,'0');
             const s = (timerObj.remaining%60).toString().padStart(2,'0');
-            const display = document.getElementById('timer-display');
-            if(display) display.innerText = `${m}:${s}`;
-            
-            const btn = document.getElementById('timer-btn');
-            if(btn) btn.innerHTML = timerObj.running ? '<i data-lucide="pause" class="w-6 h-6"></i>' : '<i data-lucide="play" class="w-6 h-6"></i>';
+            document.getElementById('timer-display').innerText = `${m}:${s}`;
+            document.getElementById('timer-btn').innerHTML = timerObj.running ? '<i data-lucide="pause" class="w-8 h-8"></i>' : '<i data-lucide="play" class="w-8 h-8"></i>';
             initLucide();
         }
 
         window.resetTimer = function() { 
-            clearInterval(timerObj.interval); 
-            timerObj.running = false; 
-            timerObj.remaining = 1500; 
-            const bg = document.getElementById('pomodoro-bg');
-            if(bg) bg.classList.remove('scale-150');
+            clearInterval(timerObj.interval); timerObj.running = false; timerObj.remaining = 1500; 
+            document.getElementById('pomodoro-bg').classList.remove('scale-150');
             updateTimerUI(); 
         }
 
         // --- Utility ---
         window.initLucide = function() { if(window.lucide) window.lucide.createIcons(); }
-        window.toggleDarkMode = function() { 
-            window.appState.config.darkMode = !window.appState.config.darkMode; 
-            saveData(); 
-            applyTheme(); 
-        }
+        window.toggleDarkMode = function() { window.appState.config.darkMode = !window.appState.config.darkMode; saveData(); applyTheme(); }
         window.applyTheme = function() {
             document.body.classList.toggle('dark-mode', window.appState.config.darkMode);
             const icon = document.getElementById('theme-icon');
