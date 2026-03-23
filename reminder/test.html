@@ -351,9 +351,7 @@
         </section>
     </main>
 
-    <!-- Generic Modals Setup (Form Input Modal & Dialog Confirmation Modal) -->
-    
-    <!-- Data Entry Modal -->
+    <!-- Generic Modal Structure -->
     <div id="unifiedModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
         <div class="glass w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl relative">
             <button onclick="closeModal('unifiedModal')" class="absolute top-6 right-6 text-slate-400 hover:text-rose-500"><i data-lucide="x"></i></button>
@@ -361,39 +359,22 @@
         </div>
     </div>
 
-    <!-- Alert / Confirm Dialog Modal -->
-    <div id="dialogModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4 hidden">
-        <div class="glass w-full max-w-sm rounded-[2rem] p-6 shadow-2xl relative text-center">
-            <div id="dialog-icon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 dark:bg-indigo-900/50 mb-4 text-indigo-600 dark:text-indigo-400"></div>
-            <h3 id="dialog-title" class="text-xl font-bold mb-2"></h3>
-            <p id="dialog-message" class="text-sm text-slate-500 dark:text-slate-400 mb-6"></p>
-            <div id="dialog-actions" class="flex gap-3 justify-center"></div>
-        </div>
-    </div>
-
-
     <!-- Firebase SDK Setup -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 
-        // Your specific Firebase configuration
-       const firebaseConfig = {
-                 apiKey: "AIzaSyD6uwDAEFAbGTBY4-hckibbvscwXYW0CXY", // මේ key එක වැඩ කරන්නේ නැත්නම් අලුත් එකක් දාන්න
-                 authDomain: "reminderapp-d84e9.firebaseapp.com",
-                 databaseURL: "https://reminderapp-d84e9-default-rtdb.firebaseio.com",
-                 projectId: "reminderapp-d84e9",
-                 storageBucket: "reminderapp-d84e9.firebasestorage.app",
-                 messagingSenderId: "312145339940",
-                 appId: "1:312145339940:web:447a3e5f4e54e0fd221ab1"
-        };
-        
         // State Structure
         window.appState = {
             subjects: ['Biology', 'Chemistry', 'Physics'],
             activeSubject: 'Biology',
-            lessons: [], flashcards: [], equations: [], definitions: [], papers: [], 
+            lessons: [], 
+            flashcards: [], 
+            equations: [], 
+            definitions: [], 
+            papers: [], 
             stats: { totalTime: 0, pomodoros: 0, firstLoad: true },
             config: { darkMode: false }
         };
@@ -401,6 +382,7 @@
         window.db = null;
         window.auth = null;
         window.currentUser = null;
+        window.analytics = null;
 
         // Load Local state first
         const saved = localStorage.getItem('study_master_pro_data');
@@ -416,82 +398,45 @@
             showTab('dashboard'); 
             checkFirstLoad();
             
-            // Setup Firebase
+            // Setup User's specific Firebase config
             try {
-                let finalConfig;
-                // If running in a protected canvas environment, prefer injected config so auth doesn't break, 
-                // but default back to user's config if it's exported externally.
-                try {
-                     const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-                    finalConfig = (envConfig && envConfig.apiKey) ? envConfig : firebaseConfig; // මෙතන firebaseConfig කියලා දාන්න
-                 } catch(e) { finalConfig = firebaseConfig; }
+                const firebaseConfig = {
+                    apiKey: "AIzaSyA9DLfAHTUUGxCPn2j_k6godoTEopzaFAU",
+                    authDomain: "studymaster-919ba.firebaseapp.com",
+                    projectId: "studymaster-919ba",
+                    storageBucket: "studymaster-919ba.firebasestorage.app",
+                    messagingSenderId: "426684063256",
+                    appId: "1:426684063256:web:52c17625a9450ea9662d6d",
+                    measurementId: "G-CWQB2330GF"
+                };
 
-                
-                const app = initializeApp(finalConfig);
+                const app = initializeApp(firebaseConfig);
                 window.auth = getAuth(app);
                 window.db = getFirestore(app);
+                
+                // Initialize analytics safely
+                try {
+                    window.analytics = getAnalytics(app);
+                } catch(analyticsErr) {
+                    console.log("Analytics initialization skipped.", analyticsErr);
+                }
 
-                const initAuth = async () => {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(window.auth, __initial_auth_token);
-                    } else {
-                        // Fallback anonymous sign-in so DB requests don't fail before actual sign in
-                        await signInAnonymously(window.auth);
-                    }
-                };
-                initAuth();
-
+                // Auth state listener
                 onAuthStateChanged(window.auth, (user) => {
                     window.currentUser = user;
                     updateAuthUI();
+                    
                     if(user && !user.isAnonymous) {
                         setupCloudSync();
+                    } else if (!user) {
+                        // Fallback to anonymous if no user is signed in
+                        signInAnonymously(window.auth).catch(e => console.error("Anonymous auth failed", e));
                     }
                 });
-            } catch(e) { console.error("Firebase Initialization Failed", e); }
+            } catch(e) { 
+                console.log("Firebase not available in this env, using local storage.", e); 
+            }
         });
-
-        // --- Custom UI Dialogs (Replacing Alerts/Confirms) ---
-        window.showNotification = function(title, message, type='info') {
-            const d = document.getElementById('dialogModal');
-            document.getElementById('dialog-title').innerText = title;
-            document.getElementById('dialog-message').innerText = message;
-            
-            let icon = '<i data-lucide="info" class="w-6 h-6"></i>';
-            if(type === 'success') icon = '<i data-lucide="check-circle" class="w-6 h-6 text-emerald-500"></i>';
-            if(type === 'error') icon = '<i data-lucide="alert-triangle" class="w-6 h-6 text-rose-500"></i>';
-            
-            document.getElementById('dialog-icon').innerHTML = icon;
-            document.getElementById('dialog-actions').innerHTML = `<button onclick="closeDialog()" class="w-full btn-primary text-white py-3 rounded-xl font-bold">Got it</button>`;
-            d.classList.remove('hidden');
-            initLucide();
-        }
-
-        window.showConfirm = function(title, message, onConfirm) {
-            const d = document.getElementById('dialogModal');
-            document.getElementById('dialog-title').innerText = title;
-            document.getElementById('dialog-message').innerText = message;
-            document.getElementById('dialog-icon').innerHTML = '<i data-lucide="help-circle" class="w-6 h-6"></i>';
-            
-            window._pendingConfirm = onConfirm; // Store callback
-            
-            document.getElementById('dialog-actions').innerHTML = `
-                <button onclick="closeDialog()" class="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Cancel</button>
-                <button onclick="executeConfirm()" class="flex-1 py-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold transition-colors shadow-lg">Confirm</button>
-            `;
-            d.classList.remove('hidden');
-            initLucide();
-        }
-
-        window.executeConfirm = function() {
-            closeDialog();
-            if(window._pendingConfirm) window._pendingConfirm();
-            window._pendingConfirm = null;
-        }
-
-        window.closeDialog = function() {
-            document.getElementById('dialogModal').classList.add('hidden');
-        }
 
         window.checkFirstLoad = function() {
             if(window.appState.stats.firstLoad) {
@@ -509,50 +454,55 @@
             if(banner) banner.classList.add('translate-y-[-100%]');
         }
 
-        // --- Actual Google Sign-In Execution ---
+        // UPDATED: Real Google Sign-In with Popup
         window.handleGoogleSignIn = async function() {
-            if(!window.auth) return;
+            if (!window.auth) {
+                alert("Firebase Authentication is not initialized properly.");
+                return;
+            }
+
+            const statusText = document.getElementById('sync-status-text');
+            statusText.innerText = "Opening Google Sign-In...";
             
-            document.getElementById('sync-status-text').innerText = "Opening Google Sign-In...";
+            const provider = new GoogleAuthProvider();
             
             try {
-                const provider = new GoogleAuthProvider();
                 const result = await signInWithPopup(window.auth, provider);
-                
-                // Success
                 window.currentUser = result.user;
+                
+                statusText.innerText = `Synced as ${result.user.displayName || result.user.email}`;
+                alert(`Successfully signed in as ${result.user.displayName || result.user.email}! Cloud Sync started.`);
+                
                 updateAuthUI();
                 setupCloudSync();
-                
-                showNotification("Success", "Signed in successfully. Cloud sync is active.", "success");
             } catch (error) {
-                console.error("Google Auth Error:", error);
-                document.getElementById('sync-status-text').innerText = "Sign-in failed. Try again.";
-                
-                // If the canvas environment blocks popups, provide a descriptive error instead of failing silently
-                if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cross-origin-opener-policy-failed') {
-                    showNotification("Popup Blocked", "The sign-in popup was blocked by the browser or the current iframe environment. Export the file and open it directly to sign in.", "error");
-                } else {
-                    showNotification("Sign In Error", error.message, "error");
-                }
+                console.error("Google Sign-In Error", error);
+                statusText.innerText = "Sign-in failed. Try again.";
+                alert("Error signing in with Google: " + error.message);
             }
         }
 
         window.updateAuthUI = function() {
             if(window.currentUser && !window.currentUser.isAnonymous) {
                 const authBtn = document.getElementById('auth-btn');
-                const syncText = document.getElementById('sync-status-text');
-                if(authBtn) authBtn.innerHTML = `<i data-lucide="check-circle" class="text-emerald-500 w-5 h-5"></i> Synced to Account`;
-                if(syncText) syncText.innerText = `Synced as ${window.currentUser.displayName || window.currentUser.email || 'User'}`;
+                const statusText = document.getElementById('sync-status-text');
+                
+                if(authBtn) {
+                    authBtn.innerHTML = `<i data-lucide="check-circle" class="text-emerald-500 w-5 h-5"></i> Synced to Account`;
+                    authBtn.classList.add('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-200');
+                }
+                if(statusText) {
+                    statusText.innerText = `Synced as ${window.currentUser.displayName || window.currentUser.email || 'User'}`;
+                }
                 initLucide();
             }
         }
 
         window.setupCloudSync = function() {
-            if(!window.currentUser || window.currentUser.isAnonymous || !window.db) return;
+            if(!window.currentUser || !window.db) return;
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'study-master';
             
-            // Fixed path logic ensuring 6 segments correctly format the DocReference
+            // Path structure ensuring proper data scoping
             const docRef = doc(window.db, 'artifacts', appId, 'users', window.currentUser.uid, 'appData', 'mainState');
             
             setDoc(docRef, window.appState, {merge: true}).catch(e => console.error("Initial write failed", e));
@@ -567,6 +517,7 @@
         }
 
         // --- Core UI Functions ---
+
         window.showTab = function(id) {
             document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
             const target = document.getElementById(`tab-${id}`);
@@ -629,6 +580,7 @@
             document.getElementById('stat-total-time').innerText = Math.floor(window.appState.stats.totalTime / 60) + 'h ' + (window.appState.stats.totalTime % 60) + 'm';
             document.getElementById('stat-pomodoro').innerText = window.appState.stats.pomodoros;
 
+            // Random Revision Items
             const now = Date.now();
             let toRevise = [];
             
@@ -681,6 +633,7 @@
             const item = collection.find(x => x.id === id);
             if(item) {
                 item.level = (item.level || 0) + 1;
+                // Spaced repetition gaps
                 const gaps = [1, 3, 7, 14, 30];
                 const daysToAdd = gaps[Math.min(item.level - 1, gaps.length - 1)];
                 item.nextRev = Date.now() + (daysToAdd * 24 * 60 * 60 * 1000);
@@ -689,6 +642,7 @@
         }
 
         // --- Data Rendering ---
+        
         window.renderLessons = function() {
             const container = document.getElementById('lessons-container');
             const items = window.appState.lessons.filter(x => x.subject === window.appState.activeSubject).sort((a,b) => a.priority - b.priority);
@@ -710,7 +664,7 @@
                     </div>
 
                     <div class="flex gap-2">
-                        <button onclick="promptSubLesson('${l.id}')" class="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300"><i data-lucide="plus" class="w-3 h-3 inline mr-1"></i> Sub</button>
+                        <button onclick="promptSubLesson('${l.id}')" class="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300"><i data-lucide="plus" class="w-3 h-3 inline mr-1"></i> Sub-lesson</button>
                         <button onclick="toggleLesson('${l.id}')" class="flex-1 py-2 rounded-xl text-xs font-bold ${l.done ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-indigo-600 text-white'}">
                             ${l.done ? 'Completed' : 'Mark Done'}
                         </button>
@@ -798,6 +752,7 @@
         }
 
         // --- Modals & Data Entry ---
+        
         window.openModal = function(type) {
             const contentArea = document.getElementById('modal-content-area');
             const subOptions = window.appState.subjects.map(s => `<option value="${s}" ${window.appState.activeSubject === s ? 'selected' : ''}>${s}</option>`).join('');
@@ -850,13 +805,6 @@
                     </div>
                     <button onclick="saveNewItem('paper')" class="w-full btn-primary text-white py-4 rounded-2xl font-bold shadow-lg">Save</button>
                 `;
-            } else if (type === 'promptSubLessonModal') {
-                // A secondary layout logic for a prompt
-                html = `
-                    <h3 class="text-xl font-black mb-6">Add Sub-Lesson</h3>
-                    <input type="text" id="m-sub-title" placeholder="Sub-lesson Name" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-6 border-none outline-none font-bold">
-                    <button onclick="executeAddSubLesson()" class="w-full btn-primary text-white py-4 rounded-2xl font-bold shadow-lg">Add</button>
-                `;
             }
             
             contentArea.innerHTML = html;
@@ -894,30 +842,24 @@
         }
 
         window.deleteItem = function(collectionName, id) {
-            showConfirm("Delete Item", "Are you sure you want to delete this item? This action cannot be undone.", () => {
+            if(confirm("Are you sure you want to delete this item?")) {
                 window.appState[collectionName] = window.appState[collectionName].filter(x => x.id !== id);
                 saveData();
-            });
+            }
         }
 
         window.toggleLesson = function(id) {
             const l = window.appState.lessons.find(x => x.id === id);
             if(l) {
                 l.done = !l.done;
-                if(l.done) l.nextRev = Date.now() + 86400000;
+                if(l.done) l.nextRev = Date.now() + 86400000; // Next day schedule
             }
             saveData();
         }
 
         window.promptSubLesson = function(id) {
-            window._pendingSubLessonId = id;
-            openModal('promptSubLessonModal');
-        }
-
-        window.executeAddSubLesson = function() {
-            const title = document.getElementById('m-sub-title').value;
-            const id = window._pendingSubLessonId;
-            if(title && id) {
+            const title = prompt("Enter sub-lesson name:");
+            if(title) {
                 const l = window.appState.lessons.find(x => x.id === id);
                 if(l) {
                     if(!l.subLessons) l.subLessons = [];
@@ -925,7 +867,6 @@
                     saveData();
                 }
             }
-            closeModal('unifiedModal');
         }
 
         window.toggleSubLesson = function(lessonId, subId) {
@@ -960,11 +901,11 @@
         }
 
         window.deleteSubject = function(s) {
-            showConfirm("Remove Subject", `Are you sure you want to remove '${s}'? Your saved items under this subject will remain unless manually deleted.`, () => {
+            if(confirm(`Are you sure you want to remove '${s}'?`)) {
                 window.appState.subjects = window.appState.subjects.filter(x => x !== s);
                 if(window.appState.activeSubject === s) window.appState.activeSubject = window.appState.subjects[0];
                 saveData();
-            });
+            }
         }
 
         // --- Backup & Restore ---
@@ -988,13 +929,9 @@
                         if(parsed && parsed.subjects) {
                             window.appState = parsed;
                             saveData();
-                            showNotification("Success", "Data imported successfully!", "success");
-                        } else { 
-                            showNotification("Import Error", "Invalid backup file format.", "error"); 
-                        }
-                    } catch(err) { 
-                        showNotification("Import Error", "Could not read the file.", "error"); 
-                    }
+                            alert("Data imported successfully!");
+                        } else { alert("Invalid backup file format."); }
+                    } catch(err) { alert("Could not read file."); }
                 };
                 reader.readAsText(file);
             }
@@ -1020,7 +957,7 @@
                         timerObj.running = false;
                         window.appState.stats.pomodoros++;
                         saveData();
-                        showNotification("Time's Up!", "Pomodoro complete! Take a well-deserved break.", "success");
+                        alert("Pomodoro complete! Take a break.");
                         resetTimer();
                     }
                     if(timerObj.remaining % 60 === 0) saveData();
