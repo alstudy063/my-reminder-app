@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A/L Study Master Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-light: #f8fafc;
+            --bg-dark: #0f172a;
+            --card-light: rgba(255, 255, 255, 0.9);
+            --card-dark: rgba(30, 41, 59, 0.8);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-light);
+            color: #1e293b;
+            transition: all 0.3s ease;
+        }
+
+        .glass {
+            background: var(--card-light);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+        }
+
+        .dark-mode {
+            background-color: var(--bg-dark);
+            color: #f1f5f9;
+        }
+
+        .dark-mode .glass {
+            background: var(--card-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.1);
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .animate-pop { animation: pop 0.3s ease-out; }
+        @keyframes pop {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .lesson-card:hover .play-btn { transform: scale(1.1); }
+        
+        /* Mobile Navbar Positioning */
+        @media (max-width: 768px) {
+            .mobile-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 50;
+                border-radius: 24px 24px 0 0;
+            }
+            .sidebar { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main UI Code Remains Unchanged as per Request to only focus on Firebase/Logic fixes -->
+    <div id="app" class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="sidebar w-64 glass m-4 mr-0 p-6 flex flex-col h-[calc(100vh-2rem)]">
+            <div class="flex items-center gap-3 mb-10 px-2">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+                    <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                </div>
+                <h1 class="font-bold text-xl tracking-tight">Study Master</h1>
+            </div>
+
+            <nav class="flex-1 space-y-2">
+                <button onclick="navigate('dashboard')" class="nav-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" data-page="dashboard">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span class="font-medium">Dashboard</span>
+                </button>
+                <button onclick="navigate('lessons')" class="nav-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" data-page="lessons">
+                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                    <span class="font-medium">Lessons</span>
+                </button>
+                <button onclick="navigate('flashcards')" class="nav-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" data-page="flashcards">
+                    <i data-lucide="layers" class="w-5 h-5"></i>
+                    <span class="font-medium">Flashcards</span>
+                </button>
+                <button onclick="navigate('calendar')" class="nav-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" data-page="calendar">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
+                    <span class="font-medium">Schedule</span>
+                </button>
+                <button onclick="navigate('analytics')" class="nav-item w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" data-page="analytics">
+                    <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                    <span class="font-medium">Progress</span>
+                </button>
+            </nav>
+
+            <div class="mt-auto space-y-2 pt-6 border-t border-slate-200 dark:border-slate-800">
+                <button onclick="toggleDarkMode()" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
+                    <span class="font-medium">Theme</span>
+                </button>
+                <div id="auth-section">
+                    <!-- Auth Button Injected Here -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto pb-24 md:pb-8">
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 id="greeting" class="text-3xl font-bold">Hello, Scholar!</h2>
+                    <p class="text-slate-500 mt-1">Ready to master your subjects today?</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button class="p-3 glass rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <i data-lucide="bell" class="w-6 h-6"></i>
+                    </button>
+                    <div id="user-profile-img" class="w-12 h-12 bg-indigo-100 rounded-full border-2 border-white shadow-sm flex items-center justify-center overflow-hidden">
+                        <i data-lucide="user" class="w-6 h-6 text-indigo-600"></i>
+                    </div>
+                </div>
+            </header>
+
+            <div id="page-content" class="animate-pop">
+                <!-- Page Content Injected Here -->
+            </div>
+        </main>
+
+        <!-- Mobile Nav Bar -->
+        <nav class="mobile-nav md:hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 flex justify-around p-4">
+            <button onclick="navigate('dashboard')" class="p-2 text-slate-400" data-mobile-page="dashboard"><i data-lucide="layout-dashboard"></i></button>
+            <button onclick="navigate('lessons')" class="p-2 text-slate-400" data-mobile-page="lessons"><i data-lucide="book-open"></i></button>
+            <button onclick="navigate('flashcards')" class="p-2 text-slate-400" data-mobile-page="flashcards"><i data-lucide="layers"></i></button>
+            <button onclick="navigate('calendar')" class="p-2 text-slate-400" data-mobile-page="calendar"><i data-lucide="calendar"></i></button>
+        </nav>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification-container" class="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[100] pointer-events-none"></div>
+
+    <!-- Firebase Script Module -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { 
+            getAuth, 
+            GoogleAuthProvider, 
+            signInWithPopup, 
+            onAuthStateChanged, 
+            signOut 
+        } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { 
+            getDatabase, 
+            ref, 
+            set, 
+            onValue, 
+            push 
+        } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+        // --- Updated Firebase Config (Your New Project) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6uwDAEFAbGTBY4-hckibbvscwXYW0CXY", // Ensure this is from Project Settings
+            authDomain: "studymaster-919ba.firebaseapp.com",
+            databaseURL: "https://studymaster-919ba-default-rtdb.firebaseio.com/",
+            projectId: "studymaster-919ba",
+            storageBucket: "studymaster-919ba.firebasestorage.app",
+            messagingSenderId: "312145339940",
+            appId: "1:312145339940:web:866236b281f6d3f2b1ab1"
+        };
+
+        // Initialize Firebase
+        let finalConfig = firebaseConfig;
+        try {
+            // Environment override if available
+            const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+            finalConfig = (envConfig && envConfig.apiKey) ? envConfig : firebaseConfig;
+        } catch(e) { 
+            finalConfig = firebaseConfig; 
+        }
+
+        const app = initializeApp(finalConfig);
+        window.auth = getAuth(app);
+        window.db = getDatabase(app, finalConfig.databaseURL);
+        
+        console.log("Study Master: Firebase Initialized Successfully");
+
+        // --- App State ---
+        window.appState = {
+            currentPage: 'dashboard',
+            currentUser: null,
+            data: {
+                lessons: [],
+                flashcards: [],
+                sessions: []
+            },
+            config: { darkMode: false }
+        };
+
+        // --- Auth Implementation ---
+        window.handleGoogleSignIn = async function() {
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(window.auth, provider);
+                window.appState.currentUser = result.user;
+                showNotification("Success", `Welcome, ${result.user.displayName}!`, "success");
+            } catch (error) {
+                console.error("Auth Error:", error);
+                showNotification("Error", "Authentication failed. Check if Authorized Domains includes your current site URL.", "error");
+            }
+        };
+
+        window.handleSignOut = async function() {
+            try {
+                await signOut(window.auth);
+                window.appState.currentUser = null;
+                showNotification("Logged Out", "Successfully signed out.", "info");
+            } catch (error) {
+                console.error("Sign Out Error:", error);
+            }
+        };
+
+        // Auth Observer
+        onAuthStateChanged(window.auth, (user) => {
+            window.appState.currentUser = user;
+            updateAuthUI();
+            if (user) {
+                setupCloudSync();
+                document.getElementById('greeting').innerText = `Hello, ${user.displayName.split(' ')[0]}!`;
+                if(user.photoURL) {
+                    document.getElementById('user-profile-img').innerHTML = `<img src="${user.photoURL}" class="w-full h-full object-cover">`;
+                }
+            } else {
+                document.getElementById('greeting').innerText = `Hello, Scholar!`;
+                document.getElementById('user-profile-img').innerHTML = `<i data-lucide="user" class="w-6 h-6 text-indigo-600"></i>`;
+                initLucide();
+            }
+        });
+
+        // --- Cloud Sync Implementation ---
+        window.setupCloudSync = function() {
+            if (!window.appState.currentUser) return;
+            const userRef = ref(window.db, 'users/' + window.appState.currentUser.uid);
+            
+            onValue(userRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    console.log("Data Synced from Cloud");
+                    window.appState.data = data.data || window.appState.data;
+                    window.appState.config = data.config || window.appState.config;
+                    renderCurrentPage();
+                }
+            }, (error) => {
+                console.error("Sync Read Error:", error);
+                if(error.message.includes("permission_denied")) {
+                    console.warn("Permission denied. Ensure Firebase Rules are set to: allow read/write if auth != null");
+                }
+            });
+        };
+
+        window.saveData = function() {
+            if (!window.appState.currentUser) {
+                // Save to local storage if not logged in
+                localStorage.setItem('study_master_local_data', JSON.stringify(window.appState));
+                return;
+            }
+
+            const userRef = ref(window.db, 'users/' + window.appState.currentUser.uid);
+            set(userRef, {
+                data: window.appState.data,
+                config: window.appState.config,
+                lastUpdated: new Date().toISOString()
+            }).catch(error => {
+                console.error("Cloud Save Error:", error);
+                showNotification("Sync Error", "Could not save to cloud.", "error");
+            });
+        };
+
+        // --- Core UI Functions ---
+        window.updateAuthUI = function() {
+            const authSection = document.getElementById('auth-section');
+            if (window.appState.currentUser) {
+                authSection.innerHTML = `
+                    <button onclick="handleSignOut()" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 text-red-600 transition-colors">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                        <span class="font-medium">Sign Out</span>
+                    </button>
+                `;
+            } else {
+                authSection.innerHTML = `
+                    <button onclick="handleGoogleSignIn()" class="w-full flex items-center gap-3 p-3 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100">
+                        <i data-lucide="log-in" class="w-5 h-5"></i>
+                        <span class="font-medium">Sync with Google</span>
+                    </button>
+                `;
+            }
+            initLucide();
+        };
+
+        window.navigate = function(page) {
+            window.appState.currentPage = page;
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.toggle('active', el.dataset.page === page);
+            });
+            document.querySelectorAll('.mobile-nav button').forEach(el => {
+                el.classList.toggle('text-indigo-600', el.dataset.mobilePage === page);
+                el.classList.toggle('text-slate-400', el.dataset.mobilePage !== page);
+            });
+            renderCurrentPage();
+        };
+
+        window.renderCurrentPage = function() {
+            const container = document.getElementById('page-content');
+            
+            switch(window.appState.currentPage) {
+                case 'dashboard':
+                    renderDashboard(container);
+                    break;
+                case 'lessons':
+                    renderLessons(container);
+                    break;
+                case 'flashcards':
+                    renderFlashcards(container);
+                    break;
+                default:
+                    container.innerHTML = `<div class="p-12 text-center glass"><h3 class="text-xl font-bold">Page coming soon!</h3></div>`;
+            }
+            initLucide();
+        };
+
+        // Simple Notification Logic
+        window.showNotification = function(title, message, type) {
+            const container = document.getElementById('notification-container');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-indigo-500');
+            
+            toast.className = `${bgColor} text-white p-4 rounded-2xl shadow-xl mb-4 pointer-events-auto animate-pop flex items-center gap-3 min-w-[300px]`;
+            toast.innerHTML = `
+                <div class="flex-1">
+                    <h4 class="font-bold">${title}</h4>
+                    <p class="text-sm opacity-90">${message}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" class="opacity-70 hover:opacity-100"><i data-lucide="x" class="w-4 h-4"></i></button>
+            `;
+            container.appendChild(toast);
+            initLucide();
+            setTimeout(() => { if(toast.parentElement) toast.remove(); }, 4000);
+        };
+
+        // Initial Page Render
+        window.onload = () => {
+            navigate('dashboard');
+            // Try load local data if exists
+            const local = localStorage.getItem('study_master_local_data');
+            if(local) {
+                const parsed = JSON.parse(local);
+                window.appState.data = parsed.data || window.appState.data;
+            }
+        };
+
+        // Placeholder Render Functions
+        function renderDashboard(container) {
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2 space-y-6">
+                        <div class="glass p-8 bg-indigo-600 text-white relative overflow-hidden">
+                            <div class="relative z-10">
+                                <h3 class="text-2xl font-bold">Exam Countdown</h3>
+                                <p class="opacity-80 mt-1">GCE A/L Examination 2026</p>
+                                <div class="flex gap-4 mt-6">
+                                    <div class="text-center"><span class="block text-3xl font-bold">184</span><span class="text-xs uppercase opacity-60">Days</span></div>
+                                    <div class="text-center"><span class="block text-3xl font-bold">12</span><span class="text-xs uppercase opacity-60">Hrs</span></div>
+                                </div>
+                            </div>
+                            <i data-lucide="clock" class="absolute right-[-20px] bottom-[-20px] w-48 h-48 opacity-10 rotate-12"></i>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="glass p-6"><h4 class="text-slate-500 text-sm mb-1 font-medium">Study Streak</h4><p class="text-3xl font-bold">7 Days 🔥</p></div>
+                            <div class="glass p-6"><h4 class="text-slate-500 text-sm mb-1 font-medium">Completed</h4><p class="text-3xl font-bold">12 Lessons</p></div>
+                        </div>
+                    </div>
+                    <div class="glass p-6 flex flex-col items-center justify-center text-center space-y-4">
+                        <div id="pomodoro-bg" class="w-40 h-40 rounded-full border-4 border-indigo-100 flex items-center justify-center transition-all duration-1000">
+                            <div class="text-3xl font-bold" id="timer-display">25:00</div>
+                        </div>
+                        <h4 class="font-bold">Focus Mode</h4>
+                        <div class="flex gap-2">
+                            <button id="timer-btn" onclick="toggleTimer()" class="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center hover:scale-105 transition-transform">
+                                <i data-lucide="play" class="w-6 h-6"></i>
+                            </button>
+                            <button onclick="resetTimer()" class="w-12 h-12 glass rounded-full flex items-center justify-center hover:bg-slate-100">
+                                <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderLessons(container) {
+            container.innerHTML = `
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold">Active Subjects</h3>
+                    <button class="flex items-center gap-2 text-indigo-600 font-bold hover:underline">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i> Add Subject
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    ${['Biology', 'Chemistry', 'Physics'].map(sub => `
+                        <div class="glass p-6 lesson-card group cursor-pointer">
+                            <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
+                                <i data-lucide="book" class="w-6 h-6"></i>
+                            </div>
+                            <h4 class="font-bold text-lg">${sub}</h4>
+                            <p class="text-slate-500 text-sm mt-1">4 units remaining</p>
+                            <div class="mt-4 bg-slate-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-indigo-600 h-full w-[65%]"></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderFlashcards(container) {
+            container.innerHTML = `
+                <div class="max-w-xl mx-auto py-12 text-center">
+                    <div class="glass p-12 mb-8 relative group cursor-pointer hover:rotate-2 transition-all">
+                        <span class="text-xs uppercase tracking-widest text-slate-400 mb-4 block">Chemistry • Organic</span>
+                        <h3 class="text-2xl font-bold italic">"What is the general formula for Alkanes?"</h3>
+                        <div class="mt-8 text-indigo-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">Click to flip</div>
+                    </div>
+                    <div class="flex justify-center gap-6">
+                        <button class="w-16 h-16 glass rounded-full text-red-500 flex items-center justify-center hover:bg-red-50"><i data-lucide="x" class="w-8 h-8"></i></button>
+                        <button class="w-16 h-16 glass rounded-full text-green-500 flex items-center justify-center hover:bg-green-50"><i data-lucide="check" class="w-8 h-8"></i></button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Timer Logic ---
+        let timerObj = { remaining: 1500, running: false, interval: null };
+        window.toggleTimer = function() {
+            if(timerObj.running) {
+                clearInterval(timerObj.interval);
+                timerObj.running = false;
+                document.getElementById('pomodoro-bg').classList.remove('scale-150');
+            } else {
+                timerObj.running = true;
+                document.getElementById('pomodoro-bg').classList.add('scale-150');
+                timerObj.interval = setInterval(() => {
+                    timerObj.remaining--;
+                    if(timerObj.remaining <= 0) {
+                        clearInterval(timerObj.interval);
+                        timerObj.running = false;
+                        showNotification("Time Up!", "Take a short break.", "info");
+                    }
+                    updateTimerUI();
+                    if(timerObj.remaining % 60 === 0) saveData();
+                }, 1000);
+            }
+            updateTimerUI();
+        }
+
+        window.updateTimerUI = function() {
+            const m = Math.floor(timerObj.remaining/60).toString().padStart(2,'0');
+            const s = (timerObj.remaining%60).toString().padStart(2,'0');
+            const display = document.getElementById('timer-display');
+            if(display) display.innerText = `${m}:${s}`;
+            
+            const btn = document.getElementById('timer-btn');
+            if(btn) btn.innerHTML = timerObj.running ? '<i data-lucide="pause" class="w-6 h-6"></i>' : '<i data-lucide="play" class="w-6 h-6"></i>';
+            initLucide();
+        }
+
+        window.resetTimer = function() { 
+            clearInterval(timerObj.interval); 
+            timerObj.running = false; 
+            timerObj.remaining = 1500; 
+            const bg = document.getElementById('pomodoro-bg');
+            if(bg) bg.classList.remove('scale-150');
+            updateTimerUI(); 
+        }
+
+        // --- Utility ---
+        window.initLucide = function() { if(window.lucide) window.lucide.createIcons(); }
+        window.toggleDarkMode = function() { 
+            window.appState.config.darkMode = !window.appState.config.darkMode; 
+            saveData(); 
+            applyTheme(); 
+        }
+        window.applyTheme = function() {
+            document.body.classList.toggle('dark-mode', window.appState.config.darkMode);
+            const icon = document.getElementById('theme-icon');
+            if(icon) icon.dataset.lucide = window.appState.config.darkMode ? 'sun' : 'moon';
+            initLucide();
+        }
+    </script>
+</body>
+</html>
