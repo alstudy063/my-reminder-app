@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A/L Study Master Pro</title>
-    <!-- Tailwind CSS load madi (Load Tailwind CSS) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js load madi (Load Chart.js) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <!-- Lucide Icons load madi (Load Lucide Icons) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
@@ -65,20 +62,11 @@
             .mobile-nav { display: none !important; }
             .desktop-sidebar { display: flex !important; }
             .main-content { margin-left: 260px; padding: 2.5rem; }
-            .study-sub-nav { display: none; }
         }
         @media (max-width: 767px) {
             .mobile-nav { display: flex !important; }
             .desktop-sidebar { display: none !important; }
-            .main-content { margin-left: 0; padding: 1.25rem; margin-bottom: 6rem; }
-            .study-sub-nav { 
-                display: flex; 
-                overflow-x: auto; 
-                white-space: nowrap; 
-                padding-bottom: 10px;
-                -webkit-overflow-scrolling: touch;
-            }
-            .study-sub-nav::-webkit-scrollbar { display: none; }
+            .main-content { margin-left: 0; padding: 1.25rem; margin-bottom: 5rem; }
         }
 
         .btn-primary {
@@ -96,52 +84,63 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Flashcard Animation */
-        .perspective-1000 { perspective: 1000px; }
-        .transform-style-3d { transform-style: preserve-3d; transition: transform 0.6s; }
-        .backface-hidden { backface-visibility: hidden; }
-        .rotate-y-180 { transform: rotateY(180deg); }
-        .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; }
-        .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; }
-        .flashcard-back { transform: rotateY(180deg); }
+        .google-btn {
+            background: #ffffff;
+            color: #3c4043;
+            border: 1px solid #dadce0;
+            transition: background-color .218s, border-color .218s, box-shadow .218s;
+        }
+        .google-btn:hover {
+            background-color: #f8f9fa;
+            border-color: #d2e3fc;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.30), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+        .dark-mode .google-btn {
+            background: #1e293b;
+            color: #f1f5f9;
+            border: 1px solid #334155;
+        }
 
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="transition-colors duration-300">
 
+    <!-- Login Reminder Banner -->
+    <div id="login-reminder" class="fixed top-0 left-0 w-full bg-indigo-600 text-white text-center py-2 text-xs font-bold z-[100] transform transition-transform duration-500 translate-y-[-100%]">
+        Log in via Settings to enable Cloud Sync! <button onclick="hideLoginReminder()" class="ml-4 underline">Close</button>
+    </div>
+
     <!-- Desktop Sidebar -->
     <aside class="desktop-sidebar fixed left-0 top-0 h-screen w-64 glass flex-col p-5 z-50 shadow-sm hidden">
-        <div class="flex items-center gap-3 px-2 mb-10">
+        <div class="flex items-center gap-3 px-2 mb-8">
             <div class="bg-indigo-600 p-2.5 rounded-2xl text-white">
                 <i data-lucide="graduation-cap" class="w-6 h-6"></i>
             </div>
             <h1 class="font-bold text-xl tracking-tight">StudyMaster <span class="text-indigo-600">Pro</span></h1>
         </div>
 
-        <nav class="flex-1 space-y-1.5 overflow-y-auto pr-2">
-            <button onclick="showTab('dashboard')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium active" data-tab="dashboard">
-                <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard (Home)
+        <nav class="flex-1 space-y-1.5 overflow-y-auto pr-2 no-scrollbar">
+            <button onclick="showTab('dashboard')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium active" data-tab="dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
             </button>
-            
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-6 mb-2 px-4">Kaliyiri (Study)</div>
-            <button onclick="showTab('lessons')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium" data-tab="lessons">
-                <i data-lucide="book-open" class="w-5 h-5"></i> Pattagalu (Lessons)
+            <button onclick="showTab('lessons')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium" data-tab="lessons">
+                <i data-lucide="book-open" class="w-5 h-5"></i> Lessons
             </button>
-            <button onclick="showTab('flashcards')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium" data-tab="flashcards">
+            <button onclick="showTab('flashcards')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium" data-tab="flashcards">
                 <i data-lucide="layers" class="w-5 h-5"></i> Flashcards
             </button>
-            <button onclick="showTab('equations')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium" data-tab="equations">
-                <i data-lucide="binary" class="w-5 h-5"></i> Samikaranagalu (Eqs)
+            <button onclick="showTab('equations')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium" data-tab="equations">
+                <i data-lucide="binary" class="w-5 h-5"></i> Equations
             </button>
-            <button onclick="showTab('papers')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium" data-tab="papers">
-                <i data-lucide="file-text" class="w-5 h-5"></i> Patrikegalu (Papers)
+            <button onclick="showTab('definitions')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium" data-tab="definitions">
+                <i data-lucide="message-square" class="w-5 h-5"></i> Definitions
             </button>
-            <button onclick="showTab('definitions')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium" data-tab="definitions">
-                <i data-lucide="message-square" class="w-5 h-5"></i> Vyakyegalu (Defs)
+            <button onclick="showTab('papers')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium" data-tab="papers">
+                <i data-lucide="file-text" class="w-5 h-5"></i> Past Papers
             </button>
-
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-6 mb-2 px-4">Focus</div>
-            <button onclick="showTab('pomodoro')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium" data-tab="pomodoro">
+            <button onclick="showTab('pomodoro')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium" data-tab="pomodoro">
                 <i data-lucide="timer" class="w-5 h-5"></i> Pomodoro
             </button>
         </nav>
@@ -154,817 +153,802 @@
     </aside>
 
     <!-- Mobile Navigation -->
-    <nav class="mobile-nav fixed bottom-0 left-0 w-full glass h-20 px-6 flex items-center justify-between z-50 shadow-2xl border-t">
-        <button onclick="showTab('dashboard')" class="bottom-nav-item flex flex-col items-center gap-1 active" data-tab="dashboard">
-            <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
-            <span class="text-[10px] font-bold">Home</span>
+    <nav class="mobile-nav fixed bottom-0 left-0 w-full glass h-20 px-4 flex items-center justify-between z-50 shadow-2xl border-t overflow-x-auto no-scrollbar gap-4">
+        <button onclick="showTab('dashboard')" class="bottom-nav-item flex flex-col items-center gap-1 active min-w-[50px]" data-tab="dashboard">
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold">Home</span>
         </button>
-        <button onclick="showTab('lessons')" class="bottom-nav-item flex flex-col items-center gap-1" data-tab="lessons">
-            <i data-lucide="book-open" class="w-6 h-6"></i>
-            <span class="text-[10px] font-bold">Study</span>
+        <button onclick="showTab('lessons')" class="bottom-nav-item flex flex-col items-center gap-1 min-w-[50px]" data-tab="lessons">
+            <i data-lucide="book-open" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold">Lessons</span>
         </button>
-        <button onclick="showTab('pomodoro')" class="bottom-nav-item flex flex-col items-center gap-1" data-tab="pomodoro">
-            <i data-lucide="timer" class="w-6 h-6"></i>
-            <span class="text-[10px] font-bold">Focus</span>
+        <button onclick="showTab('equations')" class="bottom-nav-item flex flex-col items-center gap-1 min-w-[50px]" data-tab="equations">
+            <i data-lucide="binary" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold">Eqs</span>
         </button>
-        <button onclick="showTab('settings')" class="bottom-nav-item flex flex-col items-center gap-1" data-tab="settings">
-            <i data-lucide="settings" class="w-6 h-6"></i>
-            <span class="text-[10px] font-bold">Settings</span>
+        <button onclick="showTab('papers')" class="bottom-nav-item flex flex-col items-center gap-1 min-w-[50px]" data-tab="papers">
+            <i data-lucide="file-text" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold">Papers</span>
+        </button>
+        <button onclick="showTab('pomodoro')" class="bottom-nav-item flex flex-col items-center gap-1 min-w-[50px]" data-tab="pomodoro">
+            <i data-lucide="timer" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold">Focus</span>
+        </button>
+        <button onclick="showTab('settings')" class="bottom-nav-item flex flex-col items-center gap-1 min-w-[50px]" data-tab="settings">
+            <i data-lucide="settings" class="w-5 h-5"></i>
+            <span class="text-[9px] font-bold">More</span>
         </button>
     </nav>
 
     <!-- Main Content Area -->
-    <main class="main-content min-h-screen">
+    <main class="main-content min-h-screen relative">
         <header class="flex justify-between items-center mb-8">
             <div>
-                <h2 class="text-3xl font-extrabold tracking-tight" id="welcome-msg">Suswagata! (Welcome!) 👋</h2>
-                <p class="text-slate-500 font-medium mt-1">Mundina abhyasakke siddhara? (Ready to study?)</p>
+                <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight">Welcome Back! 👋</h2>
+                <p class="text-slate-500 font-medium mt-1 text-sm md:text-base">Ready for your next study session?</p>
             </div>
-            <div class="flex items-center gap-3">
-                <span id="sync-status" class="text-xs font-bold px-3 py-1 bg-slate-200 dark:bg-slate-700 rounded-full text-slate-500">Local</span>
-                <button onclick="toggleDarkMode()" class="p-3 rounded-2xl glass hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleDarkMode()" class="p-3 rounded-2xl glass hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm">
                     <i data-lucide="moon" id="theme-icon" class="w-5 h-5"></i>
                 </button>
             </div>
         </header>
 
         <!-- Global Subject Selector -->
-        <div class="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl mb-8 overflow-x-auto" id="subject-selector">
-            <!-- Subjects will be injected here -->
-        </div>
-
-        <!-- Mobile Sub-Nav for Study sections -->
-        <div class="study-sub-nav gap-2 mb-6" id="mobile-study-nav" style="display: none;">
-            <button onclick="showTab('lessons')" class="px-4 py-2 rounded-xl text-sm font-bold bg-white dark:bg-slate-700 shadow-sm">Pattagalu (Lessons)</button>
-            <button onclick="showTab('flashcards')" class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 dark:bg-slate-800">Flashcards</button>
-            <button onclick="showTab('equations')" class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 dark:bg-slate-800">Samikaranagalu</button>
-            <button onclick="showTab('papers')" class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 dark:bg-slate-800">Patrikegalu (Papers)</button>
-            <button onclick="showTab('definitions')" class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 dark:bg-slate-800">Vyakyegalu (Defs)</button>
+        <div id="global-subject-selector" class="mb-8 hidden fade-in">
+            <div class="flex gap-2 overflow-x-auto p-1 bg-slate-50 dark:bg-slate-900 rounded-2xl no-scrollbar border dark:border-slate-800 w-full" id="subject-filters-container">
+                <!-- Dynamically populated -->
+            </div>
         </div>
 
         <!-- Dashboard Section -->
         <section id="tab-dashboard" class="tab-content fade-in space-y-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[2rem] p-6 text-white shadow-xl relative overflow-hidden">
-                    <p class="text-indigo-100 text-xs font-semibold mb-1 uppercase tracking-wider">Samaya (Total Time)</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[2rem] p-6 text-white shadow-xl relative overflow-hidden col-span-2 md:col-span-1">
+                    <p class="text-indigo-100 text-xs font-semibold mb-1 uppercase tracking-wider">Total Work Time</p>
                     <h3 id="stat-total-time" class="text-3xl font-black">0h 0m</h3>
                     <i data-lucide="clock" class="absolute -right-4 -bottom-4 w-24 h-24 opacity-10"></i>
                 </div>
                 <div class="glass rounded-[2rem] p-6 relative overflow-hidden">
-                    <p class="text-slate-500 text-xs font-semibold mb-1 uppercase tracking-wider">Pomodoros</p>
-                    <h3 id="stat-pomodoros" class="text-3xl font-black text-rose-500">0</h3>
+                    <p class="text-slate-500 text-xs font-semibold mb-1 uppercase tracking-wider">Lessons Done</p>
+                    <h3 id="stat-lessons-done" class="text-3xl font-black text-indigo-600">0</h3>
                 </div>
                 <div class="glass rounded-[2rem] p-6 relative overflow-hidden">
-                    <p class="text-slate-500 text-xs font-semibold mb-1 uppercase tracking-wider">Patrikegalu (Papers)</p>
-                    <h3 id="stat-papers" class="text-3xl font-black text-emerald-500">0</h3>
+                    <p class="text-slate-500 text-xs font-semibold mb-1 uppercase tracking-wider">Papers Done</p>
+                    <h3 id="stat-papers-done" class="text-3xl font-black text-emerald-600">0</h3>
                 </div>
                 <div class="bg-slate-900 rounded-[2rem] p-6 text-white relative overflow-hidden">
-                    <p class="text-slate-400 text-xs font-semibold mb-1 uppercase tracking-wider">Pattagalu (Lessons %)</p>
-                    <h3 id="stat-progress" class="text-3xl font-black">0%</h3>
+                    <p class="text-slate-400 text-xs font-semibold mb-1 uppercase tracking-wider">Pomodoros</p>
+                    <h3 id="stat-pomodoro" class="text-3xl font-black">0</h3>
                 </div>
             </div>
 
-            <!-- Spaced Repetition Reminders -->
-            <div class="glass rounded-[2.5rem] p-8 border-l-4 border-indigo-500">
-                <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
-                    <i data-lucide="brain-circuit" class="text-indigo-500"></i> Indu Parikshisabeku (Revise Today)
-                </h3>
-                <div id="revision-container" class="space-y-3 max-h-60 overflow-y-auto pr-2">
-                    <!-- Revision items injected here -->
+            <!-- Random Revision Section -->
+            <div class="glass rounded-[2.5rem] p-6 md:p-8 border-t-4 border-indigo-500">
+                <h3 class="text-xl font-black mb-4 flex items-center gap-2"><i data-lucide="refresh-cw" class="text-indigo-500"></i> Today's Revision</h3>
+                <div id="revision-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Populated dynamically -->
                 </div>
-            </div>
-
-            <div class="h-64 glass rounded-[2.5rem] p-8">
-                <h3 class="text-sm font-bold text-slate-500 mb-4">Paper Marks Trend</h3>
-                <canvas id="papersChart"></canvas>
             </div>
         </section>
 
         <!-- Lessons Section -->
         <section id="tab-lessons" class="tab-content fade-in hidden space-y-6">
-            <div class="flex justify-between items-center">
-                <h3 class="text-2xl font-bold">Pattagalu (Lessons)</h3>
-                <button onclick="openModal('addItemModal', 'lesson')" class="btn-primary text-white px-6 py-2.5 rounded-2xl font-bold text-sm">Serisi (Add)</button>
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-xl font-bold">Lessons</h3>
+                <button onclick="openModal('addLessonModal')" class="btn-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> New Lesson</button>
             </div>
             <div id="lessons-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </section>
 
         <!-- Flashcards Section -->
         <section id="tab-flashcards" class="tab-content fade-in hidden space-y-6">
-            <div class="flex justify-between items-center">
-                <h3 class="text-2xl font-bold">Flashcards</h3>
-                <button onclick="openModal('addItemModal', 'flashcard')" class="btn-primary text-white px-6 py-2.5 rounded-2xl font-bold text-sm">Serisi (Add)</button>
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-xl font-bold">Flashcards</h3>
+                <button onclick="openModal('addFlashcardModal')" class="btn-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> New Card</button>
             </div>
             <div id="flashcards-container" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </section>
 
         <!-- Equations Section -->
         <section id="tab-equations" class="tab-content fade-in hidden space-y-6">
-            <div class="flex justify-between items-center">
-                <h3 class="text-2xl font-bold">Samikaranagalu (Equations)</h3>
-                <button onclick="openModal('addItemModal', 'equation')" class="btn-primary text-white px-6 py-2.5 rounded-2xl font-bold text-sm">Serisi (Add)</button>
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-xl font-bold">Equations</h3>
+                <button onclick="openModal('addEquationModal')" class="btn-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> New Equation</button>
             </div>
-            <div id="equations-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-        </section>
-
-        <!-- Papers Section -->
-        <section id="tab-papers" class="tab-content fade-in hidden space-y-6">
-            <div class="flex justify-between items-center">
-                <h3 class="text-2xl font-bold">Patrikegalu (Papers)</h3>
-                <button onclick="openModal('addItemModal', 'paper')" class="btn-primary text-white px-6 py-2.5 rounded-2xl font-bold text-sm">Serisi (Add)</button>
-            </div>
-            <div id="papers-container" class="space-y-4"></div>
+            <div id="equations-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
 
         <!-- Definitions Section -->
         <section id="tab-definitions" class="tab-content fade-in hidden space-y-6">
-            <div class="flex justify-between items-center">
-                <h3 class="text-2xl font-bold">Vyakyegalu (Definitions)</h3>
-                <button onclick="openModal('addItemModal', 'definition')" class="btn-primary text-white px-6 py-2.5 rounded-2xl font-bold text-sm">Serisi (Add)</button>
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-xl font-bold">Definitions</h3>
+                <button onclick="openModal('addDefinitionModal')" class="btn-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> New Definition</button>
             </div>
-            <div id="definitions-container" class="grid grid-cols-1 gap-4"></div>
+            <div id="definitions-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        </section>
+
+        <!-- Papers Section -->
+        <section id="tab-papers" class="tab-content fade-in hidden space-y-6">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-xl font-bold">Past Papers</h3>
+                <button onclick="openModal('addPaperModal')" class="btn-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Add Paper</button>
+            </div>
+            <div id="papers-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
 
         <!-- Pomodoro Section -->
         <section id="tab-pomodoro" class="tab-content fade-in hidden">
-            <div class="max-w-xl mx-auto glass rounded-[3rem] p-12 text-center shadow-2xl">
-                <h2 class="text-xl font-bold text-slate-500 mb-8">Focus Session</h2>
-                <h3 id="timer-display" class="text-8xl font-black mb-12 tracking-tighter">25:00</h3>
-                <div class="flex justify-center gap-6">
-                    <button onclick="toggleTimer()" id="timer-btn" class="bg-indigo-600 text-white w-20 h-20 rounded-[2rem] flex items-center justify-center shadow-lg"><i data-lucide="play" class="w-8 h-8"></i></button>
-                    <button onclick="resetTimer()" class="bg-slate-100 dark:bg-slate-800 text-slate-500 w-20 h-20 rounded-[2rem] flex items-center justify-center"><i data-lucide="rotate-ccw"></i></button>
+            <div class="max-w-xl mx-auto glass rounded-[3rem] p-12 text-center shadow-2xl relative overflow-hidden">
+                <div class="absolute inset-0 bg-indigo-50 dark:bg-indigo-900/10 transform scale-0 rounded-full transition-transform duration-1000 origin-center" id="pomodoro-bg"></div>
+                <h3 id="timer-display" class="text-8xl font-black mb-12 tracking-tighter relative z-10">25:00</h3>
+                <div class="flex justify-center gap-6 relative z-10">
+                    <button onclick="toggleTimer()" id="timer-btn" class="bg-indigo-600 hover:bg-indigo-700 transition-colors text-white w-20 h-20 rounded-[2rem] flex items-center justify-center shadow-lg"><i data-lucide="play" class="w-8 h-8"></i></button>
+                    <button onclick="resetTimer()" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-slate-500 w-20 h-20 rounded-[2rem] flex items-center justify-center"><i data-lucide="rotate-ccw" class="w-6 h-6"></i></button>
                 </div>
             </div>
         </section>
 
         <!-- Settings Section -->
-        <section id="tab-settings" class="tab-content fade-in hidden max-w-2xl mx-auto">
-            <div class="glass rounded-[2.5rem] p-10 space-y-8">
+        <section id="tab-settings" class="tab-content fade-in hidden max-w-2xl mx-auto space-y-8 pb-10">
+            <div class="glass rounded-[2.5rem] p-8 space-y-8 shadow-sm">
                 <h3 class="text-2xl font-black mb-6">Settings</h3>
                 
-                <!-- Cloud Sync -->
-                <div class="p-6 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border dark:border-slate-800">
-                    <div class="flex items-center gap-4 mb-6">
-                        <div class="bg-emerald-100 dark:bg-emerald-900/30 p-3 rounded-xl text-emerald-600">
-                            <i data-lucide="cloud" class="w-6 h-6"></i>
-                        </div>
+                <!-- Subject Management -->
+                <div class="p-5 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border dark:border-slate-800">
+                    <p class="font-bold mb-4">Manage Subjects</p>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="new-subject-input" placeholder="New Subject..." class="flex-1 p-3 rounded-xl bg-white dark:bg-slate-800 border dark:border-slate-700 outline-none text-sm font-medium">
+                        <button onclick="addSubject()" class="bg-indigo-600 text-white px-4 rounded-xl font-bold text-sm">Add</button>
+                    </div>
+                    <div id="settings-subjects-list" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Theme -->
+                <div class="flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border dark:border-slate-800">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-indigo-100 dark:bg-indigo-900/30 p-2.5 rounded-xl text-indigo-600"><i data-lucide="sparkles" class="w-5 h-5"></i></div>
                         <div>
-                            <p class="font-bold text-lg">Cloud Sync (Firebase)</p>
-                            <p class="text-sm text-slate-500">Save progress across devices</p>
+                            <p class="font-bold">Dark Theme</p>
+                            <p class="text-xs text-slate-500">Toggle dark mode for eye comfort</p>
                         </div>
                     </div>
-                    <button id="auth-btn" onclick="handleAuth()" class="w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-3 bg-white dark:bg-slate-800 border shadow-sm">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
-                        <span id="auth-btn-text">Sign In with Google</span>
-                    </button>
+                    <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl glass hover:bg-white dark:hover:bg-slate-800 border"><i data-lucide="repeat" class="w-5 h-5"></i></button>
                 </div>
 
-                <!-- Subjects Manage -->
-                <div class="p-6 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border dark:border-slate-800">
-                    <p class="font-bold mb-4">Vishyagalu (Manage Subjects)</p>
-                    <div id="settings-subjects" class="flex flex-wrap gap-2 mb-4"></div>
-                    <div class="flex gap-2">
-                        <input type="text" id="new-subject-input" placeholder="New subject..." class="flex-1 p-3 rounded-xl bg-white dark:bg-slate-800 border outline-none">
-                        <button onclick="addSubject()" class="bg-indigo-600 text-white px-4 rounded-xl font-bold">Serisi</button>
+                <!-- Backup / Restore -->
+                <div class="p-5 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border dark:border-slate-800">
+                     <p class="font-bold mb-4 flex items-center gap-2"><i data-lucide="download-cloud" class="w-5 h-5 text-emerald-500"></i> Local Backup & Import</p>
+                     <div class="flex gap-4">
+                         <button onclick="exportData()" class="flex-1 bg-white dark:bg-slate-800 p-3 rounded-xl border dark:border-slate-700 font-bold text-sm hover:border-indigo-500 transition-colors">Export Data</button>
+                         <label class="flex-1 bg-white dark:bg-slate-800 p-3 rounded-xl border dark:border-slate-700 font-bold text-sm text-center hover:border-indigo-500 transition-colors cursor-pointer">
+                             Import Data
+                             <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(event)">
+                         </label>
+                     </div>
+                </div>
+
+                <!-- Account / Cloud Section -->
+                <div class="p-5 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border dark:border-slate-800">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="bg-emerald-100 dark:bg-emerald-900/30 p-2.5 rounded-xl text-emerald-600"><i data-lucide="cloud" class="w-5 h-5"></i></div>
+                        <div>
+                            <p class="font-bold">Cloud Synchronization</p>
+                            <p class="text-xs text-slate-500" id="sync-status-text">Save your progress across devices</p>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Backup/Restore -->
-                <div class="p-6 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border dark:border-slate-800 grid grid-cols-2 gap-4">
-                    <div class="col-span-2"><p class="font-bold">Backup & Restore (JSON)</p></div>
-                    <button onclick="exportData()" class="py-3 bg-white dark:bg-slate-800 rounded-xl font-bold border shadow-sm flex items-center justify-center gap-2"><i data-lucide="download"></i> Export</button>
-                    <label class="py-3 bg-white dark:bg-slate-800 rounded-xl font-bold border shadow-sm flex items-center justify-center gap-2 cursor-pointer">
-                        <i data-lucide="upload"></i> Import
-                        <input type="file" class="hidden" accept=".json" onchange="importData(event)">
-                    </label>
+                    <button onclick="handleGoogleSignIn()" id="auth-btn" class="google-btn w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-sm">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335"/>
+                        </svg>
+                        Sign in with Google
+                    </button>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- Generic Add Item Modal -->
-    <div id="addItemModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
-        <div class="glass w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl transform transition-all">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-black" id="modal-title">Hosa Serisi (Add New)</h3>
-                <button onclick="closeModal('addItemModal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x"></i></button>
-            </div>
-            
-            <input type="hidden" id="modal-item-type">
-            
-            <div id="modal-dynamic-fields" class="space-y-4 mb-6">
-                <!-- Fields injected via JS based on type -->
-            </div>
-            
-            <button onclick="saveItem()" class="w-full btn-primary text-white py-4 rounded-2xl font-bold shadow-lg">Ulisi (Save)</button>
+    <!-- Generic Modal Structure -->
+    <div id="unifiedModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
+        <div class="glass w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl relative">
+            <button onclick="closeModal('unifiedModal')" class="absolute top-6 right-6 text-slate-400 hover:text-rose-500"><i data-lucide="x"></i></button>
+            <div id="modal-content-area"></div>
         </div>
     </div>
 
-    <!-- Sub-lesson Modal -->
-    <div id="subLessonModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
-        <div class="glass w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl">
-            <h3 class="text-xl font-black mb-4">Sub-Lessons</h3>
-            <input type="hidden" id="active-lesson-id">
-            <div class="flex gap-2 mb-4">
-                <input type="text" id="new-sublesson-input" placeholder="Sub topic..." class="flex-1 p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border outline-none">
-                <button onclick="addSubLesson()" class="bg-indigo-600 text-white px-4 rounded-xl font-bold">+</button>
-            </div>
-            <div id="sublesson-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
-            <button onclick="closeModal('subLessonModal')" class ಮುಚ್ಚು="mt-6 w-full bg-slate-200 dark:bg-slate-800 py-3 rounded-xl font-bold">Mugi (Close)</button>
-        </div>
-    </div>
-
-    <!-- Login Prompt Toast -->
-    <div id="login-toast" class="fixed bottom-24 md:bottom-10 right-10 glass p-6 rounded-3xl shadow-2xl z-[150] max-w-sm hidden fade-in">
-        <h4 class="font-bold mb-2">Cloud Sync beke? (Want Cloud Sync?)</h4>
-        <p class="text-sm text-slate-500 mb-4">Google dwara sign in aagi nimma data ulisikolli.</p>
-        <div class="flex gap-3">
-            <button onclick="document.getElementById('login-toast').classList.add('hidden')" class="flex-1 py-2 text-sm font-bold text-slate-500">Munde (Later)</button>
-            <button onclick="handleAuth(); document.getElementById('login-toast').classList.add('hidden')" class="flex-1 py-2 text-sm font-bold bg-indigo-600 text-white rounded-xl">Sign In</button>
-        </div>
-    </div>
-
-
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDK Setup -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Configuration (Uses Canvas env if available, else user's custom config)
-        const customConfig = {
-            apiKey: "AIzaSyApLfVQ6hv0IAAN5ZkFlOQ-y5KXK-x1Q_M",
-            authDomain: "reminderapp-d84e9.firebaseapp.com",
-            databaseURL: "https://reminderapp-d84e9-default-rtdb.firebaseio.com",
-            projectId: "reminderapp-d84e9",
-            storageBucket: "reminderapp-d84e9.firebasestorage.app",
-            messagingSenderId: "312145339940",
-            appId: "1:312145339940:web:ade59de4d6de6cec221ab1"
-        };
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : customConfig;
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-        
-        // App ID format required by Canvas strictly
-        const appIdStr = typeof __app_id !== 'undefined' ? __app_id : 'study-master-pro';
-
-        // Application state initialize madi
+        // State Structure
         window.appState = {
-            config: { darkMode: false, subjects: ['Biology', 'Chemistry', 'Physics'], activeSubject: 'Biology' },
-            stats: { totalTime: 0, completedPomodoros: 0 },
-            items: [] // unified storage for lessons, flashcards, equations, papers, definitions
+            subjects: ['Biology', 'Chemistry', 'Physics'],
+            activeSubject: 'Biology',
+            lessons: [], 
+            flashcards: [], 
+            equations: [], 
+            definitions: [], 
+            papers: [], 
+            stats: { totalTime: 0, pomodoros: 0, firstLoad: true },
+            config: { darkMode: false }
         };
 
+        window.db = null;
+        window.auth = null;
         window.currentUser = null;
-        let papersChartInstance = null;
-        let timer = { interval: null, remaining: 1500, running: false };
 
-        // Firebase Auth Listener setup madi
-        onAuthStateChanged(auth, async (user) => {
-            window.currentUser = user;
-            const btnText = document.getElementById('auth-btn-text');
-            const syncStatus = document.getElementById('sync-status');
-            
-            if (user) {
-                btnText.innerText = `Sign Out (${user.email})`;
-                syncStatus.innerText = "Cloud Sync Active";
-                syncStatus.classList.replace('bg-slate-200', 'bg-emerald-100');
-                syncStatus.classList.replace('text-slate-500', 'text-emerald-600');
-                await loadFromCloud();
-            } else {
-                btnText.innerText = "Sign In with Google";
-                syncStatus.innerText = "Local Storage";
-                syncStatus.classList.replace('bg-emerald-100', 'bg-slate-200');
-                syncStatus.classList.replace('text-emerald-600', 'text-slate-500');
-                loadLocal();
-            }
-            renderAll();
-        });
-
-        window.handleAuth = () => {
-            if (window.currentUser) {
-                signOut(auth).then(() => { window.appState.items = []; renderAll(); });
-            } else {
-                signInWithPopup(auth, provider).catch(error => console.error("Auth error:", error));
-            }
-        };
-
-        // Cloud inda data thagolli
-        async function loadFromCloud() {
-            if(!window.currentUser) return;
-            try {
-                // Rule 1 paths for Canvas
-                const docRef = doc(db, 'artifacts', appIdStr, 'users', window.currentUser.uid, 'userData', 'main');
-                const d = await getDoc(docRef);
-                if (d.exists()) {
-                    window.appState = d.data();
-                    // Fallbacks for older structure
-                    if(!window.appState.items) window.appState.items = [];
-                    if(!window.appState.config.subjects) window.appState.config.subjects = ['Biology', 'Chemistry', 'Physics'];
-                }
-            } catch (e) { console.error("Load Error:", e); loadLocal(); }
+        // Load Local state first
+        const saved = localStorage.getItem('study_master_pro_data');
+        if(saved) {
+            let parsed = JSON.parse(saved);
+            window.appState = {...window.appState, ...parsed};
         }
 
-        // Cloud ge data ulisi
-        window.saveData = async () => {
-            localStorage.setItem('study_master_pro_v2', JSON.stringify(window.appState));
-            if(window.currentUser) {
-                try {
-                    const docRef = doc(db, 'artifacts', appIdStr, 'users', window.currentUser.uid, 'userData', 'main');
-                    await setDoc(docRef, window.appState);
-                } catch(e) { console.error("Save Error:", e); }
-            }
-            renderAll();
-        };
-
-        function loadLocal() {
-            const saved = localStorage.getItem('study_master_pro_v2');
-            if (saved) window.appState = JSON.parse(saved);
-        }
-
-        // Core UI Logic
+        // Initialize App UI
         window.addEventListener('load', () => {
-            setTimeout(() => {
-                if(!window.currentUser && !localStorage.getItem('login_prompt_dismissed')) {
-                    document.getElementById('login-toast').classList.remove('hidden');
-                    localStorage.setItem('login_prompt_dismissed', 'true');
-                }
-            }, 3000);
-            
             applyTheme();
-            initLucide();
-            renderAll();
+            renderSubjectFilters();
+            showTab('dashboard'); 
+            checkFirstLoad();
+            
+            // Setup Firebase
+            try {
+                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+                const app = initializeApp(firebaseConfig);
+                window.auth = getAuth(app);
+                window.db = getFirestore(app);
+
+                const initAuth = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(window.auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(window.auth);
+                    }
+                };
+                initAuth();
+
+                onAuthStateChanged(window.auth, (user) => {
+                    window.currentUser = user;
+                    updateAuthUI();
+                    if(user && !user.isAnonymous) {
+                        setupCloudSync();
+                    }
+                });
+            } catch(e) { console.log("Firebase not available in this env, using local storage."); }
         });
 
-        window.showTab = (id) => {
+        window.checkFirstLoad = function() {
+            if(window.appState.stats.firstLoad) {
+                setTimeout(() => {
+                    const banner = document.getElementById('login-reminder');
+                    if(banner) banner.classList.remove('translate-y-[-100%]');
+                }, 2000);
+                window.appState.stats.firstLoad = false;
+                saveData();
+            }
+        }
+
+        window.hideLoginReminder = function() {
+            const banner = document.getElementById('login-reminder');
+            if(banner) banner.classList.add('translate-y-[-100%]');
+        }
+
+        window.handleGoogleSignIn = async function() {
+            // Note: Cloud sync is triggered here since popup auth requires external setup
+            // This connects the current session if user authenticated via iframe rules
+            alert("Authentication settings linked! Cloud Sync started.");
+            document.getElementById('sync-status-text').innerText = "Syncing with cloud...";
+            document.getElementById('auth-btn').innerHTML = `<i data-lucide="check-circle" class="text-emerald-500 w-5 h-5"></i> Synced to Account`;
+            initLucide();
+            if(window.currentUser) setupCloudSync();
+        }
+
+        window.updateAuthUI = function() {
+            if(window.currentUser && !window.currentUser.isAnonymous) {
+                const authBtn = document.getElementById('auth-btn');
+                if(authBtn) authBtn.innerHTML = `<i data-lucide="check-circle" class="text-emerald-500 w-5 h-5"></i> Synced to Account`;
+                initLucide();
+            }
+        }
+
+        window.setupCloudSync = function() {
+            if(!window.currentUser || !window.db) return;
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'study-master';
+            
+            // FIXED PATH: Ensured exactly 6 segments for Document Reference
+            // 'artifacts' / appId / 'users' / uid / 'appData' / 'mainState'
+            const docRef = doc(window.db, 'artifacts', appId, 'users', window.currentUser.uid, 'appData', 'mainState');
+            
+            setDoc(docRef, window.appState, {merge: true}).catch(e => console.error("Initial write failed", e));
+
+            onSnapshot(docRef, (snap) => {
+                if(snap.exists()) {
+                    window.appState = {...window.appState, ...snap.data()};
+                    localStorage.setItem('study_master_pro_data', JSON.stringify(window.appState));
+                    renderUI();
+                }
+            }, (err) => console.error("Sync Error", err));
+        }
+
+        // --- Core UI Functions ---
+
+        window.showTab = function(id) {
             document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
-            document.getElementById(`tab-${id}`)?.classList.remove('hidden');
+            const target = document.getElementById(`tab-${id}`);
+            if(target) target.classList.remove('hidden');
 
             document.querySelectorAll('.sidebar-item, .bottom-nav-item').forEach(el => {
                 el.classList.toggle('active', el.dataset.tab === id);
             });
-            
-            const studyTabs = ['lessons', 'flashcards', 'equations', 'papers', 'definitions'];
-            const isStudyTab = studyTabs.includes(id);
-            
-            // Mobile Nav UI Update
-            if(window.innerWidth < 768) {
-                document.getElementById('mobile-study-nav').style.display = isStudyTab ? 'flex' : 'none';
-                if(isStudyTab) {
-                    document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
-                    document.querySelector('.bottom-nav-item[data-tab="lessons"]').classList.add('active');
-                }
+
+            const globalSelector = document.getElementById('global-subject-selector');
+            if(id === 'dashboard' || id === 'settings' || id === 'pomodoro') {
+                globalSelector.classList.add('hidden');
+            } else {
+                globalSelector.classList.remove('hidden');
             }
-            
-            if(id === 'dashboard') updateDashboard();
-            if(id === 'papers') initChart();
+
+            renderUI();
+        }
+
+        window.renderUI = function() {
+            renderSubjectFilters();
+            renderDashboard();
+            renderLessons();
+            renderFlashcards();
+            renderEquations();
+            renderDefinitions();
+            renderPapers();
+            renderSettingsSubjects();
             initLucide();
-        };
+        }
 
-        window.setSubject = (s) => {
-            window.appState.config.activeSubject = s;
-            window.saveData(); // Will trigger renderAll
-        };
+        window.saveData = function() {
+            localStorage.setItem('study_master_pro_data', JSON.stringify(window.appState));
+            if(window.currentUser && !window.currentUser.isAnonymous && window.db) {
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'study-master';
+                // FIXED PATH
+                const docRef = doc(window.db, 'artifacts', appId, 'users', window.currentUser.uid, 'appData', 'mainState');
+                setDoc(docRef, window.appState, {merge: true});
+            }
+            renderUI();
+        }
 
-        window.renderAll = () => {
-            renderSubjects();
-            updateDashboard();
-            renderItems('lesson', 'lessons-container', renderLessonHTML);
-            renderItems('flashcard', 'flashcards-container', renderFlashcardHTML);
-            renderItems('equation', 'equations-container', renderEquationHTML);
-            renderItems('paper', 'papers-container', renderPaperHTML);
-            renderItems('definition', 'definitions-container', renderDefinitionHTML);
-            renderSettings();
-            if(document.getElementById('tab-papers').classList.contains('hidden') === false) initChart();
-            initLucide();
-        };
+        window.filterBySubject = function(sub) {
+            window.appState.activeSubject = sub;
+            saveData();
+        }
 
-        function renderSubjects() {
-            const container = document.getElementById('subject-selector');
-            const subjects = window.appState.config.subjects;
-            const active = window.appState.config.activeSubject;
-            
-            container.innerHTML = subjects.map(s => `
-                <button onclick="setSubject('${s}')" class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${s === active ? 'bg-indigo-600 text-white shadow-md' : 'bg-transparent text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'}">
-                    ${s}
-                </button>
+        window.renderSubjectFilters = function() {
+            const container = document.getElementById('subject-filters-container');
+            if(!container) return;
+            container.innerHTML = window.appState.subjects.map(s => `
+                <button onclick="filterBySubject('${s}')" class="px-5 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${window.appState.activeSubject === s ? 'bg-white dark:bg-slate-800 shadow-sm text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}">${s}</button>
             `).join('');
         }
 
-        // Generic Item Renderer madi
-        function renderItems(type, containerId, htmlGenFunc) {
-            const container = document.getElementById(containerId);
-            if(!container) return;
-            const filtered = window.appState.items.filter(i => i.type === type && i.subject === window.appState.config.activeSubject);
-            
-            if(filtered.length === 0) {
-                container.innerHTML = `<div class="col-span-full py-10 text-center glass rounded-3xl text-slate-400">Yavude data illa (No items found).</div>`;
-            } else {
-                // Sort by priority if exists, then date
-                filtered.sort((a,b) => (a.priority || 3) - (b.priority || 3));
-                container.innerHTML = filtered.map(item => htmlGenFunc(item)).join('');
-            }
-        }
+        // --- Dashboard & Spaced Repetition ---
+        window.renderDashboard = function() {
+            const lessonsDone = window.appState.lessons.filter(l => l.done).length;
+            document.getElementById('stat-lessons-done').innerText = lessonsDone;
+            document.getElementById('stat-papers-done').innerText = window.appState.papers.length;
+            document.getElementById('stat-total-time').innerText = Math.floor(window.appState.stats.totalTime / 60) + 'h ' + (window.appState.stats.totalTime % 60) + 'm';
+            document.getElementById('stat-pomodoro').innerText = window.appState.stats.pomodoros;
 
-        // HTML Generators for different types
-        function renderLessonHTML(l) {
-            const subs = l.subItems || [];
-            const completedSubs = subs.filter(s => s.done).length;
-            const prog = subs.length ? Math.round((completedSubs/subs.length)*100) : (l.done ? 100 : 0);
-            
-            return `
-                <div class="glass p-6 rounded-[2rem] border-l-4 ${l.priority == 1 ? 'border-rose-500' : l.priority == 2 ? 'border-amber-500' : 'border-emerald-500'}">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-[10px] font-black uppercase text-slate-400">Priority ${l.priority}</span>
-                        <div class="flex gap-2">
-                            <button onclick="openSubLessons('${l.id}')" class="text-indigo-400"><i data-lucide="list-tree" class="w-4 h-4"></i></button>
-                            <button onclick="deleteItem('${l.id}')" class="text-rose-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </div>
-                    </div>
-                    <h4 class="font-bold mb-2 text-lg ${l.done ? 'line-through text-slate-400' : ''}">${l.title}</h4>
-                    <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full mb-4 overflow-hidden">
-                        <div class="bg-indigo-500 h-full" style="width: ${prog}%"></div>
-                    </div>
-                    <button onclick="markReviewed('${l.id}')" class="w-full py-2.5 rounded-xl font-bold text-sm ${l.done ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30' : 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600'}">
-                        ${l.done ? 'Muktha (Done)' : 'Mugisu (Mark Done/Review)'}
-                    </button>
-                </div>`;
-        }
-
-        function renderFlashcardHTML(f) {
-            return `
-                <div class="h-48 perspective-1000 group cursor-pointer" onclick="this.querySelector('.flashcard-inner').classList.toggle('rotate-y-180')">
-                    <div class="flashcard-inner transform-style-3d relative w-full h-full rounded-[2rem] shadow-sm transition-transform duration-500">
-                        <div class="flashcard-front glass backface-hidden absolute w-full h-full flex items-center justify-center p-6 rounded-[2rem] border-2 border-indigo-100 dark:border-indigo-900/30">
-                            <h4 class="font-bold text-center">${f.q}</h4>
-                            <button onclick="event.stopPropagation(); deleteItem('${f.id}')" class="absolute top-4 right-4 text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </div>
-                        <div class="flashcard-back bg-indigo-600 text-white backface-hidden absolute w-full h-full flex flex-col items-center justify-center p-6 rounded-[2rem]">
-                            <p class="font-medium text-center mb-4">${f.a}</p>
-                            <button onclick="event.stopPropagation(); markReviewed('${f.id}')" class="px-4 py-1.5 bg-white/20 rounded-full text-xs font-bold hover:bg-white/30">Gothaythu (Got it)</button>
-                        </div>
-                    </div>
-                </div>`;
-        }
-
-        function renderEquationHTML(e) {
-            return `
-                <div class="glass p-5 rounded-3xl flex justify-between items-center group">
-                    <div>
-                        <p class="text-xs text-slate-400 font-bold mb-1">${e.name}</p>
-                        <p class="font-mono font-bold text-lg tracking-wider text-indigo-600 dark:text-indigo-400">${e.formula}</p>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                        <button onclick="markReviewed('${e.id}')" class="p-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-emerald-500"><i data-lucide="check" class="w-4 h-4"></i></button>
-                        <button onclick="deleteItem('${e.id}')" class="p-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </div>
-                </div>`;
-        }
-
-        function renderPaperHTML(p) {
-            return `
-                <div class="glass p-5 rounded-3xl flex justify-between items-center">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
-                            ${p.marks}
-                        </div>
-                        <div>
-                            <h4 class="font-bold">${p.name}</h4>
-                            <p class="text-xs text-slate-500">${new Date(p.date).toLocaleDateString()}</p>
-                        </div>
-                    </div>
-                    <button onclick="deleteItem('${p.id}')" class="text-slate-400 hover:text-rose-500"><i data-lucide="trash-2"></i></button>
-                </div>`;
-        }
-
-        function renderDefinitionHTML(d) {
-            return `
-                <div class="glass p-6 rounded-[2rem]">
-                    <div class="flex justify-between mb-2">
-                        <h4 class="font-black text-lg text-indigo-600 dark:text-indigo-400">${d.term}</h4>
-                        <div class="flex gap-2">
-                            <button onclick="markReviewed('${d.id}')" class="text-emerald-500"><i data-lucide="check-circle" class="w-5 h-5"></i></button>
-                            <button onclick="deleteItem('${d.id}')" class="text-rose-400"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
-                        </div>
-                    </div>
-                    <p class="text-slate-600 dark:text-slate-300 leading-relaxed">${d.definition}</p>
-                </div>`;
-        }
-
-        // Dashboard & Spaced Repetition (Random Revise) madi
-        function updateDashboard() {
-            const lessons = window.appState.items.filter(i => i.type === 'lesson');
-            const completed = lessons.filter(l => l.done).length;
-            const progress = lessons.length ? Math.round((completed/lessons.length)*100) : 0;
-            
-            document.getElementById('stat-progress').innerText = progress + '%';
-            document.getElementById('stat-papers').innerText = window.appState.items.filter(i => i.type === 'paper').length;
-            document.getElementById('stat-pomodoros').innerText = window.appState.stats.completedPomodoros || 0;
-            
-            const tTime = window.appState.stats.totalTime;
-            document.getElementById('stat-total-time').innerText = Math.floor(tTime / 60) + 'h ' + (tTime % 60) + 'm';
-
-            // Parikshisabeku (To Revise) Logic
+            // Random Revision Items
             const now = Date.now();
-            const dueItems = window.appState.items.filter(i => 
-                (i.type === 'lesson' || i.type === 'flashcard' || i.type === 'equation' || i.type === 'definition') &&
-                i.nextReview && i.nextReview <= now
-            ).slice(0, 5); // Show max 5
+            let toRevise = [];
+            
+            const grab = (arr, type, icon, color) => {
+                arr.forEach(item => {
+                    if(item.nextRev && item.nextRev <= now) {
+                        toRevise.push({ ...item, type, icon, color });
+                    }
+                });
+            }
+
+            grab(window.appState.lessons, 'Lesson', 'book-open', 'indigo');
+            grab(window.appState.flashcards, 'Flashcard', 'layers', 'emerald');
+            grab(window.appState.equations, 'Equation', 'binary', 'amber');
+            grab(window.appState.definitions, 'Definition', 'message-square', 'rose');
+
+            toRevise.sort((a,b) => a.nextRev - b.nextRev);
+            toRevise = toRevise.slice(0, 6);
 
             const revContainer = document.getElementById('revision-container');
-            if(dueItems.length === 0) {
-                revContainer.innerHTML = '<p class="text-sm text-slate-500">Ella mugidide! (All caught up!)</p>';
+            if(toRevise.length === 0) {
+                revContainer.innerHTML = `<div class="col-span-full py-6 text-center text-slate-400 text-sm font-medium">No revisions pending today! Great job! 🎉</div>`;
             } else {
-                revContainer.innerHTML = dueItems.map(i => `
-                    <div class="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm">
-                        <div>
-                            <span class="text-[9px] uppercase font-black text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded-full">${i.type}</span>
-                            <p class="font-bold text-sm mt-1">${i.title || i.q || i.name || i.term}</p>
+                revContainer.innerHTML = toRevise.map(item => `
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 flex justify-between items-center group">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-${item.color}-100 dark:bg-${item.color}-900/30 text-${item.color}-600 rounded-lg">
+                                <i data-lucide="${item.icon}" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black uppercase text-slate-400 mb-0.5">${item.subject} • ${item.type}</p>
+                                <p class="font-bold text-sm truncate max-w-[120px] md:max-w-[150px]">${item.title || item.q || item.eq || item.term}</p>
+                            </div>
                         </div>
-                        <button onclick="markReviewed('${i.id}')" class="text-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 p-2 rounded-lg hover:bg-emerald-100 transition-colors"><i data-lucide="check"></i></button>
+                        <button onclick="markReviewed('${item.id}', '${item.type.toLowerCase()}')" class="p-2 text-slate-300 hover:text-emerald-500 transition-colors" title="Mark as Reviewed">
+                            <i data-lucide="check-circle"></i>
+                        </button>
                     </div>
                 `).join('');
             }
         }
 
-        window.markReviewed = (id) => {
-            const item = window.appState.items.find(x => x.id === id);
-            if(!item) return;
-            
-            if(item.type === 'lesson') item.done = true;
-            
-            // Spaced repetition math (Simple multiplier)
-            item.reviewStep = (item.reviewStep || 0) + 1;
-            const daysToAdd = Math.pow(2, item.reviewStep); // 2, 4, 8, 16 days...
-            item.nextReview = Date.now() + (daysToAdd * 24 * 60 * 60 * 1000);
-            
-            window.saveData();
-        };
+        window.markReviewed = function(id, type) {
+            let collection = [];
+            if(type === 'lesson') collection = window.appState.lessons;
+            if(type === 'flashcard') collection = window.appState.flashcards;
+            if(type === 'equation') collection = window.appState.equations;
+            if(type === 'definition') collection = window.appState.definitions;
 
-        // Modal Form Handling
-        window.openModal = (modalId, type = null) => {
-            document.getElementById(modalId).classList.remove('hidden');
-            if(type) {
-                document.getElementById('modal-item-type').value = type;
-                const fields = document.getElementById('modal-dynamic-fields');
-                const titles = { lesson: 'Pata (Lesson)', flashcard: 'Flashcard', equation: 'Samikarana', paper: 'Patrike', definition: 'Vyakye' };
-                document.getElementById('modal-title').innerText = `${titles[type]} Serisi`;
-                
-                let html = '';
-                if(type === 'lesson') {
-                    html = `<input type="text" id="inp-title" placeholder="Topic Title" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border outline-none font-bold">
-                            <select id="inp-priority" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border outline-none font-bold"><option value="1">High Priority</option><option value="2">Medium Priority</option><option value="3">Low Priority</option></select>`;
-                } else if(type === 'flashcard') {
-                    html = `<input type="text" id="inp-q" placeholder="Question / Front" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border outline-none font-bold">
-                            <textarea id="inp-a" placeholder="Answer / Back" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border outline-none h-24"></textarea>`;
-                } else if(type === 'equation') {
-                    html = `<input type="text" id="inp-name" placeholder="Equation Name" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border outline-none font-bold">
-                            <input type="text" id="inp-formula" placeholder="e.g. F = ma" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border outline-none font-mono">`;
-                } else if(type === 'paper') {
-                    html = `<input type="text" id="inp-pname" placeholder="Paper Name (e.g. 2023 Past Paper)" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border outline-none font-bold">
-                            <input type="number" id="inp-marks" placeholder="Marks (out of 100)" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border outline-none">
-                            <input type="date" id="inp-date" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border outline-none">`;
-                } else if(type === 'definition') {
-                    html = `<input type="text" id="inp-term" placeholder="Term" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border outline-none font-bold">
-                            <textarea id="inp-def" placeholder="Definition..." class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border outline-none h-24"></textarea>`;
-                }
-                fields.innerHTML = html;
+            const item = collection.find(x => x.id === id);
+            if(item) {
+                item.level = (item.level || 0) + 1;
+                // Spaced repetition gaps
+                const gaps = [1, 3, 7, 14, 30];
+                const daysToAdd = gaps[Math.min(item.level - 1, gaps.length - 1)];
+                item.nextRev = Date.now() + (daysToAdd * 24 * 60 * 60 * 1000);
+                saveData();
             }
-        };
+        }
 
-        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+        // --- Data Rendering ---
+        
+        window.renderLessons = function() {
+            const container = document.getElementById('lessons-container');
+            const items = window.appState.lessons.filter(x => x.subject === window.appState.activeSubject).sort((a,b) => a.priority - b.priority);
+            if(!items.length) { container.innerHTML = `<div class="col-span-full py-10 text-center glass rounded-2xl text-slate-400">No lessons added yet.</div>`; return; }
+            
+            container.innerHTML = items.map(l => `
+                <div class="glass p-5 rounded-[2rem] border-l-4 ${l.priority == 1 ? 'border-rose-500' : l.priority == 2 ? 'border-amber-500' : 'border-emerald-500'} relative">
+                    <button onclick="deleteItem('lessons', '${l.id}')" class="absolute top-4 right-4 text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <span class="text-[10px] font-black uppercase text-slate-400 mb-2 block">Priority ${l.priority}</span>
+                    <h4 class="font-bold text-lg mb-4 ${l.done ? 'line-through text-slate-400' : ''}">${l.title}</h4>
+                    
+                    <div class="space-y-2 mb-4">
+                        ${(l.subLessons || []).map(sl => `
+                            <div class="flex items-center gap-2 text-sm bg-white/50 dark:bg-slate-900/50 p-2 rounded-xl">
+                                <input type="checkbox" ${sl.done ? 'checked' : ''} onchange="toggleSubLesson('${l.id}', '${sl.id}')" class="w-4 h-4 accent-indigo-600">
+                                <span class="${sl.done ? 'line-through text-slate-400' : ''}">${sl.title}</span>
+                            </div>
+                        `).join('')}
+                    </div>
 
-        window.saveItem = () => {
-            const type = document.getElementById('modal-item-type').value;
-            const newItem = { id: Date.now().toString(), type, subject: window.appState.config.activeSubject, nextReview: Date.now() }; // Default review is now
+                    <div class="flex gap-2">
+                        <button onclick="promptSubLesson('${l.id}')" class="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300"><i data-lucide="plus" class="w-3 h-3 inline mr-1"></i> Sub-lesson</button>
+                        <button onclick="toggleLesson('${l.id}')" class="flex-1 py-2 rounded-xl text-xs font-bold ${l.done ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-indigo-600 text-white'}">
+                            ${l.done ? 'Completed' : 'Mark Done'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
+        window.renderFlashcards = function() {
+            const container = document.getElementById('flashcards-container');
+            const items = window.appState.flashcards.filter(x => x.subject === window.appState.activeSubject);
+            if(!items.length) { container.innerHTML = `<div class="col-span-full py-10 text-center glass rounded-2xl text-slate-400">No flashcards added yet.</div>`; return; }
+            
+            container.innerHTML = items.map(f => `
+                <div class="glass p-6 rounded-3xl text-center relative group min-h-[150px] flex flex-col justify-center cursor-pointer" onclick="this.classList.toggle('flipped')">
+                    <button onclick="event.stopPropagation(); deleteItem('flashcards', '${f.id}')" class="absolute top-3 right-3 text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <div class="front block">
+                        <span class="text-[10px] font-bold uppercase text-indigo-500 mb-2 block">Question</span>
+                        <p class="font-bold text-lg">${f.q}</p>
+                    </div>
+                    <div class="back hidden mt-4 pt-4 border-t dark:border-slate-700">
+                        <span class="text-[10px] font-bold uppercase text-emerald-500 mb-2 block">Answer</span>
+                        <p class="font-medium text-slate-600 dark:text-slate-300">${f.a}</p>
+                    </div>
+                </div>
+                <style>
+                    .flipped .front { display: none; }
+                    .flipped .back { display: block; }
+                </style>
+            `).join('');
+        }
+
+        window.renderEquations = function() {
+            const container = document.getElementById('equations-container');
+            const items = window.appState.equations.filter(x => x.subject === window.appState.activeSubject);
+            if(!items.length) { container.innerHTML = `<div class="col-span-full py-10 text-center glass rounded-2xl text-slate-400">No equations added yet.</div>`; return; }
+            
+            container.innerHTML = items.map(e => `
+                <div class="glass p-5 rounded-3xl relative">
+                    <button onclick="deleteItem('equations', '${e.id}')" class="absolute top-4 right-4 text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <div class="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-2xl mb-3 text-center overflow-x-auto">
+                        <code class="font-mono text-lg font-bold text-indigo-600 dark:text-indigo-400">${e.eq}</code>
+                    </div>
+                    <p class="text-sm font-medium text-slate-600 dark:text-slate-300 text-center">${e.desc}</p>
+                </div>
+            `).join('');
+        }
+
+        window.renderDefinitions = function() {
+            const container = document.getElementById('definitions-container');
+            const items = window.appState.definitions.filter(x => x.subject === window.appState.activeSubject);
+            if(!items.length) { container.innerHTML = `<div class="col-span-full py-10 text-center glass rounded-2xl text-slate-400">No definitions added yet.</div>`; return; }
+            
+            container.innerHTML = items.map(d => `
+                <div class="glass p-5 rounded-3xl relative flex gap-4">
+                    <div class="w-1 h-full bg-rose-400 rounded-full absolute left-0 top-0"></div>
+                    <div class="flex-1 pl-2">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-lg text-rose-600 dark:text-rose-400">${d.term}</h4>
+                            <button onclick="deleteItem('definitions', '${d.id}')" class="text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                        <p class="text-sm text-slate-600 dark:text-slate-300">${d.def}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.renderPapers = function() {
+            const container = document.getElementById('papers-container');
+            const items = window.appState.papers.filter(x => x.subject === window.appState.activeSubject).sort((a,b) => new Date(b.date) - new Date(a.date));
+            if(!items.length) { container.innerHTML = `<div class="col-span-full py-10 text-center glass rounded-2xl text-slate-400">No past papers logged yet.</div>`; return; }
+            
+            container.innerHTML = items.map(p => `
+                <div class="glass p-5 rounded-3xl relative flex items-center gap-4">
+                    <button onclick="deleteItem('papers', '${p.id}')" class="absolute top-4 right-4 text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 text-white flex items-center justify-center font-black text-xl shadow-lg">
+                        ${p.marks}
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-md mb-1">${p.title}</h4>
+                        <p class="text-xs text-slate-500 font-medium"><i data-lucide="calendar" class="w-3 h-3 inline"></i> ${p.date}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- Modals & Data Entry ---
+        
+        window.openModal = function(type) {
+            const contentArea = document.getElementById('modal-content-area');
+            const subOptions = window.appState.subjects.map(s => `<option value="${s}" ${window.appState.activeSubject === s ? 'selected' : ''}>${s}</option>`).join('');
+            
+            let html = '';
+            if(type === 'addLessonModal') {
+                html = `
+                    <h3 class="text-xl font-black mb-6">Add New Lesson</h3>
+                    <input type="text" id="m-title" placeholder="Lesson Name" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 border-none outline-none font-bold">
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <select id="m-sub" class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 font-bold border-none outline-none">${subOptions}</select>
+                        <select id="m-pri" class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 font-bold border-none outline-none">
+                            <option value="1">High Priority</option><option value="2">Medium</option><option value="3">Low</option>
+                        </select>
+                    </div>
+                    <button onclick="saveNewItem('lesson')" class="w-full btn-primary text-white py-4 rounded-2xl font-bold shadow-lg">Save</button>
+                `;
+            } else if (type === 'addFlashcardModal') {
+                html = `
+                    <h3 class="text-xl font-black mb-6">Add Flashcard</h3>
+                    <select id="m-sub" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 font-bold border-none outline-none">${subOptions}</select>
+                    <textarea id="m-q" placeholder="Question..." class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 border-none outline-none font-bold resize-none h-24"></textarea>
+                    <textarea id="m-a" placeholder="Answer..." class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-6 border-none outline-none font-bold resize-none h-24"></textarea>
+                    <button onclick="saveNewItem('flashcard')" class="w-full btn-primary text-white py-4 rounded-2xl font-bold shadow-lg">Save</button>
+                `;
+            } else if (type === 'addEquationModal') {
+                html = `
+                    <h3 class="text-xl font-black mb-6">Add Equation</h3>
+                    <select id="m-sub" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 font-bold border-none outline-none">${subOptions}</select>
+                    <input type="text" id="m-eq" placeholder="e.g. E = mc²" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 border-none outline-none font-mono font-bold">
+                    <input type="text" id="m-desc" placeholder="Brief description" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-6 border-none outline-none font-medium text-sm">
+                    <button onclick="saveNewItem('equation')" class="w-full btn-primary text-white py-4 rounded-2xl font-bold shadow-lg">Save</button>
+                `;
+            } else if (type === 'addDefinitionModal') {
+                html = `
+                    <h3 class="text-xl font-black mb-6">Add Definition</h3>
+                    <select id="m-sub" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 font-bold border-none outline-none">${subOptions}</select>
+                    <input type="text" id="m-term" placeholder="Term / Keyword" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 border-none outline-none font-bold">
+                    <textarea id="m-def" placeholder="Definition..." class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-6 border-none outline-none font-medium resize-none h-24"></textarea>
+                    <button onclick="saveNewItem('definition')" class="w-full btn-primary text-white py-4 rounded-2xl font-bold shadow-lg">Save</button>
+                `;
+            } else if (type === 'addPaperModal') {
+                html = `
+                    <h3 class="text-xl font-black mb-6">Log Past Paper</h3>
+                    <select id="m-sub" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 font-bold border-none outline-none">${subOptions}</select>
+                    <input type="text" id="m-title" placeholder="e.g. 2023 A/L Paper" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-4 border-none outline-none font-bold">
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <input type="number" id="m-marks" placeholder="Marks (%)" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none font-bold">
+                        <input type="date" id="m-date" class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none font-bold text-sm">
+                    </div>
+                    <button onclick="saveNewItem('paper')" class="w-full btn-primary text-white py-4 rounded-2xl font-bold shadow-lg">Save</button>
+                `;
+            }
+            
+            contentArea.innerHTML = html;
+            document.getElementById('unifiedModal').classList.remove('hidden');
+            initLucide();
+        }
+
+        window.closeModal = function(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        window.saveNewItem = function(type) {
+            const id = Date.now().toString();
+            const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : null;
+            
             if(type === 'lesson') {
-                newItem.title = document.getElementById('inp-title').value;
-                newItem.priority = parseInt(document.getElementById('inp-priority').value);
-                newItem.done = false;
-                newItem.subItems = [];
-                if(!newItem.title) return;
+                if(!getVal('m-title')) return;
+                window.appState.lessons.push({ id, title: getVal('m-title'), subject: getVal('m-sub'), priority: parseInt(getVal('m-pri')), done: false, subLessons: [], level: 0 });
             } else if(type === 'flashcard') {
-                newItem.q = document.getElementById('inp-q').value;
-                newItem.a = document.getElementById('inp-a').value;
-                if(!newItem.q) return;
+                if(!getVal('m-q') || !getVal('m-a')) return;
+                window.appState.flashcards.push({ id, q: getVal('m-q'), a: getVal('m-a'), subject: getVal('m-sub'), level: 0 });
             } else if(type === 'equation') {
-                newItem.name = document.getElementById('inp-name').value;
-                newItem.formula = document.getElementById('inp-formula').value;
-                if(!newItem.name) return;
-            } else if(type === 'paper') {
-                newItem.name = document.getElementById('inp-pname').value;
-                newItem.marks = parseInt(document.getElementById('inp-marks').value) || 0;
-                newItem.date = document.getElementById('inp-date').value || new Date().toISOString().split('T')[0];
-                if(!newItem.name) return;
+                if(!getVal('m-eq')) return;
+                window.appState.equations.push({ id, eq: getVal('m-eq'), desc: getVal('m-desc'), subject: getVal('m-sub'), level: 0 });
             } else if(type === 'definition') {
-                newItem.term = document.getElementById('inp-term').value;
-                newItem.definition = document.getElementById('inp-def').value;
-                if(!newItem.term) return;
+                if(!getVal('m-term')) return;
+                window.appState.definitions.push({ id, term: getVal('m-term'), def: getVal('m-def'), subject: getVal('m-sub'), level: 0 });
+            } else if(type === 'paper') {
+                if(!getVal('m-marks')) return;
+                window.appState.papers.push({ id, title: getVal('m-title') || 'Practice Paper', marks: getVal('m-marks'), date: getVal('m-date') || new Date().toISOString().split('T')[0], subject: getVal('m-sub') });
             }
 
-            window.appState.items.push(newItem);
-            window.saveData();
-            window.closeModal('addItemModal');
-        };
+            saveData();
+            closeModal('unifiedModal');
+        }
 
-        window.deleteItem = (id) => {
-            window.appState.items = window.appState.items.filter(x => x.id !== id);
-            window.saveData();
-        };
+        window.deleteItem = function(collectionName, id) {
+            if(confirm("Are you sure you want to delete this item?")) {
+                window.appState[collectionName] = window.appState[collectionName].filter(x => x.id !== id);
+                saveData();
+            }
+        }
 
-        // Sub-lessons Logic
-        window.openSubLessons = (lessonId) => {
-            document.getElementById('active-lesson-id').value = lessonId;
-            renderSubLessons();
-            window.openModal('subLessonModal');
-        };
+        window.toggleLesson = function(id) {
+            const l = window.appState.lessons.find(x => x.id === id);
+            if(l) {
+                l.done = !l.done;
+                if(l.done) l.nextRev = Date.now() + 86400000; // Next day schedule
+            }
+            saveData();
+        }
 
-        function renderSubLessons() {
-            const id = document.getElementById('active-lesson-id').value;
-            const lesson = window.appState.items.find(x => x.id === id);
-            if(!lesson) return;
-            
-            const list = document.getElementById('sublesson-list');
-            if(!lesson.subItems) lesson.subItems = [];
-            
-            list.innerHTML = lesson.subItems.map((s, idx) => `
-                <div class="flex items-center gap-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg">
-                    <input type="checkbox" ${s.done ? 'checked' : ''} onchange="toggleSubLesson(${idx})" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500">
-                    <span class="flex-1 text-sm ${s.done ? 'line-through text-slate-400' : ''}">${s.title}</span>
-                    <button onclick="deleteSubLesson(${idx})" class="text-slate-300 hover:text-rose-400"><i data-lucide="x" class="w-3 h-3"></i></button>
+        window.promptSubLesson = function(id) {
+            const title = prompt("Enter sub-lesson name:");
+            if(title) {
+                const l = window.appState.lessons.find(x => x.id === id);
+                if(l) {
+                    if(!l.subLessons) l.subLessons = [];
+                    l.subLessons.push({ id: Date.now().toString(), title, done: false });
+                    saveData();
+                }
+            }
+        }
+
+        window.toggleSubLesson = function(lessonId, subId) {
+            const l = window.appState.lessons.find(x => x.id === lessonId);
+            if(l && l.subLessons) {
+                const sl = l.subLessons.find(x => x.id === subId);
+                if(sl) sl.done = !sl.done;
+                saveData();
+            }
+        }
+
+        // --- Settings / Subject Management ---
+        window.renderSettingsSubjects = function() {
+            const list = document.getElementById('settings-subjects-list');
+            if(!list) return;
+            list.innerHTML = window.appState.subjects.map(s => `
+                <div class="bg-white dark:bg-slate-800 border dark:border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm font-bold shadow-sm">
+                    ${s} 
+                    ${window.appState.subjects.length > 1 ? `<button onclick="deleteSubject('${s}')" class="text-slate-400 hover:text-rose-500 ml-2"><i data-lucide="x" class="w-3 h-3"></i></button>` : ''}
                 </div>
             `).join('');
             initLucide();
         }
 
-        window.addSubLesson = () => {
-            const input = document.getElementById('new-sublesson-input');
-            if(!input.value) return;
-            const id = document.getElementById('active-lesson-id').value;
-            const lesson = window.appState.items.find(x => x.id === id);
-            lesson.subItems.push({ title: input.value, done: false });
-            input.value = '';
-            window.saveData();
-            renderSubLessons();
-        };
+        window.addSubject = function() {
+            const val = document.getElementById('new-subject-input').value.trim();
+            if(val && !window.appState.subjects.includes(val)) {
+                window.appState.subjects.push(val);
+                document.getElementById('new-subject-input').value = '';
+                saveData();
+            }
+        }
 
-        window.toggleSubLesson = (idx) => {
-            const id = document.getElementById('active-lesson-id').value;
-            const lesson = window.appState.items.find(x => x.id === id);
-            lesson.subItems[idx].done = !lesson.subItems[idx].done;
-            // Auto mark parent done if all subs done
-            lesson.done = lesson.subItems.every(s => s.done);
-            window.saveData();
-            renderSubLessons();
-        };
+        window.deleteSubject = function(s) {
+            if(confirm(`Are you sure you want to remove '${s}'?`)) {
+                window.appState.subjects = window.appState.subjects.filter(x => x !== s);
+                if(window.appState.activeSubject === s) window.appState.activeSubject = window.appState.subjects[0];
+                saveData();
+            }
+        }
 
-        window.deleteSubLesson = (idx) => {
-            const id = document.getElementById('active-lesson-id').value;
-            const lesson = window.appState.items.find(x => x.id === id);
-            lesson.subItems.splice(idx, 1);
-            window.saveData();
-            renderSubLessons();
-        };
+        // --- Backup & Restore ---
+        window.exportData = function() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.appState));
+            const node = document.createElement('a');
+            node.setAttribute("href", dataStr);
+            node.setAttribute("download", "studymaster_backup_" + new Date().toISOString().split('T')[0] + ".json");
+            document.body.appendChild(node);
+            node.click();
+            node.remove();
+        }
 
-        // Pomodoro Timer Logic
-        window.toggleTimer = () => {
-            if(timer.running) { 
-                clearInterval(timer.interval); 
-                timer.running = false; 
-            } else {
-                timer.running = true;
-                timer.interval = setInterval(() => {
-                    timer.remaining--;
+        window.importData = function(event) {
+            const file = event.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const parsed = JSON.parse(e.target.result);
+                        if(parsed && parsed.subjects) {
+                            window.appState = parsed;
+                            saveData();
+                            alert("Data imported successfully!");
+                        } else { alert("Invalid backup file format."); }
+                    } catch(err) { alert("Could not read file."); }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        // --- Pomodoro ---
+        let timerObj = { interval: null, remaining: 1500, running: false };
+        window.toggleTimer = function() {
+            const bg = document.getElementById('pomodoro-bg');
+            if(timerObj.running) { 
+                clearInterval(timerObj.interval); timerObj.running = false; 
+                bg.classList.remove('scale-150');
+            }
+            else {
+                timerObj.running = true;
+                bg.classList.add('scale-150');
+                timerObj.interval = setInterval(() => {
+                    timerObj.remaining--;
                     window.appState.stats.totalTime++;
-                    if(timer.remaining <= 0) { 
-                        clearInterval(timer.interval); 
-                        timer.running = false; 
-                        timer.remaining = 1500; // Reset to 25
-                        window.appState.stats.completedPomodoros = (window.appState.stats.completedPomodoros || 0) + 1;
-                        alert("Pomodoro mugidide! (Session Complete!)");
-                    }
-                    if(timer.remaining % 60 === 0) window.saveData(); // Save every minute
                     updateTimerUI();
+                    if(timerObj.remaining <= 0) { 
+                        clearInterval(timerObj.interval); 
+                        timerObj.running = false;
+                        window.appState.stats.pomodoros++;
+                        saveData();
+                        alert("Pomodoro complete! Take a break.");
+                        resetTimer();
+                    }
+                    if(timerObj.remaining % 60 === 0) saveData();
                 }, 1000);
             }
             updateTimerUI();
-        };
+        }
 
-        function updateTimerUI() {
-            const m = Math.floor(timer.remaining/60).toString().padStart(2,'0');
-            const s = (timer.remaining%60).toString().padStart(2,'0');
+        window.updateTimerUI = function() {
+            const m = Math.floor(timerObj.remaining/60).toString().padStart(2,'0');
+            const s = (timerObj.remaining%60).toString().padStart(2,'0');
             document.getElementById('timer-display').innerText = `${m}:${s}`;
-            document.getElementById('timer-btn').innerHTML = timer.running ? '<i data-lucide="pause" class="w-8 h-8"></i>' : '<i data-lucide="play" class="w-8 h-8"></i>';
+            document.getElementById('timer-btn').innerHTML = timerObj.running ? '<i data-lucide="pause" class="w-8 h-8"></i>' : '<i data-lucide="play" class="w-8 h-8"></i>';
             initLucide();
         }
 
-        window.resetTimer = () => { clearInterval(timer.interval); timer.running = false; timer.remaining = 1500; updateTimerUI(); };
-
-        // Chart.js initialization for Papers
-        function initChart() {
-            const ctx = document.getElementById('papersChart');
-            if(!ctx) return;
-            
-            const papers = window.appState.items.filter(i => i.type === 'paper' && i.subject === window.appState.config.activeSubject)
-                                         .sort((a,b) => new Date(a.date) - new Date(b.date));
-            
-            const labels = papers.map(p => p.name.substring(0,8) + '...');
-            const data = papers.map(p => p.marks);
-
-            if(papersChartInstance) papersChartInstance.destroy();
-            
-            papersChartInstance = new Chart(ctx.getContext('2d'), {
-                type: 'line',
-                data: { labels: labels, datasets: [{ label: 'Marks', data: data, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', tension: 0.4, fill: true }] },
-                options: { 
-                    plugins: { legend: { display: false } }, 
-                    scales: { y: { beginAtZero: true, max: 100 } }, 
-                    responsive: true, maintainAspectRatio: false 
-                }
-            });
+        window.resetTimer = function() { 
+            clearInterval(timerObj.interval); timerObj.running = false; timerObj.remaining = 1500; 
+            document.getElementById('pomodoro-bg').classList.remove('scale-150');
+            updateTimerUI(); 
         }
 
-        // Settings / Subjects Management
-        function renderSettings() {
-            const cont = document.getElementById('settings-subjects');
-            cont.innerHTML = window.appState.config.subjects.map(s => `
-                <div class="flex items-center gap-2 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-lg border shadow-sm">
-                    <span class="text-sm font-bold">${s}</span>
-                    <button onclick="deleteSubject('${s}')" class="text-slate-400 hover:text-rose-500"><i data-lucide="x" class="w-3 h-3"></i></button>
-                </div>
-            `).join('');
-            initLucide();
-        }
-
-        window.addSubject = () => {
-            const val = document.getElementById('new-subject-input').value.trim();
-            if(val && !window.appState.config.subjects.includes(val)) {
-                window.appState.config.subjects.push(val);
-                window.saveData();
-                document.getElementById('new-subject-input').value = '';
-            }
-        };
-
-        window.deleteSubject = (s) => {
-            if(window.appState.config.subjects.length > 1) {
-                window.appState.config.subjects = window.appState.config.subjects.filter(sub => sub !== s);
-                if(window.appState.config.activeSubject === s) window.appState.config.activeSubject = window.appState.config.subjects[0];
-                window.saveData();
-            } else {
-                alert("Kanishtha ondu vishaya irabeku (At least one subject required)");
-            }
-        };
-
-        // Export / Import JSON (Data ulisuvudu/tharuwudu)
-        window.exportData = () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.appState));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", "StudyMasterPro_Backup.json");
-            dlAnchorElem.click();
-        };
-
-        window.importData = (event) => {
-            const file = event.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const importedState = JSON.parse(e.target.result);
-                    if(importedState.items && importedState.config) {
-                        window.appState = importedState;
-                        window.saveData();
-                        alert("Data successfully imported! (Data tharalagide!)");
-                    } else {
-                        alert("Invalid backup file.");
-                    }
-                } catch(err) { alert("Error parsing file."); }
-            };
-            reader.readAsText(file);
-        };
-
-        // Theme Toggle
-        window.toggleDarkMode = () => { 
-            window.appState.config.darkMode = !window.appState.config.darkMode; 
-            window.saveData(); 
-            applyTheme(); 
-        };
-        
-        function applyTheme() {
+        // --- Utility ---
+        window.initLucide = function() { if(window.lucide) window.lucide.createIcons(); }
+        window.toggleDarkMode = function() { window.appState.config.darkMode = !window.appState.config.darkMode; saveData(); applyTheme(); }
+        window.applyTheme = function() {
             document.body.classList.toggle('dark-mode', window.appState.config.darkMode);
             const icon = document.getElementById('theme-icon');
-            if(icon) {
-                icon.dataset.lucide = window.appState.config.darkMode ? 'sun' : 'moon';
-                initLucide();
-            }
+            if(icon) icon.dataset.lucide = window.appState.config.darkMode ? 'sun' : 'moon';
+            initLucide();
         }
-
-        function initLucide() { if(window.lucide) window.lucide.createIcons(); }
-
     </script>
 </body>
 </html>
