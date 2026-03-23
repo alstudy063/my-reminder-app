@@ -361,11 +361,10 @@
 
     <!-- Firebase SDK Setup -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+      import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+      import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+        
         // State Structure
         window.appState = {
             subjects: ['Biology', 'Chemistry', 'Physics'],
@@ -411,9 +410,8 @@
                 };
 
                 const app = initializeApp(firebaseConfig);
-                window.db = getDatabase(app, "https://studymaster-919ba-default-rtdb.firebaseio.com/"); 
-                window.auth = getAuth(app);
-                console.log("Firebase initialized with Realtime Database");
+                  window.auth = getAuth(app);
+                  window.db = getDatabase(app, "https://studymaster-919ba-default-rtdb.firebaseio.com/");
                 
                 // Initialize analytics safely
                 try {
@@ -499,21 +497,27 @@
             }
         }
 
-        window.setupCloudSync = function() {
-            if(!window.currentUser || !window.db) return;
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'study-master';
-            
-            // Path structure ensuring proper data scoping
-            const docRef = doc(window.db, 'artifacts', appId, 'users', window.currentUser.uid, 'appData', 'mainState');
-            
-            setDoc(docRef, window.appState, {merge: true}).catch(e => console.error("Initial write failed", e));
+      // මේක ඒ වෙනුවට දාන්න
+window.setupCloudSync = function() {
+    if(!window.currentUser || !window.db) return;
 
-            onSnapshot(docRef, (snap) => {
-                if(snap.exists()) {
-                    window.appState = {...window.appState, ...snap.data()};
-                    localStorage.setItem('study_master_pro_data', JSON.stringify(window.appState));
-                    renderUI();
-                }
+    // Realtime Database Path
+    const userRef = ref(window.db, 'users/' + window.currentUser.uid);
+    
+    // Cloud එකට දත්ත යැවීම
+    set(userRef, window.appState).catch(e => console.error("Sync failed", e));
+
+    // Cloud එකෙන් දත්ත කියවීම
+    onValue(userRef, (snapshot) => {
+        const data = snapshot.val();
+        if(data) {
+            window.appState = data;
+            localStorage.setItem('study_master_pro_data', JSON.stringify(window.appState));
+            // UI එක update කරන function එක (ඔයාගේ code එකේ නම බලන්න)
+            if(typeof renderCurrentPage === 'function') renderCurrentPage();
+        }
+    });
+};
             }, (err) => console.error("Sync Error", err));
         }
 
@@ -550,13 +554,11 @@
             initLucide();
         }
 
-        window.saveData = function() {
-            localStorage.setItem('study_master_pro_data', JSON.stringify(window.appState));
-            if(window.currentUser && !window.currentUser.isAnonymous && window.db) {
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'study-master';
-                const docRef = doc(window.db, 'artifacts', appId, 'users', window.currentUser.uid, 'appData', 'mainState');
-                setDoc(docRef, window.appState, {merge: true});
-            }
+       window.saveData = function() {
+    if(!window.currentUser || !window.db) return;
+    const userRef = ref(window.db, 'users/' + window.currentUser.uid);
+    set(userRef, window.appState).catch(e => console.error("Save failed", e));
+}
             renderUI();
         }
 
