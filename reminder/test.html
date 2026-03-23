@@ -379,15 +379,15 @@
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Your specific Firebase configuration
-        const firebaseConfig = {
-  apiKey: "AIzaSyD6uwDAEFAbGTBY4-hckibbvscwXYW0CXY",
-  authDomain: "reminderapp-d84e9.firebaseapp.com",
-  databaseURL: "https://reminderapp-d84e9-default-rtdb.firebaseio.com",
-  projectId: "reminderapp-d84e9",
-  storageBucket: "reminderapp-d84e9.firebasestorage.app",
-  messagingSenderId: "312145339940",
-  appId: "1:312145339940:web:447a3e5f4e54e0fd221ab1"
-};
+       const firebaseConfig = {
+                 apiKey: "AIzaSyD6uwDAEFAbGTBY4-hckibbvscwXYW0CXY", // මේ key එක වැඩ කරන්නේ නැත්නම් අලුත් එකක් දාන්න
+                 authDomain: "reminderapp-d84e9.firebaseapp.com",
+                 databaseURL: "https://reminderapp-d84e9-default-rtdb.firebaseio.com",
+                 projectId: "reminderapp-d84e9",
+                 storageBucket: "reminderapp-d84e9.firebasestorage.app",
+                 messagingSenderId: "312145339940",
+                 appId: "1:312145339940:web:447a3e5f4e54e0fd221ab1"
+        };
         
         // State Structure
         window.appState = {
@@ -422,10 +422,11 @@
                 // If running in a protected canvas environment, prefer injected config so auth doesn't break, 
                 // but default back to user's config if it's exported externally.
                 try {
-                    const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-                    finalConfig = (envConfig && envConfig.apiKey) ? envConfig : userConfig;
-                } catch(e) { finalConfig = userConfig; }
+                     const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+                    finalConfig = (envConfig && envConfig.apiKey) ? envConfig : firebaseConfig; // මෙතන firebaseConfig කියලා දාන්න
+                 } catch(e) { finalConfig = firebaseConfig; }
 
+                
                 const app = initializeApp(finalConfig);
                 window.auth = getAuth(app);
                 window.db = getFirestore(app);
