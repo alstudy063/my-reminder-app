@@ -103,6 +103,11 @@
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Smooth fade for the sync indicator */
+        .sync-fade { transition: opacity 0.3s ease, transform 0.3s ease; }
+        .sync-hidden { opacity: 0; transform: scale(0.9); pointer-events: none; }
+        .sync-visible { opacity: 1; transform: scale(1); }
     </style>
 </head>
 <body class="transition-colors duration-300">
@@ -187,7 +192,14 @@
                 <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight">Welcome Back! 👋</h2>
                 <p class="text-slate-500 font-medium mt-1 text-sm md:text-base">Ready for your next study session?</p>
             </div>
-            <div class="flex items-center gap-4">
+            
+            <div class="flex items-center gap-3">
+                <!-- Syncing Indicator (Real-time feedback) -->
+                <div id="sync-indicator" class="sync-fade sync-hidden flex items-center gap-2 bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 px-3 py-1.5 rounded-xl text-xs font-bold border border-indigo-100 dark:border-indigo-800/50 shadow-sm">
+                    <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+                    <span class="hidden sm:inline">Syncing...</span>
+                </div>
+
                 <button onclick="toggleDarkMode()" class="p-3 rounded-2xl glass hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm">
                     <i data-lucide="moon" id="theme-icon" class="w-5 h-5"></i>
                 </button>
@@ -376,7 +388,8 @@
             definitions: [], 
             papers: [], 
             stats: { totalTime: 0, pomodoros: 0, firstLoad: true },
-            config: { darkMode: false }
+            config: { darkMode: false },
+            lastUpdated: Date.now()
         };
 
         window.db = null;
@@ -384,7 +397,23 @@
         window.currentUser = null;
         window.analytics = null;
 
-        // Load Local state first
+        // UI Controls for Sync Spinner
+        window.showSyncSpinner = function() {
+            const el = document.getElementById('sync-indicator');
+            if(el) {
+                el.classList.remove('sync-hidden');
+                el.classList.add('sync-visible');
+            }
+        }
+        window.hideSyncSpinner = function() {
+            const el = document.getElementById('sync-indicator');
+            if(el) {
+                el.classList.remove('sync-visible');
+                el.classList.add('sync-hidden');
+            }
+        }
+
+        // Load Local state first to keep it fast
         const saved = localStorage.getItem('study_master_pro_data');
         if(saved) {
             let parsed = JSON.parse(saved);
@@ -496,24 +525,62 @@
             }
         }
 
-        // --- CLOUD SYNC FIXED ---
+        // --- REAL-TIME CLOUD SYNC LOGIC ---
         window.setupCloudSync = function() {
             if(!window.currentUser || !window.db) return;
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'study-master';
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'study-master-prod';
             const docRef = doc(window.db, 'artifacts', appId, 'users', window.currentUser.uid, 'sync', 'mainState');
             
-            // Listen to the cloud document First! Do not immediately overwrite it with local data!
+            window.showSyncSpinner();
+
+            // Real-time listener
             onSnapshot(docRef, (snap) => {
+                window.hideSyncSpinner();
+
                 if(snap.exists()) {
-                    // Cloud has data. Bring it to the device!
-                    window.appState = snap.data(); // Replace local entirely to ensure deleted items are also synced properly
-                    localStorage.setItem('study_master_pro_data', JSON.stringify(window.appState));
-                    renderUI();
+                    // Check if this update came from ANOTHER device. 
+                    // `hasPendingWrites` means we are the ones who just saved it locally, so ignore it.
+                    if (!snap.metadata.hasPendingWrites) {
+                        const cloudData = snap.data();
+                        
+                        // Overwrite local memory with the fresh cloud data
+                        window.appState = cloudData;
+                        localStorage.setItem('study_master_pro_data', JSON.stringify(window.appState));
+                        
+                        // Re-render instantly so changes appear before your eyes
+                        renderUI();
+                    }
                 } else {
-                    // Cloud is empty. This is the first time the user synced from this account. Push local data!
+                    // Cloud is empty (First login ever). Push the local data.
                     setDoc(docRef, window.appState).catch(e => console.error("Initial write failed", e));
                 }
-            }, (err) => console.error("Sync Error", err));
+            }, (err) => {
+                console.error("Sync Error", err);
+                window.hideSyncSpinner();
+            });
+        }
+
+        // The save function is now asynchronous to handle the visual spinner appropriately
+        window.saveData = async function() {
+            window.appState.lastUpdated = Date.now();
+            
+            // 1. Save locally instantly for a snappy UI feel
+            localStorage.setItem('study_master_pro_data', JSON.stringify(window.appState));
+            renderUI();
+            
+            // 2. Push to Cloud silently in the background with spinner
+            if(window.currentUser && !window.currentUser.isAnonymous && window.db) {
+                window.showSyncSpinner();
+                try {
+                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'study-master-prod';
+                    const docRef = doc(window.db, 'artifacts', appId, 'users', window.currentUser.uid, 'sync', 'mainState');
+                    await setDoc(docRef, window.appState);
+                } catch(e) {
+                    console.error("Save failed: ", e);
+                } finally {
+                    window.hideSyncSpinner();
+                }
+            }
         }
 
         // --- Core UI Functions ---
@@ -547,19 +614,6 @@
             renderPapers();
             renderSettingsSubjects();
             initLucide();
-        }
-
-        window.saveData = function() {
-            // Save Locally First
-            localStorage.setItem('study_master_pro_data', JSON.stringify(window.appState));
-            
-            // Push to Cloud if Logged In
-            if(window.currentUser && !window.currentUser.isAnonymous && window.db) {
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'study-master';
-                const docRef = doc(window.db, 'artifacts', appId, 'users', window.currentUser.uid, 'sync', 'mainState');
-                setDoc(docRef, window.appState);
-            }
-            renderUI();
         }
 
         window.filterBySubject = function(sub) {
