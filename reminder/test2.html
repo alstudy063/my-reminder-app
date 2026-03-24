@@ -10,7 +10,6 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
     
-    /* Theme Variables */
     :root {
       --bg-primary: #f5f7fa;
       --bg-secondary: #ffffff;
@@ -19,6 +18,8 @@
       --card-bg: rgba(255, 255, 255, 0.75);
       --border-color: rgba(0, 0, 0, 0.08);
       --glass-blur: blur(12px);
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
     }
     
     body.dark {
@@ -34,11 +35,10 @@
       background: var(--bg-primary);
       color: var(--text-primary);
       transition: all 0.3s ease;
+      font-size: var(--font-size, 16px);
     }
     
     .app-container { display: flex; min-height: 100vh; }
-    
-    /* Sidebar Desktop */
     .sidebar {
       width: 280px;
       background: var(--card-bg);
@@ -52,19 +52,16 @@
       flex-direction: column;
       gap: 2rem;
     }
-    
     .logo {
       font-size: 1.7rem;
       font-weight: 800;
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
       padding-left: 0.5rem;
     }
-    
     .nav-links { display: flex; flex-direction: column; gap: 0.5rem; }
-    
     .nav-item {
       display: flex;
       align-items: center;
@@ -76,17 +73,14 @@
       transition: all 0.2s;
       cursor: pointer;
     }
-    
     .nav-item i { width: 24px; font-size: 1.2rem; }
     .nav-item.active {
       background: var(--bg-secondary);
-      color: #3b82f6;
+      color: var(--accent);
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      border-left: 3px solid #3b82f6;
+      border-left: 3px solid var(--accent);
     }
-    
     .main-content { flex: 1; padding: 1.8rem 2rem; overflow-y: auto; }
-    
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -95,9 +89,8 @@
       flex-wrap: wrap;
       gap: 1rem;
     }
-    
     .random-insight-bar {
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
       color: white;
       padding: 0.75rem 1.5rem;
       border-radius: 60px;
@@ -107,7 +100,6 @@
       flex: 1;
       text-align: center;
     }
-    
     .sync-indicator {
       display: flex;
       align-items: center;
@@ -119,18 +111,15 @@
       font-size: 0.8rem;
       font-weight: 500;
     }
-    
     .spinner {
       width: 18px;
       height: 18px;
       border: 2px solid var(--border-color);
-      border-top: 2px solid #3b82f6;
+      border-top: 2px solid var(--accent);
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
     }
-    
     @keyframes spin { 100% { transform: rotate(360deg); } }
-    
     .glass-card {
       background: var(--card-bg);
       backdrop-filter: var(--glass-blur);
@@ -140,24 +129,36 @@
       padding: 1.5rem;
       margin-bottom: 1.5rem;
     }
-    
     .priority-high { border-left: 4px solid #ef4444; }
     .priority-medium { border-left: 4px solid #f59e0b; }
     .priority-low { border-left: 4px solid #10b981; }
-    
     .btn-icon {
       background: var(--bg-secondary);
       color: var(--text-primary);
       border: 1px solid var(--border-color);
-      padding: 8px 16px;
+      padding: 6px 14px;
       border-radius: 40px;
       cursor: pointer;
       font-weight: 500;
+      font-size: 0.85rem;
       transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-    
     .btn-icon:hover { transform: translateY(-1px); filter: brightness(0.95); }
-    
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      border: none;
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+      border: none;
+    }
+    .btn-danger:hover { background: #dc2626; }
     .mobile-bottom-nav {
       display: none;
       position: fixed;
@@ -167,27 +168,75 @@
       background: var(--card-bg);
       backdrop-filter: var(--glass-blur);
       border-top: 1px solid var(--border-color);
-      padding: 0.6rem 1rem;
+      padding: 0.8rem 1rem;
       justify-content: space-around;
       z-index: 100;
+      min-height: 70px;
     }
-    
     .mobile-nav-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      font-size: 0.7rem;
+      font-size: 0.8rem;
       color: var(--text-secondary);
-      gap: 4px;
+      gap: 6px;
+      cursor: pointer;
+      flex: 1;
+      text-align: center;
+    }
+    .mobile-nav-item i { font-size: 1.4rem; }
+    .mobile-nav-item span { font-size: 0.75rem; font-weight: 500; }
+    .mobile-nav-item.active { color: var(--accent); }
+    .bottom-sheet-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .bottom-sheet {
+      background: var(--bg-secondary);
+      border-radius: 28px 28px 0 0;
+      width: 100%;
+      max-width: 500px;
+      padding: 1.5rem 1rem 2rem;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    }
+    .bottom-sheet.show { transform: translateY(0); }
+    .bottom-sheet-header { font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+    .bottom-sheet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .sheet-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 20px;
+      background: var(--card-bg);
       cursor: pointer;
     }
-    
+    .sheet-item i { font-size: 1.5rem; }
+    .sheet-item.active { background: var(--accent); color: white; }
     @media (max-width: 768px) {
       .sidebar { display: none; }
       .mobile-bottom-nav { display: flex; }
-      .main-content { padding: 1rem 1rem 5rem 1rem; }
+      .main-content { padding: 1rem 1rem calc(70px + 1rem) 1rem; }
+      .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 0.8rem; }
+      .add-section-header { display: flex; }
+      .add-section-content { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+      .add-section-content.expanded { max-height: 500px; margin-top: 1rem; }
     }
-    
+    @media (min-width: 769px) {
+      .add-section-header { display: none; }
+      .add-section-content { max-height: none !important; overflow: visible !important; display: block !important; }
+    }
     .item-card {
       background: var(--bg-secondary);
       border-radius: 20px;
@@ -196,73 +245,186 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      transition: all 0.2s;
     }
-    
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; }
     .stat-card { background: var(--bg-secondary); border-radius: 20px; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.2s; }
-    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    
     .flex-row { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
-    
     input, textarea, select {
       background: var(--bg-secondary);
       color: var(--text-primary);
       border: 1px solid var(--border-color);
-      border-radius: 24px;
-      padding: 10px 16px;
+      border-radius: 1rem;
+      padding: 8px 14px;
       outline: none;
       font-size: 0.9rem;
     }
-    
-    .subject-tag {
-      background: #3b82f6;
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+    }
+    .subject-tag, .subject-pill {
+      background: var(--accent);
       color: white;
-      padding: 6px 14px;
+      padding: 4px 10px;
       border-radius: 40px;
-      font-size: 0.85rem;
-      cursor: pointer;
+      font-size: 0.8rem;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
-    
-    .done-btn {
-      background: #10b981;
-      color: white;
-      border: none;
-      padding: 4px 12px;
-      border-radius: 20px;
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .badge-high { background: #ef4444; color: white; }
+    .badge-medium { background: #f59e0b; color: white; }
+    .badge-low { background: #10b981; color: white; }
+    .timer-container {
+      position: relative;
+      width: 280px;
+      margin: 0 auto;
+      transition: all 0.3s ease;
+    }
+    .timer-container.active-focus { filter: drop-shadow(0 0 15px rgba(59,130,246,0.3)); animation: pulse 2s infinite; }
+    .timer-container.active-short { filter: drop-shadow(0 0 15px rgba(16,185,129,0.3)); animation: pulse 2s infinite; }
+    .timer-container.active-long { filter: drop-shadow(0 0 15px rgba(139,92,246,0.3)); animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+    .timer-ring-svg { transform: rotate(-90deg); width: 100%; height: auto; }
+    .timer-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5rem; font-weight: 700; text-align: center; white-space: nowrap; }
+    .mode-buttons { display: flex; gap: 0.5rem; justify-content: center; margin: 1rem 0; }
+    .mode-btn { padding: 6px 16px; border-radius: 40px; background: var(--bg-secondary); border: 1px solid var(--border-color); cursor: pointer; font-weight: 500; font-size: 0.85rem; }
+    .mode-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+    .duration-input { width: 70px; text-align: center; }
+    .notification-toast { position: fixed; bottom: 20px; right: 20px; background: var(--accent); color: white; padding: 12px 24px; border-radius: 60px; font-weight: 500; backdrop-filter: blur(8px); z-index: 1000; animation: slideIn 0.3s ease, fadeOut 0.5s ease 3s forwards; pointer-events: none; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+    .history-timeline { max-height: 300px; overflow-y: auto; }
+    .history-item { display: flex; justify-content: space-between; padding: 0.75rem; border-bottom: 1px solid var(--border-color); }
+    .study-mode-card { flex: 1; background: var(--bg-secondary); border-radius: 20px; padding: 0.75rem 0.5rem; text-align: center; cursor: pointer; transition: all 0.2s; border: 1px solid var(--border-color); }
+    .study-mode-card i { font-size: 1.2rem; }
+    .study-mode-card h4 { font-size: 0.9rem; margin: 0.25rem 0; }
+    .study-mode-card p { font-size: 0.7rem; opacity: 0.8; }
+    .essay-preview { max-height: 80px; overflow-y: auto; line-height: 1.4; font-size: 0.85rem; }
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+    .settings-card {
+      background: var(--card-bg);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-color);
+      border-radius: 2rem;
+      padding: 1.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .settings-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+    }
+    .settings-card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .settings-card h3 i { color: var(--accent); }
+    .profile-hero {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--accent);
+    }
+    .profile-info h2 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+    .profile-info p { color: var(--text-secondary); }
+    .sync-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--bg-secondary);
+      padding: 0.25rem 0.75rem;
+      border-radius: 40px;
+      font-size: 0.75rem;
+    }
+    .control-group { margin-bottom: 1rem; }
+    .control-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+      color: var(--text-secondary);
+    }
+    input[type="range"] {
+      padding: 0;
+      -webkit-appearance: none;
+      background: transparent;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 4px;
+      background: var(--border-color);
+      border-radius: 2px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-top: -6px;
       cursor: pointer;
+    }
+    .color-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid var(--border-color);
+      transition: transform 0.2s;
+    }
+    .color-circle:hover { transform: scale(1.05); }
+    .data-buttons {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    @media (max-width: 768px) {
+      .settings-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
     }
   </style>
 </head>
 <body>
 <div class="app-container">
-  <aside class="sidebar">
-    <div class="logo">✨ AL Master Flow</div>
-    <div class="nav-links" id="navLinks"></div>
-  </aside>
+  <aside class="sidebar"><div class="logo">✨ AL Master Flow</div><div class="nav-links" id="navLinks"></div></aside>
   <main class="main-content">
     <div class="top-bar">
-      <div class="random-insight-bar" id="randomInsightBar">
-        <i class="fas fa-lightbulb"></i> <span id="randomInsightText">Click for random insight!</span>
-      </div>
-      <div class="sync-indicator">
-        <i class="fas fa-cloud-upload-alt"></i> 
-        <span id="syncText">Ready</span>
-        <div id="syncSpinner" style="display:none;" class="spinner"></div>
-      </div>
+      <div class="random-insight-bar" id="randomInsightBar"><i class="fas fa-lightbulb"></i> <span id="randomInsightText">Click for random insight!</span></div>
+      <div class="sync-indicator"><i class="fas fa-cloud-upload-alt"></i> <span id="syncText">Ready</span><div id="syncSpinner" style="display:none;" class="spinner"></div></div>
     </div>
     <div id="tabContent"></div>
   </main>
 </div>
 <div class="mobile-bottom-nav" id="mobileNav"></div>
+<div id="bottomSheetOverlay" class="bottom-sheet-overlay"><div class="bottom-sheet" id="bottomSheet"><div class="bottom-sheet-header">More</div><div class="bottom-sheet-grid" id="sheetItems"></div></div></div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getDatabase, ref, set, get, child, push, remove, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
   
   const firebaseConfig = {
     apiKey: "AIzaSyA9DLfAHTUUGxCPn2j_k6godoTEopzaFAU",
@@ -273,7 +435,6 @@
     messagingSenderId: "426684063256",
     appId: "1:426684063256:web:52c17625a9450ea9662d6d",
   };
-  
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getDatabase(app);
@@ -285,59 +446,104 @@
   let subjects = ['Physics', 'Chemistry', 'Biology', 'Mathematics'];
   let allItems = { revision: [], equations: [], papers: [], essays: [], pomodoro: [] };
   let syncCount = 0;
+  let reminderInterval = null;
+  
+  // Settings storage keys
+  const SETTINGS_KEYS = {
+    dailyHours: 'dailyStudyHours',
+    weeklyPapers: 'weeklyPaperTarget',
+    reminderFreq: 'reminderFrequency',
+    theme: 'theme',
+    accentColor: 'accentColor',
+    fontSize: 'fontSize'
+  };
+  
+  function loadSettings() {
+    return {
+      dailyStudyHours: localStorage.getItem(SETTINGS_KEYS.dailyHours) || 2,
+      weeklyPaperTarget: localStorage.getItem(SETTINGS_KEYS.weeklyPapers) || 3,
+      reminderFrequency: parseInt(localStorage.getItem(SETTINGS_KEYS.reminderFreq)) || 30,
+      theme: localStorage.getItem(SETTINGS_KEYS.theme) || 'light',
+      accentColor: localStorage.getItem(SETTINGS_KEYS.accentColor) || '#3b82f6',
+      fontSize: localStorage.getItem(SETTINGS_KEYS.fontSize) || '16'
+    };
+  }
+  
+  function saveSettings(settings) {
+    Object.entries(settings).forEach(([key, value]) => {
+      if (key === 'dailyStudyHours') localStorage.setItem(SETTINGS_KEYS.dailyHours, value);
+      else if (key === 'weeklyPaperTarget') localStorage.setItem(SETTINGS_KEYS.weeklyPapers, value);
+      else if (key === 'reminderFrequency') localStorage.setItem(SETTINGS_KEYS.reminderFreq, value);
+      else if (key === 'theme') localStorage.setItem(SETTINGS_KEYS.theme, value);
+      else if (key === 'accentColor') localStorage.setItem(SETTINGS_KEYS.accentColor, value);
+      else if (key === 'fontSize') localStorage.setItem(SETTINGS_KEYS.fontSize, value);
+    });
+    applyThemeAndStyle();
+    setupReminderEngine();
+  }
+  
+  function applyThemeAndStyle() {
+    const settings = loadSettings();
+    if (settings.theme === 'dark') document.body.classList.add('dark');
+    else document.body.classList.remove('dark');
+    document.documentElement.style.setProperty('--accent', settings.accentColor);
+    document.documentElement.style.setProperty('--accent-hover', settings.accentColor);
+    document.body.style.setProperty('--font-size', settings.fontSize + 'px');
+  }
+  
+  function setupReminderEngine() {
+    if (reminderInterval) clearInterval(reminderInterval);
+    const freq = parseInt(loadSettings().reminderFrequency);
+    if (freq > 0) {
+      reminderInterval = setInterval(() => {
+        const insight = getRandomInsight();
+        if (Notification.permission === 'granted') {
+          new Notification(`📚 ${insight.type}`, { body: `${insight.text} (${insight.subject})`, icon: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' });
+        } else if (Notification.permission !== 'denied') Notification.requestPermission();
+        document.getElementById('randomInsightText').innerHTML = `<strong>${insight.type}</strong> (${insight.subject}): ${insight.text.substring(0, 80)}...`;
+      }, freq * 60 * 1000);
+    }
+  }
   
   // Sync functions
   function showSync() { syncCount++; const sp = document.getElementById('syncSpinner'); const tx = document.getElementById('syncText'); if(sp) sp.style.display = 'block'; if(tx) tx.innerText = 'Syncing...'; }
   function hideSync() { syncCount--; if(syncCount <= 0) { syncCount=0; const sp=document.getElementById('syncSpinner'); const tx=document.getElementById('syncText'); if(sp) sp.style.display='none'; if(tx) tx.innerText='Synced'; } }
   async function withSync(fn) { showSync(); try { return await fn(); } finally { hideSync(); } }
-  
-  // Storage helpers
   function getLocalData(key) { const data = localStorage.getItem(key); return data ? JSON.parse(data) : []; }
   function setLocalData(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
-  
   async function syncToFirebase(collection) { if(currentUser) { await withSync(async()=>{ await set(ref(db, `users/${currentUser.uid}/${collection}`), allItems[collection]); }); } }
   async function loadAllFromFirebase() { if(!currentUser) return; await withSync(async()=>{ for(let key of Object.keys(allItems)) { const snap = await get(child(ref(db), `users/${currentUser.uid}/${key}`)); if(snap.exists()) allItems[key] = snap.val(); } }); }
-  
   async function saveAll() { for(let key of Object.keys(allItems)) { setLocalData(key, allItems[key]); await syncToFirebase(key); } }
   
   // Priority sort
   const priorityOrder = { High: 3, Medium: 2, Low: 1 };
   function sortByPriority(arr) { return [...arr].sort((a,b) => (priorityOrder[b.priority]||0) - (priorityOrder[a.priority]||0)); }
   
-  // Random Insight Engine (pulls from all sections)
+  // Random Insight
   function getRandomInsight() {
     const allEntries = [
-      ...allItems.revision.map(i => ({ type: 'Revision', text: `${i.title}: ${i.content}`, subject: i.subject })),
-      ...allItems.equations.map(i => ({ type: 'Equation', text: `${i.name} = ${i.formula}`, subject: i.subject })),
-      ...allItems.essays.map(i => ({ type: 'Essay Point', text: `${i.title}: ${i.points.substring(0, 100)}`, subject: i.subject })),
-      ...allItems.papers.map(i => ({ type: 'Past Paper', text: `${i.subject}: ${i.marks}/${i.total} (${((i.marks/i.total)*100).toFixed(1)}%)`, subject: i.subject }))
+      ...allItems.revision.map(i => ({ type: '📘 Revision', text: `${i.title}: ${i.content}`, subject: i.subject })),
+      ...allItems.equations.map(i => ({ type: '📐 Equation', text: `${i.name} = ${i.formula}`, subject: i.subject })),
+      ...allItems.essays.map(i => ({ type: '✍️ Essay', text: `${i.title}: ${i.points.substring(0, 100)}`, subject: i.subject })),
+      ...allItems.papers.map(i => ({ type: '📊 Paper', text: `${i.subject}: ${i.marks}/${i.total} (${((i.marks/i.total)*100).toFixed(1)}%)`, subject: i.subject }))
     ];
-    if(allEntries.length === 0) return { type: 'Tip', text: 'Add some content to get personalized insights!', subject: 'System' };
-    const random = allEntries[Math.floor(Math.random() * allEntries.length)];
-    return random;
+    if(allEntries.length === 0) return { type: '💡 Tip', text: 'Add content to get personalized insights!', subject: 'System' };
+    return allEntries[Math.floor(Math.random() * allEntries.length)];
   }
-  
   function updateRandomInsight() { const insight = getRandomInsight(); document.getElementById('randomInsightText').innerHTML = `<strong>${insight.type}</strong> (${insight.subject}): ${insight.text.substring(0, 80)}...`; }
   
-  // Smart Scheduler: Suggest next lesson when marking done
+  // Smart Scheduler
   function suggestNextLesson(currentItem, collection) {
     const items = allItems[collection];
     const currentIndex = items.findIndex(i => i.id === currentItem.id);
     if(currentIndex !== -1 && currentIndex + 1 < items.length) {
       const next = items[currentIndex + 1];
-      setTimeout(() => {
-        alert(`🎯 Smart Suggestion: Next lesson is "${next.title || next.name || next.subject}"! Ready to continue?`);
-      }, 100);
-    } else if(items.length > 1) {
-      setTimeout(() => alert(`🎉 Great job! You've completed this section. Try the next subject!`), 100);
+      setTimeout(() => alert(`🎯 Smart Suggestion: Next lesson is "${next.title || next.name || next.subject}"! Ready to continue?`), 100);
     }
   }
-  
-  // Mark item as done (for revision/lessons)
   async function markAsDone(item, collection) {
     if(confirm(`Mark "${item.title || item.name || item.subject}" as done?`)) {
       suggestNextLesson(item, collection);
-      // Optionally remove or mark completed
       if(collection === 'revision') {
         allItems.revision = allItems.revision.filter(i => i.id !== item.id);
         await saveAll();
@@ -347,20 +553,48 @@
   }
   
   // Navigation
-  const tabs = ['dashboard', 'revision', 'equations', 'papers', 'essays', 'pomodoro', 'settings'];
-  function renderNavigation() {
-    const navHtml = tabs.map(tab => `<div class="nav-item ${currentTab === tab ? 'active' : ''}" data-tab="${tab}"><i class="${getIcon(tab)}"></i> ${tab.charAt(0).toUpperCase() + tab.slice(1)}</div>`).join('');
-    document.getElementById('navLinks').innerHTML = navHtml;
-    document.getElementById('mobileNav').innerHTML = tabs.map(tab => `<div class="mobile-nav-item ${currentTab === tab ? 'active' : ''}" data-tab="${tab}"><i class="${getIcon(tab)}"></i><span>${tab.slice(0,3)}</span></div>`).join('');
-    document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(el => el.addEventListener('click', () => switchTab(el.dataset.tab)));
+  const allTabs = ['dashboard', 'revision', 'equations', 'papers', 'essays', 'pomodoro', 'settings'];
+  const bottomBarTabs = ['dashboard', 'revision', 'papers'];
+  const moreTabs = ['equations', 'essays', 'pomodoro', 'settings'];
+  function getIcon(tab) { const icons = { dashboard: 'fas fa-chart-pie', revision: 'fas fa-layer-group', equations: 'fas fa-square-root-alt', papers: 'fas fa-scroll', essays: 'fas fa-feather-alt', pomodoro: 'fas fa-hourglass-half', settings: 'fas fa-user-astronaut' }; return icons[tab]; }
+  function getTabName(tab) { return tab.charAt(0).toUpperCase() + tab.slice(1); }
+  function openBottomSheet() { const overlay = document.getElementById('bottomSheetOverlay'); const sheet = document.getElementById('bottomSheet'); overlay.style.display = 'flex'; sheet.offsetHeight; sheet.classList.add('show'); }
+  function closeBottomSheet() { const sheet = document.getElementById('bottomSheet'); sheet.classList.remove('show'); setTimeout(() => { document.getElementById('bottomSheetOverlay').style.display = 'none'; }, 300); }
+  function renderMobileNavigation() {
+    const mobileNav = document.getElementById('mobileNav');
+    mobileNav.innerHTML = bottomBarTabs.map(tab => `<div class="mobile-nav-item ${currentTab === tab ? 'active' : ''}" data-tab="${tab}"><i class="${getIcon(tab)}"></i><span>${getTabName(tab)}</span></div>`).join('') + `<div class="mobile-nav-item" id="moreButton"><i class="fas fa-ellipsis-h"></i><span>More</span></div>`;
+    document.querySelectorAll('.mobile-nav-item[data-tab]').forEach(el => el.addEventListener('click', () => { switchTab(el.dataset.tab); closeBottomSheet(); }));
+    document.getElementById('moreButton').addEventListener('click', openBottomSheet);
+    document.getElementById('sheetItems').innerHTML = moreTabs.map(tab => `<div class="sheet-item ${currentTab === tab ? 'active' : ''}" data-tab="${tab}"><i class="${getIcon(tab)}"></i><span>${getTabName(tab)}</span></div>`).join('');
+    document.querySelectorAll('.sheet-item[data-tab]').forEach(el => el.addEventListener('click', () => { switchTab(el.dataset.tab); closeBottomSheet(); }));
+    document.getElementById('bottomSheetOverlay').addEventListener('click', (e) => { if (e.target === document.getElementById('bottomSheetOverlay')) closeBottomSheet(); });
+  }
+  function renderDesktopNavigation() { document.getElementById('navLinks').innerHTML = allTabs.map(tab => `<div class="nav-item ${currentTab === tab ? 'active' : ''}" data-tab="${tab}"><i class="${getIcon(tab)}"></i> ${getTabName(tab)}</div>`).join(''); document.querySelectorAll('.nav-item').forEach(el => el.addEventListener('click', () => switchTab(el.dataset.tab))); }
+  
+  function createAddSection(headerText, iconClass, contentHtml, expandId) {
+    return `<div class="add-section"><div class="add-section-header" data-expand="${expandId}"><i class="${iconClass}"></i><span>${headerText}</span><i class="fas fa-chevron-down" style="margin-left: auto; font-size: 0.8rem;"></i></div><div class="add-section-content" id="${expandId}">${contentHtml}</div></div>`;
+  }
+  function attachCollapsibleListeners() {
+    if (window.innerWidth <= 768) {
+      document.querySelectorAll('.add-section-header').forEach(header => {
+        const contentId = header.dataset.expand;
+        const content = document.getElementById(contentId);
+        if (content && !header.hasListener) {
+          header.hasListener = true;
+          header.addEventListener('click', () => {
+            content.classList.toggle('expanded');
+            const icon = header.querySelector('.fa-chevron-down');
+            if (icon) icon.style.transform = content.classList.contains('expanded') ? 'rotate(180deg)' : 'rotate(0deg)';
+          });
+          if (!content.classList.contains('expanded')) content.classList.remove('expanded');
+        }
+      });
+    } else {
+      document.querySelectorAll('.add-section-content').forEach(content => content.classList.add('expanded'));
+    }
   }
   
-  function getIcon(tab) {
-    const icons = { dashboard: 'fas fa-chart-pie', revision: 'fas fa-layer-group', equations: 'fas fa-square-root-alt', papers: 'fas fa-scroll', essays: 'fas fa-feather-alt', pomodoro: 'fas fa-hourglass-half', settings: 'fas fa-user-astronaut' };
-    return icons[tab];
-  }
-  
-  // Dashboard with clickable cards linking to tabs
+  // ========== DASHBOARD (FULL) ==========
   async function renderDashboard() {
     const revCount = allItems.revision.length;
     const eqCount = allItems.equations.length;
@@ -369,261 +603,167 @@
     const pomoCount = allItems.pomodoro.length;
     const highPriorityTasks = allItems.revision.filter(i => i.priority === 'High').slice(0, 3);
     const avgPaperScore = allItems.papers.length ? (allItems.papers.reduce((acc,p)=>acc+(p.marks/p.total)*100,0)/allItems.papers.length).toFixed(1) : 0;
-    
-    const html = `
-      <div class="glass-card">
-        <h2><i class="fas fa-chart-line"></i> Study Dashboard</h2>
-        <div class="stats-grid">
-          <div class="stat-card" data-tab="revision"><i class="fas fa-brain"></i><br><strong>${revCount}</strong><br>Revision Cards</div>
-          <div class="stat-card" data-tab="equations"><i class="fas fa-square-root-alt"></i><br><strong>${eqCount}</strong><br>Equations</div>
-          <div class="stat-card" data-tab="papers"><i class="fas fa-scroll"></i><br><strong>${paperCount}</strong><br>Past Papers</div>
-          <div class="stat-card" data-tab="essays"><i class="fas fa-feather-alt"></i><br><strong>${essayCount}</strong><br>Essays</div>
-          <div class="stat-card" data-tab="pomodoro"><i class="fas fa-clock"></i><br><strong>${pomoCount}</strong><br>Pomodoro Sessions</div>
-        </div>
-        <div><h3>⚡ Current High Priority Tasks</h3>${highPriorityTasks.length ? highPriorityTasks.map(t => `<div class="item-card priority-high"><div><strong>${t.title}</strong><br>${t.content}<br><small>${t.subject}</small></div><button class="done-btn" data-id="${t.id}">Mark Done</button></div>`).join('') : '<p>No high-priority tasks. Add some!</p>'}</div>
-        <div><h3>📊 Past Paper Performance</h3><canvas id="paperChart" style="max-height:250px;"></canvas></div>
-        <div><h3>🍅 Pomodoro Analytics</h3><canvas id="pomoChart" style="max-height:200px;"></canvas></div>
-      </div>`;
+    const html = `<div class="glass-card"><h2><i class="fas fa-chart-line"></i> Study Dashboard</h2><div class="stats-grid"><div class="stat-card" data-tab="revision"><i class="fas fa-brain"></i><br><strong>${revCount}</strong><br>Revision Cards</div><div class="stat-card" data-tab="equations"><i class="fas fa-square-root-alt"></i><br><strong>${eqCount}</strong><br>Equations</div><div class="stat-card" data-tab="papers"><i class="fas fa-scroll"></i><br><strong>${paperCount}</strong><br>Past Papers</div><div class="stat-card" data-tab="essays"><i class="fas fa-feather-alt"></i><br><strong>${essayCount}</strong><br>Essays</div><div class="stat-card" data-tab="pomodoro"><i class="fas fa-clock"></i><br><strong>${pomoCount}</strong><br>Pomodoro Sessions</div></div><div><h3>⚡ Current High Priority Tasks</h3>${highPriorityTasks.length ? highPriorityTasks.map(t => `<div class="item-card priority-high"><div><strong>${t.title}</strong><br>${t.content}<br><small>${t.subject}</small></div><button class="done-btn" data-id="${t.id}">Mark Done</button></div>`).join('') : '<p>No high-priority tasks. Add some!</p>'}</div><div><h3>📊 Past Paper Performance</h3><canvas id="paperChart" style="max-height:250px;"></canvas></div><div><h3>🍅 Pomodoro Analytics</h3><canvas id="pomoChart" style="max-height:200px;"></canvas></div></div>`;
     document.getElementById('tabContent').innerHTML = html;
-    
     document.querySelectorAll('.stat-card').forEach(card => card.addEventListener('click', () => switchTab(card.dataset.tab)));
     document.querySelectorAll('.done-btn').forEach(btn => btn.addEventListener('click', async () => { const item = allItems.revision.find(i => i.id === parseInt(btn.dataset.id)); if(item) await markAsDone(item, 'revision'); }));
-    
     setTimeout(() => {
       const paperCtx = document.getElementById('paperChart')?.getContext('2d');
-      if(paperCtx && allItems.papers.length) {
-        new Chart(paperCtx, { type: 'bar', data: { labels: allItems.papers.slice(-5).map(p => p.subject), datasets: [{ label: 'Score %', data: allItems.papers.slice(-5).map(p => (p.marks/p.total)*100), backgroundColor: '#3b82f6' }] } });
-      }
+      if(paperCtx && allItems.papers.length) new Chart(paperCtx, { type: 'bar', data: { labels: allItems.papers.slice(-5).map(p => p.subject), datasets: [{ label: 'Score %', data: allItems.papers.slice(-5).map(p => (p.marks/p.total)*100), backgroundColor: '#3b82f6' }] } });
       const pomoCtx = document.getElementById('pomoChart')?.getContext('2d');
-      if(pomoCtx && allItems.pomodoro.length) {
-        new Chart(pomoCtx, { type: 'line', data: { labels: allItems.pomodoro.slice(-7).map((_,i) => `Session ${i+1}`), datasets: [{ label: 'Duration (min)', data: allItems.pomodoro.slice(-7).map(p => p.duration), borderColor: '#8b5cf6' }] } });
-      }
+      if(pomoCtx && allItems.pomodoro.length) { const focusSessions = allItems.pomodoro.filter(log => log.type === 'Focus'); const dates = focusSessions.slice(-7).map(log => new Date(log.date).toLocaleDateString()); const durations = focusSessions.slice(-7).map(log => log.durationMinutes); new Chart(pomoCtx, { type: 'line', data: { labels: dates, datasets: [{ label: 'Focus Minutes', data: durations, borderColor: '#8b5cf6' }] } }); }
     }, 100);
   }
   
-  // Revision with shuffle mode and subject-wise random recall
+  // ========== REVISION (FULL) ==========
   async function renderRevision() {
     let items = sortByPriority(allItems.revision);
     const subjectsList = [...new Set(items.map(i => i.subject).concat(subjects))];
-    const html = `
-      <div class="glass-card">
-        <h2><i class="fas fa-brain"></i> Revision Cards</h2>
-        <div class="flex-row">
-          <input type="text" id="revTitle" placeholder="Topic title" style="flex:2">
-          <input type="text" id="revContent" placeholder="Key points" style="flex:3">
-          <select id="revPriority"><option>High</option><option>Medium</option><option>Low</option></select>
-          <select id="revSubject">${subjectsList.map(s => `<option>${s}</option>`).join('')}</select>
-          <button id="addRevBtn" class="btn-icon"><i class="fas fa-plus"></i> Add</button>
-        </div>
-        <div class="flex-row">
-          <button id="shuffleBtn" class="btn-icon"><i class="fas fa-shuffle"></i> Shuffle Study Mode</button>
-          <button id="subjectRecallBtn" class="btn-icon"><i class="fas fa-filter"></i> Subject-wise Random</button>
-          <select id="recallSubject"><option>All</option>${subjectsList.map(s => `<option>${s}</option>`).join('')}</select>
-        </div>
-        <div id="randomFlashDisplay" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; padding: 20px; border-radius: 20px; margin-bottom: 1rem; display: none;"></div>
-        <div id="revisionList"></div>
-      </div>`;
+    const addFormHtml = `<div class="flex-row"><input type="text" id="revTitle" placeholder="Topic title" style="flex:2"><input type="text" id="revContent" placeholder="Key points" style="flex:3"><select id="revPriority"><option>High</option><option>Medium</option><option>Low</option></select><select id="revSubject">${subjectsList.map(s => `<option>${s}</option>`).join('')}</select><button id="addRevBtn" class="btn-icon"><i class="fas fa-plus"></i> Add</button></div>`;
+    const collapsibleSection = createAddSection('➕ Add New Revision', 'fas fa-plus-circle', addFormHtml, 'revAddContent');
+    const html = `<div class="glass-card"><h2><i class="fas fa-brain"></i> Revision Cards</h2>${collapsibleSection}<div class="flex-row"><button id="shuffleBtn" class="btn-icon"><i class="fas fa-shuffle"></i> Shuffle Study Mode</button><button id="subjectRecallBtn" class="btn-icon"><i class="fas fa-filter"></i> Subject-wise Random</button><select id="recallSubject"><option>All</option>${subjectsList.map(s => `<option>${s}</option>`).join('')}</select></div><div id="randomFlashDisplay" style="background: linear-gradient(135deg, var(--accent), #8b5cf6); color: white; padding: 20px; border-radius: 20px; margin-bottom: 1rem; display: none;"></div><div id="revisionList"></div></div>`;
     document.getElementById('tabContent').innerHTML = html;
-    
     function renderList() {
       const container = document.getElementById('revisionList');
-      container.innerHTML = items.map(item => `
-        <div class="item-card ${item.priority === 'High' ? 'priority-high' : item.priority === 'Medium' ? 'priority-medium' : 'priority-low'}">
-          <div><strong>${item.title}</strong><br><small>${item.content} | ${item.subject} | ⚡${item.priority}</small></div>
-          <div><button class="editRev" data-id="${item.id}"><i class="fas fa-edit"></i></button>
-          <button class="deleteRev" data-id="${item.id}"><i class="fas fa-trash"></i></button>
-          <button class="doneRev" data-id="${item.id}" style="background:#10b981; color:white; border:none; border-radius:20px; padding:4px 12px; margin-left:8px;"><i class="fas fa-check"></i> Done</button></div>
-        </div>`).join('');
-      
+      container.innerHTML = items.map(item => `<div class="item-card ${item.priority === 'High' ? 'priority-high' : item.priority === 'Medium' ? 'priority-medium' : 'priority-low'}"><div><strong>${item.title}</strong><br><small>${item.content} | ${item.subject} | <span class="badge badge-${item.priority.toLowerCase()}">${item.priority}</span></small></div><div><button class="editRev" data-id="${item.id}"><i class="fas fa-edit"></i></button><button class="deleteRev" data-id="${item.id}"><i class="fas fa-trash"></i></button><button class="doneRev" data-id="${item.id}" style="background:#10b981; color:white; border:none; border-radius:20px; padding:4px 12px; margin-left:8px;"><i class="fas fa-check"></i> Done</button></div></div>`).join('');
       document.querySelectorAll('.deleteRev').forEach(btn => btn.addEventListener('click', async () => { allItems.revision = allItems.revision.filter(i => i.id !== parseInt(btn.dataset.id)); await saveAll(); renderRevision(); }));
       document.querySelectorAll('.editRev').forEach(btn => btn.addEventListener('click', async () => { const item = allItems.revision.find(i => i.id === parseInt(btn.dataset.id)); const newTitle = prompt("Edit title", item.title); if(newTitle) { item.title = newTitle; await saveAll(); renderRevision(); } }));
       document.querySelectorAll('.doneRev').forEach(btn => btn.addEventListener('click', async () => { const item = allItems.revision.find(i => i.id === parseInt(btn.dataset.id)); await markAsDone(item, 'revision'); }));
     }
-    
-    document.getElementById('addRevBtn').onclick = async () => {
-      const title = document.getElementById('revTitle').value;
-      const content = document.getElementById('revContent').value;
-      const priority = document.getElementById('revPriority').value;
-      const subject = document.getElementById('revSubject').value;
-      if(title && content) {
-        allItems.revision.push({ id: Date.now(), title, content, priority, subject });
-        await saveAll();
-        renderRevision();
-      }
-    };
-    
-    document.getElementById('shuffleBtn').onclick = () => {
-      const shuffled = [...items];
-      for(let i = shuffled.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; }
-      items = shuffled;
-      renderList();
-    };
-    
-    document.getElementById('subjectRecallBtn').onclick = () => {
-      const subject = document.getElementById('recallSubject').value;
-      const filtered = subject === 'All' ? items : items.filter(i => i.subject === subject);
-      if(filtered.length) {
-        const random = filtered[Math.floor(Math.random() * filtered.length)];
-        const disp = document.getElementById('randomFlashDisplay');
-        disp.style.display = 'block';
-        disp.innerHTML = `<i class="fas fa-lightbulb"></i> <strong>${random.title}</strong><br>${random.content}<br><small>${random.subject} · ${random.priority}</small>`;
-      }
-    };
-    
+    document.getElementById('addRevBtn').onclick = async () => { const title = document.getElementById('revTitle').value, content = document.getElementById('revContent').value, priority = document.getElementById('revPriority').value, subject = document.getElementById('revSubject').value; if(title && content) { allItems.revision.push({ id: Date.now(), title, content, priority, subject }); await saveAll(); renderRevision(); } };
+    document.getElementById('shuffleBtn').onclick = () => { const shuffled = [...items]; for(let i = shuffled.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; } items = shuffled; renderList(); alert('🃏 Shuffle mode activated!'); };
+    document.getElementById('subjectRecallBtn').onclick = () => { const subject = document.getElementById('recallSubject').value; const filtered = subject === 'All' ? items : items.filter(i => i.subject === subject); if(filtered.length) { const random = filtered[Math.floor(Math.random() * filtered.length)]; const disp = document.getElementById('randomFlashDisplay'); disp.style.display = 'block'; disp.innerHTML = `<i class="fas fa-lightbulb"></i> <strong>${random.title}</strong><br>${random.content}<br><small>${random.subject} · ${random.priority}</small>`; setTimeout(() => { disp.style.opacity = '0'; setTimeout(() => { disp.style.display = 'none'; disp.style.opacity = '1'; }, 500); }, 5000); } else alert(`No items found for subject: ${subject}`); };
     renderList();
+    attachCollapsibleListeners();
   }
   
-  // Simplified render functions for other tabs (similar structure with CRUD)
+  // ========== EQUATIONS (FULL) ==========
   async function renderEquations() {
     let items = sortByPriority(allItems.equations);
     const subjectsList = [...new Set(items.map(i => i.subject).concat(subjects))];
-    const html = `<div class="glass-card"><h2><i class="fas fa-square-root-alt"></i> Equations Library</h2>
-      <div class="flex-row"><input id="eqName" placeholder="Equation name"><input id="eqFormula" placeholder="Formula"><select id="eqSubject">${subjectsList.map(s => `<option>${s}</option>`).join('')}</select><select id="eqPriority"><option>High</option><option>Medium</option><option>Low</option></select><button id="addEqBtn" class="btn-icon">+ Add</button></div>
-      <div id="eqList"></div></div>`;
+    const addFormHtml = `<div class="flex-row"><input id="eqName" placeholder="Equation name"><input id="eqFormula" placeholder="Formula"><select id="eqSubject">${subjectsList.map(s => `<option>${s}</option>`).join('')}</select><select id="eqPriority"><option>High</option><option>Medium</option><option>Low</option></select><button id="addEqBtn" class="btn-icon">+ Add</button></div>`;
+    const collapsibleSection = createAddSection('➕ Add New Equation', 'fas fa-plus-circle', addFormHtml, 'eqAddContent');
+    const html = `<div class="glass-card"><h2><i class="fas fa-square-root-alt"></i> Equations Library</h2>${collapsibleSection}<div id="eqList"></div></div>`;
     document.getElementById('tabContent').innerHTML = html;
     function renderEqList() {
-      document.getElementById('eqList').innerHTML = items.map(e => `<div class="item-card ${e.priority === 'High' ? 'priority-high' : e.priority === 'Medium' ? 'priority-medium' : 'priority-low'}"><div><strong>${e.name}</strong><br>${e.formula}<br><small>${e.subject} | ${e.priority}</small></div><div><button class="editEq" data-id="${e.id}"><i class="fas fa-edit"></i></button><button class="delEq" data-id="${e.id}"><i class="fas fa-trash"></i></button></div></div>`).join('');
+      document.getElementById('eqList').innerHTML = items.map(e => `<div class="item-card ${e.priority === 'High' ? 'priority-high' : e.priority === 'Medium' ? 'priority-medium' : 'priority-low'}"><div><strong>${e.name}</strong><br>${e.formula}<br><small>${e.subject} | <span class="badge badge-${e.priority.toLowerCase()}">${e.priority}</span></small></div><div><button class="editEq" data-id="${e.id}"><i class="fas fa-edit"></i></button><button class="delEq" data-id="${e.id}"><i class="fas fa-trash"></i></button></div></div>`).join('');
       document.querySelectorAll('.delEq').forEach(btn => btn.addEventListener('click', async()=>{ allItems.equations = allItems.equations.filter(x=>x.id !== parseInt(btn.dataset.id)); await saveAll(); renderEquations(); }));
       document.querySelectorAll('.editEq').forEach(btn => btn.addEventListener('click', async()=>{ const item=allItems.equations.find(x=>x.id === parseInt(btn.dataset.id)); const newName=prompt("Edit name", item.name); if(newName){ item.name=newName; await saveAll(); renderEquations(); } }));
     }
     document.getElementById('addEqBtn').onclick = async()=>{ const name=document.getElementById('eqName').value, formula=document.getElementById('eqFormula').value, subject=document.getElementById('eqSubject').value, priority=document.getElementById('eqPriority').value; if(name&&formula){ allItems.equations.push({id:Date.now(), name, formula, subject, priority}); await saveAll(); renderEquations(); } };
     renderEqList();
+    attachCollapsibleListeners();
   }
   
+  // ========== PAPERS (FULL) ==========
   async function renderPapers() {
     let items = sortByPriority(allItems.papers);
-    const html = `<div class="glass-card"><h2><i class="fas fa-scroll"></i> Past Papers</h2>
-      <div class="flex-row"><input id="paperSubject" placeholder="Subject"><input id="paperMarks" type="number" placeholder="Marks"><input id="paperTotal" type="number" placeholder="Total"><input id="paperDate" type="date"><select id="paperPriority"><option>High</option><option>Medium</option><option>Low</option></select><button id="addPaperBtn" class="btn-icon">+ Record</button></div>
-      <div id="paperList"></div></div>`;
+    const subjectsList = [...new Set([...subjects, ...items.map(i => i.subject)])];
+    const uniqueSubjects = ['All Subjects', ...subjectsList];
+    const addFormHtml = `<div class="flex-row"><select id="paperSubjectSelect" style="flex:1;"><option value="">Select Subject</option>${subjectsList.map(s => `<option value="${s}">${s}</option>`).join('')}</select><input type="text" id="paperSubjectNew" placeholder="Or enter new subject" style="flex:1;"><input type="number" id="paperMarks" placeholder="Marks" style="width:100px;"><input type="number" id="paperTotal" placeholder="Total" style="width:100px;"><input type="date" id="paperDate" style="width:130px;"><select id="paperPriority"><option>High</option><option>Medium</option><option>Low</option></select><button id="addPaperBtn" class="btn-icon"><i class="fas fa-save"></i> Save</button></div>`;
+    const collapsibleSection = createAddSection('📄 Add New Past Paper', 'fas fa-plus-circle', addFormHtml, 'paperAddContent');
+    const html = `<div class="glass-card"><h2><i class="fas fa-scroll"></i> Past Papers Tracker</h2>${collapsibleSection}<div class="filter-bar"><h3><i class="fas fa-filter"></i> Filter Papers</h3><div class="flex-row"><select id="filterSubject" style="flex:1;">${uniqueSubjects.map(s => `<option value="${s === 'All Subjects' ? '' : s}">${s}</option>`).join('')}</select><select id="filterPriority"><option value="">All Priorities</option><option value="High">High Priority</option><option value="Medium">Medium Priority</option><option value="Low">Low Priority</option></select><button id="clearFilters" class="btn-icon"><i class="fas fa-times"></i> Clear Filters</button></div></div><div class="stats-grid"><div class="stat-card"><i class="fas fa-chart-line"></i><br><strong>${items.length}</strong><br>Total Papers</div><div class="stat-card"><i class="fas fa-percent"></i><br><strong>${items.length ? (items.reduce((acc,p)=>acc+(p.marks/p.total)*100,0)/items.length).toFixed(1) : 0}%</strong><br>Average Score</div><div class="stat-card"><i class="fas fa-trophy"></i><br><strong>${items.length ? Math.max(...items.map(p => (p.marks/p.total)*100)).toFixed(1) : 0}%</strong><br>Highest Score</div></div><div id="paperList"></div></div>`;
     document.getElementById('tabContent').innerHTML = html;
-    function renderPaperList() {
-      document.getElementById('paperList').innerHTML = items.map(p => `<div class="item-card"><div><strong>${p.subject}</strong><br>Score: ${p.marks}/${p.total} (${((p.marks/p.total)*100).toFixed(1)}%) | ${p.date} | ${p.priority}</div><div><button class="editPaper" data-id="${p.id}"><i class="fas fa-edit"></i></button><button class="delPaper" data-id="${p.id}"><i class="fas fa-trash"></i></button></div></div>`).join('');
-      document.querySelectorAll('.delPaper').forEach(btn=>btn.addEventListener('click', async()=>{ allItems.papers = allItems.papers.filter(x=>x.id !== parseInt(btn.dataset.id)); await saveAll(); renderPapers(); }));
-      document.querySelectorAll('.editPaper').forEach(btn=>btn.addEventListener('click', async()=>{ const p=allItems.papers.find(x=>x.id === parseInt(btn.dataset.id)); const newMarks=prompt("Edit marks", p.marks); if(newMarks){ p.marks=parseInt(newMarks); await saveAll(); renderPapers(); } }));
-    }
-    document.getElementById('addPaperBtn').onclick = async()=>{ const subj=document.getElementById('paperSubject').value, marks=parseInt(document.getElementById('paperMarks').value), total=parseInt(document.getElementById('paperTotal').value), date=document.getElementById('paperDate').value, priority=document.getElementById('paperPriority').value; if(subj && marks<=total){ allItems.papers.push({id:Date.now(), subject:subj, marks, total, date:date||new Date().toISOString().split('T')[0], priority}); await saveAll(); renderPapers(); } };
+    function applyFilters() { const subjectFilter = document.getElementById('filterSubject').value; const priorityFilter = document.getElementById('filterPriority').value; let filtered = [...allItems.papers]; if(subjectFilter) filtered = filtered.filter(p => p.subject === subjectFilter); if(priorityFilter) filtered = filtered.filter(p => p.priority === priorityFilter); return sortByPriority(filtered); }
+    function renderPaperList() { const filtered = applyFilters(); const container = document.getElementById('paperList'); if(filtered.length === 0) { container.innerHTML = `<div style="text-align:center;padding:2rem;"><i class="fas fa-folder-open" style="font-size:3rem;"></i><p>No past papers found.</p></div>`; return; } container.innerHTML = filtered.map(p => { const percentage = ((p.marks/p.total)*100).toFixed(1); let gradeColor = '#10b981'; if(percentage < 50) gradeColor = '#ef4444'; else if(percentage < 70) gradeColor = '#f59e0b'; return `<div class="item-card ${p.priority === 'High' ? 'priority-high' : p.priority === 'Medium' ? 'priority-medium' : 'priority-low'}"><div><strong>${p.subject}</strong><br>Score: ${p.marks}/${p.total} (${percentage}%) | ${p.date}<br><span class="badge badge-${p.priority.toLowerCase()}">${p.priority}</span></div><div><button class="editPaper" data-id="${p.id}"><i class="fas fa-edit"></i></button><button class="delPaper" data-id="${p.id}"><i class="fas fa-trash"></i></button></div></div>`; }).join(''); document.querySelectorAll('.delPaper').forEach(btn => btn.addEventListener('click', async () => { allItems.papers = allItems.papers.filter(x => x.id !== parseInt(btn.dataset.id)); await saveAll(); renderPapers(); })); document.querySelectorAll('.editPaper').forEach(btn => btn.addEventListener('click', async () => { const paper = allItems.papers.find(x => x.id === parseInt(btn.dataset.id)); const newMarks = prompt("Edit marks:", paper.marks); if(newMarks && newMarks <= paper.total) { paper.marks = parseInt(newMarks); await saveAll(); renderPapers(); } })); }
+    document.getElementById('addPaperBtn').onclick = async () => { const subjectSelect = document.getElementById('paperSubjectSelect').value; const subjectNew = document.getElementById('paperSubjectNew').value.trim(); const subject = subjectNew || subjectSelect; const marks = parseInt(document.getElementById('paperMarks').value); const total = parseInt(document.getElementById('paperTotal').value); const date = document.getElementById('paperDate').value; const priority = document.getElementById('paperPriority').value; if(!subject || isNaN(marks) || isNaN(total) || marks > total || !date) { alert('Please fill all fields correctly'); return; } if(subjectNew && !subjects.includes(subjectNew)) { subjects.push(subjectNew); localStorage.setItem('subjects', JSON.stringify(subjects)); } allItems.papers.push({ id: Date.now(), subject, marks, total, date, priority }); await saveAll(); renderPapers(); };
+    document.getElementById('filterSubject').addEventListener('change', () => renderPaperList()); document.getElementById('filterPriority').addEventListener('change', () => renderPaperList()); document.getElementById('clearFilters').addEventListener('click', () => { document.getElementById('filterSubject').value = ''; document.getElementById('filterPriority').value = ''; renderPaperList(); });
     renderPaperList();
+    attachCollapsibleListeners();
   }
   
+  // ========== ESSAYS (FULL) ==========
   async function renderEssays() {
     let items = sortByPriority(allItems.essays);
-    const html = `<div class="glass-card"><h2><i class="fas fa-feather-alt"></i> Essays</h2>
-      <div class="flex-row"><input id="essayTitle" placeholder="Essay Topic"><textarea id="essayPoints" rows="2" placeholder="Key points" style="flex:3"></textarea><input id="essaySubject" placeholder="Subject"><select id="essayPriority"><option>High</option><option>Medium</option><option>Low</option></select><button id="addEssayBtn" class="btn-icon">+ Add</button></div>
-      <div id="essayList"></div></div>`;
+    const subjectsList = [...new Set(items.map(i => i.subject).concat(subjects))];
+    let currentShuffledItems = [...items];
+    let isShuffleMode = false;
+    const addFormHtml = `<div class="flex-row"><input type="text" id="essayTitle" placeholder="Essay Topic" style="flex:2;"><textarea id="essayPoints" rows="2" placeholder="Key points, arguments, structure" style="flex:3;"></textarea><select id="essaySubject">${subjectsList.map(s => `<option>${s}</option>`).join('')}</select><select id="essayPriority"><option>High</option><option>Medium</option><option>Low</option></select><button id="addEssayBtn" class="btn-icon"><i class="fas fa-save"></i> Add</button></div>`;
+    const collapsibleSection = createAddSection('✍️ Add New Essay', 'fas fa-plus-circle', addFormHtml, 'essayAddContent');
+    const html = `<div class="glass-card"><h2><i class="fas fa-feather-alt"></i> Essays Library</h2>${collapsibleSection}<div style="margin-bottom:1.5rem;"><h3><i class="fas fa-graduation-cap"></i> Study Modes</h3><div class="flex-row"><div id="shuffleModeBtn" class="study-mode-card"><i class="fas fa-shuffle"></i><h4>Shuffle</h4><p>Randomize order</p></div><div id="subjectRandomBtn" class="study-mode-card"><i class="fas fa-filter"></i><h4>Subject-wise</h4><p>Random by subject</p></div></div></div><div class="filter-bar" id="subjectFilterSection" style="display:none;"><div class="flex-row"><label>Select Subject:</label><select id="randomSubjectSelect"><option value="all">All Subjects</option>${subjectsList.map(s => `<option value="${s}">${s}</option>`).join('')}</select><button id="getRandomEssayBtn" class="btn-icon"><i class="fas fa-random"></i> Random Essay</button></div></div><div id="randomEssayDisplay" style="background: linear-gradient(135deg, var(--accent), #8b5cf6); color: white; padding: 16px; border-radius: 20px; margin-bottom: 1rem; display: none;"><div id="randomEssayContent"></div></div><div id="studyModeStatus" style="margin-bottom:1rem;padding:0.5rem;border-radius:12px;background:var(--bg-secondary);text-align:center;display:none;"></div><h3><i class="fas fa-list"></i> Essay Collection (${items.length})</h3><div id="essayList"></div></div>`;
     document.getElementById('tabContent').innerHTML = html;
-    function renderEssayList() {
-      document.getElementById('essayList').innerHTML = items.map(e=>`<div class="item-card ${e.priority==='High'?'priority-high':e.priority==='Medium'?'priority-medium':'priority-low'}"><div><strong>${e.title}</strong><br><small>${e.points.substring(0,100)}</small><br><em>${e.subject} | ${e.priority}</em></div><div><button class="editEssay" data-id="${e.id}"><i class="fas fa-edit"></i></button><button class="delEssay" data-id="${e.id}"><i class="fas fa-trash"></i></button></div></div>`).join('');
-      document.querySelectorAll('.delEssay').forEach(btn=>btn.addEventListener('click', async()=>{ allItems.essays = allItems.essays.filter(x=>x.id!==parseInt(btn.dataset.id)); await saveAll(); renderEssays(); }));
-      document.querySelectorAll('.editEssay').forEach(btn=>btn.addEventListener('click', async()=>{ const e=allItems.essays.find(x=>x.id===parseInt(btn.dataset.id)); const newPoints=prompt("Edit essay points", e.points); if(newPoints){ e.points=newPoints; await saveAll(); renderEssays(); } }));
-    }
-    document.getElementById('addEssayBtn').onclick = async()=>{ const title=document.getElementById('essayTitle').value, points=document.getElementById('essayPoints').value, subject=document.getElementById('essaySubject').value, priority=document.getElementById('essayPriority').value; if(title && points){ allItems.essays.push({id:Date.now(), title, points, subject:subject||"General", priority}); await saveAll(); renderEssays(); } };
+    function renderEssayList() { const displayItems = isShuffleMode ? currentShuffledItems : items; const container = document.getElementById('essayList'); if(displayItems.length === 0) { container.innerHTML = `<div style="text-align:center;padding:2rem;"><i class="fas fa-book-open" style="font-size:2rem;"></i><p>No essays yet.</p></div>`; return; } container.innerHTML = displayItems.map(essay => `<div class="item-card ${essay.priority === 'High' ? 'priority-high' : essay.priority === 'Medium' ? 'priority-medium' : 'priority-low'}"><div><strong>📝 ${essay.title}</strong><br><small>${essay.points.substring(0,120)}${essay.points.length>120?'...':''}</small><br><span class="badge badge-${essay.priority.toLowerCase()}">${essay.priority}</span> <i class="fas fa-book"></i> ${essay.subject}</div><div><button class="editEssay" data-id="${essay.id}"><i class="fas fa-edit"></i></button><button class="deleteEssay" data-id="${essay.id}"><i class="fas fa-trash"></i></button></div></div>`).join(''); document.querySelectorAll('.deleteEssay').forEach(btn => btn.addEventListener('click', async () => { if(confirm('Delete this essay?')) { allItems.essays = allItems.essays.filter(e => e.id !== parseInt(btn.dataset.id)); await saveAll(); renderEssays(); } })); document.querySelectorAll('.editEssay').forEach(btn => btn.addEventListener('click', async () => { const essay = allItems.essays.find(e => e.id === parseInt(btn.dataset.id)); const newPoints = prompt("Edit essay points/content:", essay.points); if(newPoints) { essay.points = newPoints; await saveAll(); renderEssays(); } })); }
+    document.getElementById('addEssayBtn').onclick = async () => { const title = document.getElementById('essayTitle').value.trim(); const points = document.getElementById('essayPoints').value.trim(); const subject = document.getElementById('essaySubject').value; const priority = document.getElementById('essayPriority').value; if(!title || !points) { alert('Please enter both title and content.'); return; } allItems.essays.push({ id: Date.now(), title, points, subject, priority }); await saveAll(); renderEssays(); document.getElementById('essayTitle').value = ''; document.getElementById('essayPoints').value = ''; };
+    document.getElementById('shuffleModeBtn').onclick = () => { isShuffleMode = true; currentShuffledItems = [...allItems.essays]; for(let i = currentShuffledItems.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [currentShuffledItems[i], currentShuffledItems[j]] = [currentShuffledItems[j], currentShuffledItems[i]]; } renderEssayList(); const statusDiv = document.getElementById('studyModeStatus'); statusDiv.style.display = 'block'; statusDiv.innerHTML = '<i class="fas fa-shuffle"></i> Shuffle Mode Active'; statusDiv.style.background = '#8b5cf6'; statusDiv.style.color = 'white'; document.getElementById('subjectFilterSection').style.display = 'none'; document.getElementById('randomEssayDisplay').style.display = 'none'; setTimeout(() => { statusDiv.style.opacity = '0'; setTimeout(() => { statusDiv.style.display = 'none'; statusDiv.style.opacity = '1'; }, 1000); }, 3000); };
+    document.getElementById('subjectRandomBtn').onclick = () => { isShuffleMode = false; renderEssayList(); document.getElementById('subjectFilterSection').style.display = 'block'; const statusDiv = document.getElementById('studyModeStatus'); statusDiv.style.display = 'block'; statusDiv.innerHTML = '<i class="fas fa-filter"></i> Subject-wise Random Mode'; statusDiv.style.background = '#3b82f6'; statusDiv.style.color = 'white'; setTimeout(() => { statusDiv.style.opacity = '0'; setTimeout(() => { statusDiv.style.display = 'none'; statusDiv.style.opacity = '1'; }, 1000); }, 3000); };
+    document.getElementById('getRandomEssayBtn').onclick = () => { const selectedSubject = document.getElementById('randomSubjectSelect').value; let filteredEssays = [...allItems.essays]; if(selectedSubject !== 'all') filteredEssays = filteredEssays.filter(e => e.subject === selectedSubject); if(filteredEssays.length === 0) { alert(`No essays found ${selectedSubject !== 'all' ? `for ${selectedSubject}` : ''}.`); return; } const randomEssay = filteredEssays[Math.floor(Math.random() * filteredEssays.length)]; const displayDiv = document.getElementById('randomEssayDisplay'); const contentDiv = document.getElementById('randomEssayContent'); contentDiv.innerHTML = `<div style="text-align:center;"><i class="fas fa-quote-left" style="font-size:1.5rem;"></i></div><h4>${randomEssay.title}</h4><div style="background:rgba(255,255,255,0.2);border-radius:12px;padding:0.8rem;margin:0.5rem 0;max-height:150px;overflow-y:auto;">${randomEssay.points}</div><div style="display:flex;justify-content:space-between;"><span><i class="fas fa-book"></i> ${randomEssay.subject}</span><span class="badge badge-${randomEssay.priority.toLowerCase()}">${randomEssay.priority}</span></div>`; displayDiv.style.display = 'block'; setTimeout(() => { displayDiv.style.opacity = '0'; setTimeout(() => { displayDiv.style.display = 'none'; displayDiv.style.opacity = '1'; }, 500); }, 10000); };
     renderEssayList();
+    attachCollapsibleListeners();
   }
   
+  // ========== POMODORO (FULL) ==========
   async function renderPomodoro() {
-    let logs = allItems.pomodoro;
-    let timerActive = false, timeLeft = 25*60, interval;
-    const html = `<div class="glass-card"><h2><i class="fas fa-hourglass-half"></i> Pomodoro Timer</h2>
-      <div style="text-align:center;"><div id="timerDisplay" style="font-size:3rem; font-weight:700;">25:00</div><div class="flex-row" style="justify-content:center;"><button id="startTimer" class="btn-icon">▶ Start</button><button id="stopTimer" class="btn-icon">⏸ Stop</button><button id="resetTimer" class="btn-icon">🔄 Reset</button><button id="logSessionBtn" class="btn-icon">📝 Log Session</button></div></div>
-      <h3>Session Logs (Last 10)</h3><div id="pomoLogsList"></div></div>`;
+    const storedDurations = localStorage.getItem('pomodoroDurations');
+    let durations = storedDurations ? JSON.parse(storedDurations) : { focus: 25*60, shortBreak: 5*60, longBreak: 15*60 };
+    let currentMode = 'focus', timeLeft = durations[currentMode], timerActive = false, interval = null, currentSubject = subjects[0] || 'General';
+    function showNotification(message, type='info') { const toast = document.createElement('div'); toast.className = 'notification-toast'; toast.innerHTML = `<i class="fas ${type === 'focus' ? 'fa-brain' : 'fa-coffee'}"></i> ${message}`; document.body.appendChild(toast); setTimeout(() => toast.remove(), 3500); }
+    async function logSession(completedType, durationMinutes, subject) { const newLog = { id: Date.now(), date: new Date().toISOString(), subject, durationMinutes, type: completedType === 'focus' ? 'Focus' : (completedType === 'shortBreak' ? 'Short Break' : 'Long Break') }; allItems.pomodoro.push(newLog); await saveAll(); renderPomodoro(); }
+    function updateDisplay() { const mins = Math.floor(timeLeft/60), secs = timeLeft%60; document.getElementById('timerDisplay').innerText = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`; const total = durations[currentMode], percent = (timeLeft/total)*100, circumference = 2*Math.PI*120, dashOffset = circumference*(1-percent/100); const circle = document.getElementById('progressRing'); if(circle) circle.style.strokeDashoffset = dashOffset; }
+    function startTimer() { if(interval) clearInterval(interval); timerActive = true; interval = setInterval(async () => { if(timeLeft <= 0) { clearInterval(interval); timerActive = false; const completedType = currentMode; const durationMinutes = durations[currentMode]/60; const subject = document.getElementById('sessionSubject').value; let message = ''; if(completedType === 'focus') message = `🎉 Focus complete! Great work on ${subject}.`; else message = `☕ ${completedType === 'shortBreak' ? 'Short break' : 'Long break'} finished!`; showNotification(message, completedType); await logSession(completedType, durationMinutes, subject); timeLeft = durations[currentMode]; updateDisplay(); const container = document.querySelector('.timer-container'); if(container) container.classList.remove('active-focus','active-short','active-long'); } else { timeLeft--; updateDisplay(); } }, 1000); }
+    function pauseTimer() { if(interval) { clearInterval(interval); interval = null; timerActive = false; } }
+    function resetTimer() { pauseTimer(); timeLeft = durations[currentMode]; updateDisplay(); const container = document.querySelector('.timer-container'); if(container) container.classList.remove('active-focus','active-short','active-long'); }
+    function switchMode(mode) { pauseTimer(); currentMode = mode; timeLeft = durations[mode]; updateDisplay(); document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active')); document.querySelector(`.mode-btn[data-mode="${mode}"]`).classList.add('active'); const container = document.querySelector('.timer-container'); if(container) { container.classList.remove('active-focus','active-short','active-long'); container.classList.add(`active-${mode}`); } }
+    function updateDurations() { const newFocus = parseInt(document.getElementById('focusDuration').value)*60, newShort = parseInt(document.getElementById('shortDuration').value)*60, newLong = parseInt(document.getElementById('longDuration').value)*60; if(!isNaN(newFocus) && newFocus>0) durations.focus = newFocus; if(!isNaN(newShort) && newShort>0) durations.shortBreak = newShort; if(!isNaN(newLong) && newLong>0) durations.longBreak = newLong; localStorage.setItem('pomodoroDurations', JSON.stringify(durations)); timeLeft = durations[currentMode]; updateDisplay(); }
+    const today = new Date().toDateString(), todayLogs = allItems.pomodoro.filter(log => new Date(log.date).toDateString() === today), focusMinutesToday = todayLogs.filter(log => log.type === 'Focus').reduce((sum,log)=>sum+log.durationMinutes,0), focusHoursToday = (focusMinutesToday/60).toFixed(1), sessionsToday = todayLogs.length, recentSessions = [...allItems.pomodoro].reverse().slice(0,5);
+    const html = `<div class="glass-card"><h2><i class="fas fa-hourglass-half"></i> Pomodoro Focus Timer</h2><div class="flex-row" style="justify-content:center;margin-bottom:1rem;"><div><label>Focus (min):</label> <input type="number" id="focusDuration" value="${durations.focus/60}" min="1" max="60" class="duration-input"></div><div><label>Short Break:</label> <input type="number" id="shortDuration" value="${durations.shortBreak/60}" min="1" max="30" class="duration-input"></div><div><label>Long Break:</label> <input type="number" id="longDuration" value="${durations.longBreak/60}" min="1" max="60" class="duration-input"></div><button id="updateDurationsBtn" class="btn-icon"><i class="fas fa-save"></i> Update</button></div><div class="mode-buttons"><button class="mode-btn ${currentMode === 'focus' ? 'active' : ''}" data-mode="focus">🎯 Focus</button><button class="mode-btn ${currentMode === 'shortBreak' ? 'active' : ''}" data-mode="shortBreak">🍵 Short Break</button><button class="mode-btn ${currentMode === 'longBreak' ? 'active' : ''}" data-mode="longBreak">🌿 Long Break</button></div><div class="timer-container active-${currentMode}" style="position:relative;width:280px;margin:1rem auto;"><svg width="280" height="280" viewBox="0 0 280 280" class="timer-ring-svg"><circle cx="140" cy="140" r="120" fill="none" stroke="var(--border-color)" stroke-width="8"/><circle id="progressRing" cx="140" cy="140" r="120" fill="none" stroke="var(--accent)" stroke-width="8" stroke-linecap="round" stroke-dasharray="${2*Math.PI*120}" stroke-dashoffset="0" style="transition:stroke-dashoffset 0.3s linear;"/></svg><div class="timer-text" id="timerDisplay">25:00</div></div><div class="flex-row" style="justify-content:center;"><button id="startTimerBtn" class="btn-icon"><i class="fas fa-play"></i> Start</button><button id="pauseTimerBtn" class="btn-icon"><i class="fas fa-pause"></i> Pause</button><button id="resetTimerBtn" class="btn-icon"><i class="fas fa-undo-alt"></i> Reset</button></div><div class="flex-row" style="justify-content:center;margin-top:1rem;"><label>📚 Studying:</label><select id="sessionSubject">${subjects.map(s => `<option value="${s}" ${s === currentSubject ? 'selected' : ''}>${s}</option>`).join('')}</select></div><div style="margin-top:2rem;"><h3><i class="fas fa-chart-simple"></i> Today's Progress</h3><div class="stats-grid" style="grid-template-columns:1fr 1fr;"><div class="stat-card"><i class="fas fa-clock"></i><br><strong>${focusHoursToday} hrs</strong><br>Focus Time</div><div class="stat-card"><i class="fas fa-check-circle"></i><br><strong>${sessionsToday}</strong><br>Sessions Completed</div></div></div><div style="margin-top:1.5rem;"><h3><i class="fas fa-history"></i> Recent Sessions</h3><div class="history-timeline">${recentSessions.length === 0 ? '<p>No sessions yet.</p>' : recentSessions.map(s => `<div class="history-item"><span><i class="fas ${s.type === 'Focus' ? 'fa-brain' : 'fa-coffee'}"></i> ${s.type}</span><span>📖 ${s.subject}</span><span>⏱️ ${s.durationMinutes} min</span><span>📅 ${new Date(s.date).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span></div>`).join('')}</div></div></div>`;
     document.getElementById('tabContent').innerHTML = html;
-    function updateDisplay() { const mins = Math.floor(timeLeft/60); const secs = timeLeft%60; document.getElementById('timerDisplay').innerText = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`; }
-    function startTimer(){ if(interval) clearInterval(interval); timerActive=true; interval = setInterval(()=>{ if(timeLeft<=0){ clearInterval(interval); alert("🎉 Pomodoro complete! Take a break!"); timerActive=false; } else { timeLeft--; updateDisplay(); } },1000); }
-    document.getElementById('startTimer')?.addEventListener('click',()=>{ if(!timerActive) startTimer(); });
-    document.getElementById('stopTimer')?.addEventListener('click',()=>{ clearInterval(interval); timerActive=false; });
-    document.getElementById('resetTimer')?.addEventListener('click',()=>{ clearInterval(interval); timerActive=false; timeLeft=25*60; updateDisplay(); });
-    document.getElementById('logSessionBtn')?.addEventListener('click', async()=>{ const completedTime = 25 - Math.floor(timeLeft/60); allItems.pomodoro.push({ id: Date.now(), duration: completedTime || 25, date: new Date().toLocaleString() }); await saveAll(); renderPomodoro(); });
-    function renderLogs(){ const container = document.getElementById('pomoLogsList'); if(container) container.innerHTML = logs.slice(-10).reverse().map(l=>`<div class="item-card">🍅 ${l.duration} min session on ${l.date}</div>`).join(''); }
-    renderLogs();
-    updateDisplay();
+    document.getElementById('startTimerBtn').addEventListener('click', startTimer); document.getElementById('pauseTimerBtn').addEventListener('click', pauseTimer); document.getElementById('resetTimerBtn').addEventListener('click', resetTimer); document.getElementById('updateDurationsBtn').addEventListener('click', updateDurations); document.querySelectorAll('.mode-btn').forEach(btn => btn.addEventListener('click', () => switchMode(btn.dataset.mode))); document.getElementById('sessionSubject').addEventListener('change', (e) => { currentSubject = e.target.value; }); updateDisplay();
   }
   
-  // Settings with theme toggle and subject management
+  // ========== SETTINGS (Premium Modern UI) ==========
   async function renderSettings() {
     const user = auth.currentUser;
-    const theme = localStorage.getItem('theme') || 'light';
+    const settings = loadSettings();
     const html = `
-      <div class="glass-card">
-        <h2><i class="fas fa-cog"></i> Settings & Profile</h2>
-        <div style="margin-bottom: 2rem;">
-          ${user ? `
-            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-              <img src="${user.photoURL || 'https://ui-avatars.com/api/?background=3b82f6&color=fff&name='+user.displayName}" style="width: 70px; height: 70px; border-radius: 50%;">
-              <div><h3>${user.displayName}</h3><p>${user.email}</p><button id="logoutBtn" class="btn-icon"><i class="fas fa-sign-out-alt"></i> Logout</button></div>
-            </div>
-          ` : `
-            <div><p><i class="fas fa-cloud-upload-alt"></i> Log in for Cloud Sync & Backup across devices</p><button id="googleLoginBtn" class="btn-icon"><i class="fab fa-google"></i> Sign in with Google</button></div>
-          `}
+      <div class="settings-grid">
+        <div class="settings-card" style="grid-column: span 2;">
+          <div class="profile-hero">
+            ${user ? `<img class="profile-avatar" src="${user.photoURL || 'https://ui-avatars.com/api/?background=3b82f6&color=fff&name='+user.displayName}" alt="avatar"><div class="profile-info"><h2>${user.displayName || 'Student'}</h2><p>${user.email}</p><div class="sync-badge"><i class="fas fa-cloud-upload-alt"></i> <span id="syncStatusText">Synced</span><div id="profileSyncSpinner" style="display:none;" class="spinner"></div></div></div><button id="logoutBtn" class="btn-icon" style="margin-left: auto;"><i class="fas fa-sign-out-alt"></i> Logout</button>` : `<div style="width:80px;height:80px;background:var(--bg-secondary);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-user-circle" style="font-size:3rem;color:var(--text-secondary);"></i></div><div class="profile-info"><h2>Welcome!</h2><p>Sign in to sync your data across devices</p></div><button id="googleLoginBtn" class="btn-icon btn-primary"><i class="fab fa-google"></i> Sign in with Google</button>`}
+          </div>
         </div>
-        <hr>
-        <div style="margin: 1.5rem 0;"><h3><i class="fas fa-palette"></i> Theme</h3>
-          <div class="flex-row"><button id="lightThemeBtn" class="btn-icon">☀️ Light</button><button id="darkThemeBtn" class="btn-icon">🌙 Dark</button></div>
-        </div>
-        <hr>
-        <div><h3><i class="fas fa-layer-group"></i> Manage Subjects</h3>
-          <div id="subjectsList" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0;"></div>
-          <div class="flex-row"><input type="text" id="newSubjectInput" placeholder="New subject name"><button id="addSubjectBtn" class="btn-icon">+ Add Subject</button></div>
-        </div>
-        <hr>
-        <div><h3><i class="fas fa-database"></i> Data Portability</h3>
-          <div class="flex-row"><button id="exportBtn" class="btn-icon"><i class="fas fa-download"></i> Export JSON</button><button id="importBtn" class="btn-icon"><i class="fas fa-upload"></i> Import JSON</button><input type="file" id="importFile" style="display:none;"></div>
-        </div>
+        <div class="settings-card"><h3><i class="fas fa-bullseye"></i> Study Goals</h3><div class="control-group"><label>Daily Study Hours</label><input type="number" id="dailyHours" value="${settings.dailyStudyHours}" step="0.5" min="0" max="24"></div><div class="control-group"><label>Weekly Paper Targets</label><input type="number" id="weeklyPapers" value="${settings.weeklyPaperTarget}" min="0" max="20"></div><button id="saveGoalsBtn" class="btn-icon btn-primary" style="width:100%;"><i class="fas fa-save"></i> Save Goals</button></div>
+        <div class="settings-card"><h3><i class="fas fa-bell"></i> Random Reminder Engine</h3><div class="control-group"><label>Frequency (minutes): <span id="reminderFreqValue">${settings.reminderFrequency}</span></label><input type="range" id="reminderFreqSlider" min="1" max="120" value="${settings.reminderFrequency}" style="width:100%;"></div><div class="reminder-preview" style="font-size:0.8rem;color:var(--text-secondary);"><i class="fas fa-clock"></i> Reminders appear as browser notifications (if allowed)</div></div>
+        <div class="settings-card"><h3><i class="fas fa-palette"></i> Appearance</h3><div class="flex-row" style="justify-content:space-between;gap:1rem;"><button id="lightThemeBtn" class="btn-icon" style="flex:1;"><i class="fas fa-sun"></i> Light</button><button id="darkThemeBtn" class="btn-icon" style="flex:1;"><i class="fas fa-moon"></i> Dark</button></div><div class="control-group"><label>Accent Color</label><div style="display:flex;gap:0.5rem;align-items:center;"><input type="color" id="accentColorPicker" value="${settings.accentColor}" style="width:50px;height:40px;border-radius:8px;"><div class="color-circle" style="background:${settings.accentColor};"></div></div></div><div class="control-group"><label>Font Size: <span id="fontSizeValue">${settings.fontSize}</span>px</label><input type="range" id="fontSizeSlider" min="12" max="20" value="${settings.fontSize}" step="1"></div></div>
+        <div class="settings-card"><h3><i class="fas fa-layer-group"></i> Manage Subjects</h3><div id="subjectsList" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;"></div><div class="flex-row"><input type="text" id="newSubjectInput" placeholder="New subject name" style="flex:1;"><button id="addSubjectBtn" class="btn-icon"><i class="fas fa-plus"></i> Add</button></div></div>
+        <div class="settings-card" style="grid-column: span 2;"><h3><i class="fas fa-database"></i> Data Tools</h3><div class="data-buttons"><button id="exportBtn" class="btn-icon"><i class="fas fa-download"></i> Export JSON</button><button id="importBtn" class="btn-icon"><i class="fas fa-upload"></i> Import JSON</button><button id="resetDataBtn" class="btn-icon btn-danger"><i class="fas fa-trash-alt"></i> Reset App Data</button><input type="file" id="importFile" style="display:none;"></div></div>
       </div>`;
     document.getElementById('tabContent').innerHTML = html;
-    
-    // Theme toggle
-    document.getElementById('lightThemeBtn')?.addEventListener('click', () => { document.body.classList.remove('dark'); localStorage.setItem('theme', 'light'); });
-    document.getElementById('darkThemeBtn')?.addEventListener('click', () => { document.body.classList.add('dark'); localStorage.setItem('theme', 'dark'); });
-    if(theme === 'dark') document.body.classList.add('dark');
-    
-    // Subjects management
-    function renderSubjects() {
-      const container = document.getElementById('subjectsList');
-      container.innerHTML = subjects.map((s, i) => `<span class="subject-tag">${s} <i class="fas fa-times" style="cursor:pointer;" data-subject="${s}"></i></span>`).join('');
-      document.querySelectorAll('[data-subject]').forEach(el => el.addEventListener('click', () => { subjects = subjects.filter(s => s !== el.dataset.subject); localStorage.setItem('subjects', JSON.stringify(subjects)); renderSubjects(); }));
-    }
-    const storedSubjects = localStorage.getItem('subjects');
-    if(storedSubjects) subjects = JSON.parse(storedSubjects);
-    renderSubjects();
-    
-    document.getElementById('addSubjectBtn')?.addEventListener('click', () => { const input = document.getElementById('newSubjectInput'); if(input.value && !subjects.includes(input.value)) { subjects.push(input.value); localStorage.setItem('subjects', JSON.stringify(subjects)); renderSubjects(); input.value = ''; } });
-    
-    // Auth handlers
+    applyThemeAndStyle();
     document.getElementById('googleLoginBtn')?.addEventListener('click', () => signInWithPopup(auth, provider));
     document.getElementById('logoutBtn')?.addEventListener('click', () => signOut(auth));
-    
-    // Export/Import
+    document.getElementById('saveGoalsBtn')?.addEventListener('click', () => { const daily = document.getElementById('dailyHours').value, weekly = document.getElementById('weeklyPapers').value; saveSettings({ dailyStudyHours: daily, weeklyPaperTarget: weekly }); alert('Study goals saved!'); });
+    const freqSlider = document.getElementById('reminderFreqSlider'), freqValue = document.getElementById('reminderFreqValue'); freqSlider?.addEventListener('input', (e) => { freqValue.innerText = e.target.value; saveSettings({ reminderFrequency: e.target.value }); });
+    document.getElementById('lightThemeBtn')?.addEventListener('click', () => saveSettings({ theme: 'light' })); document.getElementById('darkThemeBtn')?.addEventListener('click', () => saveSettings({ theme: 'dark' }));
+    document.getElementById('accentColorPicker')?.addEventListener('change', (e) => saveSettings({ accentColor: e.target.value }));
+    const fontSizeSlider = document.getElementById('fontSizeSlider'), fontSizeValue = document.getElementById('fontSizeValue'); fontSizeSlider?.addEventListener('input', (e) => { fontSizeValue.innerText = e.target.value; saveSettings({ fontSize: e.target.value }); });
+    function renderSubjects() { const container = document.getElementById('subjectsList'); if(container) container.innerHTML = subjects.map(s => `<span class="subject-pill">${s} <i class="fas fa-times" data-subject="${s}" style="cursor:pointer;"></i></span>`).join(''); document.querySelectorAll('[data-subject]').forEach(el => el.addEventListener('click', () => { subjects = subjects.filter(s => s !== el.dataset.subject); localStorage.setItem('subjects', JSON.stringify(subjects)); renderSubjects(); })); }
+    const storedSubjects = localStorage.getItem('subjects'); if(storedSubjects) subjects = JSON.parse(storedSubjects); renderSubjects();
+    document.getElementById('addSubjectBtn')?.addEventListener('click', () => { const input = document.getElementById('newSubjectInput'); if(input.value && !subjects.includes(input.value)) { subjects.push(input.value); localStorage.setItem('subjects', JSON.stringify(subjects)); renderSubjects(); input.value = ''; } });
     document.getElementById('exportBtn')?.addEventListener('click', () => { const data = JSON.stringify({ subjects, ...allItems }); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([data])); a.download = 'almaster_backup.json'; a.click(); });
     document.getElementById('importBtn')?.addEventListener('click', () => document.getElementById('importFile').click());
     document.getElementById('importFile')?.addEventListener('change', (e) => { const file = e.target.files[0]; if(file) { const reader = new FileReader(); reader.onload = async(ev) => { const imported = JSON.parse(ev.target.result); if(imported.subjects) subjects = imported.subjects; for(let key of Object.keys(allItems)) { if(imported[key]) allItems[key] = imported[key]; } await saveAll(); localStorage.setItem('subjects', JSON.stringify(subjects)); alert('Import successful!'); switchTab(currentTab); }; reader.readAsText(file); } });
+    document.getElementById('resetDataBtn')?.addEventListener('click', async () => { if(confirm('⚠️ WARNING: This will delete ALL your data. This action cannot be undone.')) { allItems = { revision: [], equations: [], papers: [], essays: [], pomodoro: [] }; subjects = ['Physics', 'Chemistry', 'Biology', 'Mathematics']; await saveAll(); localStorage.setItem('subjects', JSON.stringify(subjects)); alert('All app data has been reset.'); if(currentTab === 'settings') renderSettings(); else switchTab(currentTab); } });
   }
   
-  // Tab switching with random insight trigger
   async function switchTab(tab) {
     currentTab = tab;
-    renderNavigation();
-    updateRandomInsight(); // Trigger random insight on tab switch
-    
+    renderDesktopNavigation();
+    renderMobileNavigation();
+    updateRandomInsight();
     const renderers = { dashboard: renderDashboard, revision: renderRevision, equations: renderEquations, papers: renderPapers, essays: renderEssays, pomodoro: renderPomodoro, settings: renderSettings };
     if(renderers[tab]) await renderers[tab]();
   }
   
-  // Load initial data and setup
   async function init() {
     for(let key of Object.keys(allItems)) { allItems[key] = getLocalData(key); if(!allItems[key].length) allItems[key] = []; }
-    const storedSubjects = localStorage.getItem('subjects');
-    if(storedSubjects) subjects = JSON.parse(storedSubjects);
-    
+    const storedSubjects = localStorage.getItem('subjects'); if(storedSubjects) subjects = JSON.parse(storedSubjects);
     onAuthStateChanged(auth, async (user) => { currentUser = user; if(user) { await loadAllFromFirebase(); await saveAll(); } if(currentTab === 'settings') await renderSettings(); });
-    
-    renderNavigation();
-    await switchTab('dashboard');
-    
-    // Random insight on app open
+    renderDesktopNavigation(); renderMobileNavigation(); await switchTab('dashboard');
     setTimeout(() => updateRandomInsight(), 100);
     document.getElementById('randomInsightBar')?.addEventListener('click', updateRandomInsight);
+    setupReminderEngine();
+    applyThemeAndStyle();
   }
-  
   init();
 </script>
 </body>
