@@ -361,10 +361,11 @@
 
     <!-- Firebase SDK Setup -->
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-      import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-      import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-        
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+
         // State Structure
         window.appState = {
             subjects: ['Biology', 'Chemistry', 'Physics'],
@@ -402,6 +403,7 @@
                 const firebaseConfig = {
                     apiKey: "AIzaSyA9DLfAHTUUGxCPn2j_k6godoTEopzaFAU",
                     authDomain: "studymaster-919ba.firebaseapp.com",
+                    databaseURL: "https://studymaster-919ba-default-rtdb.firebaseio.com",
                     projectId: "studymaster-919ba",
                     storageBucket: "studymaster-919ba.firebasestorage.app",
                     messagingSenderId: "426684063256",
@@ -410,10 +412,9 @@
                 };
 
                 const app = initializeApp(firebaseConfig);
-                  window.auth = getAuth(app);
-                  window.db = getDatabase(app, "https://studymaster-919ba-default-rtdb.firebaseio.com/");
+                window.auth = getAuth(app);
+                window.db = getFirestore(app);
                 
-                // Initialize analytics safely
                 try {
                     window.analytics = getAnalytics(app);
                 } catch(analyticsErr) {
@@ -428,7 +429,6 @@
                     if(user && !user.isAnonymous) {
                         setupCloudSync();
                     } else if (!user) {
-                        // Fallback to anonymous if no user is signed in
                         signInAnonymously(window.auth).catch(e => console.error("Anonymous auth failed", e));
                     }
                 });
@@ -453,7 +453,6 @@
             if(banner) banner.classList.add('translate-y-[-100%]');
         }
 
-        // UPDATED: Real Google Sign-In with Popup
         window.handleGoogleSignIn = async function() {
             if (!window.auth) {
                 alert("Firebase Authentication is not initialized properly.");
@@ -497,27 +496,23 @@
             }
         }
 
-      // මේක ඒ වෙනුවට දාන්න
-window.setupCloudSync = function() {
-    if(!window.currentUser || !window.db) return;
-
-    // Realtime Database Path
-    const userRef = ref(window.db, 'users/' + window.currentUser.uid);
-    
-    // Cloud එකට දත්ත යැවීම
-    set(userRef, window.appState).catch(e => console.error("Sync failed", e));
-
-    // Cloud එකෙන් දත්ත කියවීම
-    onValue(userRef, (snapshot) => {
-        const data = snapshot.val();
-        if(data) {
-            window.appState = data;
-            localStorage.setItem('study_master_pro_data', JSON.stringify(window.appState));
-            // UI එක update කරන function එක (ඔයාගේ code එකේ නම බලන්න)
-            if(typeof renderCurrentPage === 'function') renderCurrentPage();
-        }
-    });
-};
+        // --- CLOUD SYNC FIXED ---
+        window.setupCloudSync = function() {
+            if(!window.currentUser || !window.db) return;
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'study-master';
+            const docRef = doc(window.db, 'artifacts', appId, 'users', window.currentUser.uid, 'sync', 'mainState');
+            
+            // Listen to the cloud document First! Do not immediately overwrite it with local data!
+            onSnapshot(docRef, (snap) => {
+                if(snap.exists()) {
+                    // Cloud has data. Bring it to the device!
+                    window.appState = snap.data(); // Replace local entirely to ensure deleted items are also synced properly
+                    localStorage.setItem('study_master_pro_data', JSON.stringify(window.appState));
+                    renderUI();
+                } else {
+                    // Cloud is empty. This is the first time the user synced from this account. Push local data!
+                    setDoc(docRef, window.appState).catch(e => console.error("Initial write failed", e));
+                }
             }, (err) => console.error("Sync Error", err));
         }
 
@@ -554,11 +549,16 @@ window.setupCloudSync = function() {
             initLucide();
         }
 
-       window.saveData = function() {
-    if(!window.currentUser || !window.db) return;
-    const userRef = ref(window.db, 'users/' + window.currentUser.uid);
-    set(userRef, window.appState).catch(e => console.error("Save failed", e));
-}
+        window.saveData = function() {
+            // Save Locally First
+            localStorage.setItem('study_master_pro_data', JSON.stringify(window.appState));
+            
+            // Push to Cloud if Logged In
+            if(window.currentUser && !window.currentUser.isAnonymous && window.db) {
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'study-master';
+                const docRef = doc(window.db, 'artifacts', appId, 'users', window.currentUser.uid, 'sync', 'mainState');
+                setDoc(docRef, window.appState);
+            }
             renderUI();
         }
 
@@ -636,7 +636,6 @@ window.setupCloudSync = function() {
             const item = collection.find(x => x.id === id);
             if(item) {
                 item.level = (item.level || 0) + 1;
-                // Spaced repetition gaps
                 const gaps = [1, 3, 7, 14, 30];
                 const daysToAdd = gaps[Math.min(item.level - 1, gaps.length - 1)];
                 item.nextRev = Date.now() + (daysToAdd * 24 * 60 * 60 * 1000);
