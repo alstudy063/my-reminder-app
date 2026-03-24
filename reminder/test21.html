@@ -159,6 +159,7 @@
     
     .btn-icon:hover { transform: translateY(-1px); filter: brightness(0.95); }
     
+    /* Mobile Bottom Bar - Enhanced Size */
     .mobile-bottom-nav {
       display: none;
       position: fixed;
@@ -168,19 +169,32 @@
       background: var(--card-bg);
       backdrop-filter: var(--glass-blur);
       border-top: 1px solid var(--border-color);
-      padding: 0.6rem 1rem;
+      padding: 0.8rem 1rem;
       justify-content: space-around;
       z-index: 100;
+      min-height: 70px;
     }
     
     .mobile-nav-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      font-size: 0.7rem;
+      font-size: 0.8rem;
       color: var(--text-secondary);
-      gap: 4px;
+      gap: 6px;
       cursor: pointer;
+      flex: 1;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    
+    .mobile-nav-item i {
+      font-size: 1.4rem;
+    }
+    
+    .mobile-nav-item span {
+      font-size: 0.75rem;
+      font-weight: 500;
     }
     
     .mobile-nav-item.active {
@@ -266,7 +280,7 @@
     @media (max-width: 768px) {
       .sidebar { display: none; }
       .mobile-bottom-nav { display: flex; }
-      .main-content { padding: 1rem 1rem 5rem 1rem; }
+      .main-content { padding: 1rem 1rem calc(70px + 1rem) 1rem; }
     }
     
     .item-card {
