@@ -281,6 +281,27 @@
       .sidebar { display: none; }
       .mobile-bottom-nav { display: flex; }
       .main-content { padding: 1rem 1rem calc(70px + 1rem) 1rem; }
+      
+      /* Dashboard 2‑column grid on mobile */
+      .stats-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.8rem;
+      }
+      .stat-card {
+        padding: 0.8rem;
+      }
+      .stat-card i {
+        font-size: 1.2rem;
+      }
+      .stat-card strong {
+        font-size: 1.1rem;
+      }
+      .stat-card br + strong {
+        font-size: 1.2rem;
+      }
+      .stat-card span, .stat-card p {
+        font-size: 0.7rem;
+      }
     }
     
     .item-card {
@@ -294,8 +315,20 @@
       transition: all 0.2s;
     }
     
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; }
-    .stat-card { background: var(--bg-secondary); border-radius: 20px; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.2s; }
+    .stats-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+      gap: 1rem; 
+      margin-top: 1rem; 
+    }
+    .stat-card { 
+      background: var(--bg-secondary); 
+      border-radius: 20px; 
+      padding: 1rem; 
+      text-align: center; 
+      cursor: pointer; 
+      transition: all 0.2s; 
+    }
     .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     
     .flex-row { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
