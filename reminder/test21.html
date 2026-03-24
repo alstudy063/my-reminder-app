@@ -302,6 +302,64 @@
       .stat-card span, .stat-card p {
         font-size: 0.7rem;
       }
+      
+      /* Collapsible Add Section */
+      .add-section {
+        margin-bottom: 1.5rem;
+      }
+      .add-section-header {
+        background: rgba(59,130,246,0.1);
+        border: 1px solid var(--border-color);
+        border-radius: 60px;
+        padding: 0.8rem 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        cursor: pointer;
+        backdrop-filter: blur(4px);
+        transition: all 0.2s;
+        box-shadow: 0 0 0 0 rgba(59,130,246,0.4);
+      }
+      .add-section-header:hover {
+        background: rgba(59,130,246,0.2);
+        box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
+      }
+      .add-section-header i {
+        font-size: 1.2rem;
+        color: #3b82f6;
+      }
+      .add-section-header span {
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+      .add-section-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-top: 0;
+      }
+      .add-section-content.expanded {
+        max-height: 500px; /* enough to contain the form */
+        margin-top: 1rem;
+      }
+      .add-section-content .flex-row {
+        margin-bottom: 0;
+      }
+      .desktop-only {
+        display: none;
+      }
+    }
+    
+    /* Desktop styles: keep add section always visible, no collapsible */
+    @media (min-width: 769px) {
+      .add-section-header {
+        display: none;
+      }
+      .add-section-content {
+        max-height: none !important;
+        overflow: visible !important;
+        display: block !important;
+      }
     }
     
     .item-card {
@@ -595,7 +653,48 @@
     document.querySelectorAll('.nav-item').forEach(el => el.addEventListener('click', () => switchTab(el.dataset.tab)));
   }
   
-  // ========== All Tab Renderers (Fully Implemented) ==========
+  // Helper to create collapsible add section wrapper
+  function createAddSection(headerText, iconClass, contentHtml, expandId) {
+    return `
+      <div class="add-section">
+        <div class="add-section-header" data-expand="${expandId}">
+          <i class="${iconClass}"></i>
+          <span>${headerText}</span>
+          <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 0.8rem;"></i>
+        </div>
+        <div class="add-section-content" id="${expandId}">
+          ${contentHtml}
+        </div>
+      </div>
+    `;
+  }
+  
+  // Attach collapsible listeners after rendering
+  function attachCollapsibleListeners() {
+    if (window.innerWidth <= 768) {
+      document.querySelectorAll('.add-section-header').forEach(header => {
+        const contentId = header.dataset.expand;
+        const content = document.getElementById(contentId);
+        if (content && !header.hasListener) {
+          header.hasListener = true;
+          header.addEventListener('click', () => {
+            content.classList.toggle('expanded');
+            const icon = header.querySelector('.fa-chevron-down');
+            if (icon) icon.style.transform = content.classList.contains('expanded') ? 'rotate(180deg)' : 'rotate(0deg)';
+          });
+          // initially collapsed (if not expanded)
+          if (!content.classList.contains('expanded')) content.classList.remove('expanded');
+        }
+      });
+    } else {
+      // On desktop, ensure all add-section-content are visible
+      document.querySelectorAll('.add-section-content').forEach(content => {
+        content.classList.add('expanded');
+      });
+    }
+  }
+  
+  // ========== All Tab Renderers (with collapsible add sections for mobile) ==========
   
   async function renderDashboard() {
     const revCount = allItems.revision.length;
@@ -643,16 +742,23 @@
   async function renderRevision() {
     let items = sortByPriority(allItems.revision);
     const subjectsList = [...new Set(items.map(i => i.subject).concat(subjects))];
+    
+    const addFormHtml = `
+      <div class="flex-row">
+        <input type="text" id="revTitle" placeholder="Topic title" style="flex:2">
+        <input type="text" id="revContent" placeholder="Key points" style="flex:3">
+        <select id="revPriority"><option>High</option><option>Medium</option><option>Low</option></select>
+        <select id="revSubject">${subjectsList.map(s => `<option>${s}</option>`).join('')}</select>
+        <button id="addRevBtn" class="btn-icon"><i class="fas fa-plus"></i> Add</button>
+      </div>
+    `;
+    
+    const collapsibleSection = createAddSection('➕ Add New Revision', 'fas fa-plus-circle', addFormHtml, 'revAddContent');
+    
     const html = `
       <div class="glass-card">
         <h2><i class="fas fa-brain"></i> Revision Cards</h2>
-        <div class="flex-row">
-          <input type="text" id="revTitle" placeholder="Topic title" style="flex:2">
-          <input type="text" id="revContent" placeholder="Key points" style="flex:3">
-          <select id="revPriority"><option>High</option><option>Medium</option><option>Low</option></select>
-          <select id="revSubject">${subjectsList.map(s => `<option>${s}</option>`).join('')}</select>
-          <button id="addRevBtn" class="btn-icon"><i class="fas fa-plus"></i> Add</button>
-        </div>
+        ${collapsibleSection}
         <div class="flex-row">
           <button id="shuffleBtn" class="btn-icon"><i class="fas fa-shuffle"></i> Shuffle Study Mode</button>
           <button id="subjectRecallBtn" class="btn-icon"><i class="fas fa-filter"></i> Subject-wise Random</button>
@@ -713,15 +819,26 @@
     };
     
     renderList();
+    attachCollapsibleListeners();
   }
   
   async function renderEquations() {
     let items = sortByPriority(allItems.equations);
     const subjectsList = [...new Set(items.map(i => i.subject).concat(subjects))];
-    const html = `<div class="glass-card"><h2><i class="fas fa-square-root-alt"></i> Equations Library</h2>
-      <div class="flex-row"><input id="eqName" placeholder="Equation name"><input id="eqFormula" placeholder="Formula"><select id="eqSubject">${subjectsList.map(s => `<option>${s}</option>`).join('')}</select><select id="eqPriority"><option>High</option><option>Medium</option><option>Low</option></select><button id="addEqBtn" class="btn-icon">+ Add</button></div>
-      <div id="eqList"></div></div>`;
+    const addFormHtml = `
+      <div class="flex-row">
+        <input id="eqName" placeholder="Equation name">
+        <input id="eqFormula" placeholder="Formula">
+        <select id="eqSubject">${subjectsList.map(s => `<option>${s}</option>`).join('')}</select>
+        <select id="eqPriority"><option>High</option><option>Medium</option><option>Low</option></select>
+        <button id="addEqBtn" class="btn-icon">+ Add</button>
+      </div>
+    `;
+    const collapsibleSection = createAddSection('➕ Add New Equation', 'fas fa-plus-circle', addFormHtml, 'eqAddContent');
+    
+    const html = `<div class="glass-card"><h2><i class="fas fa-square-root-alt"></i> Equations Library</h2>${collapsibleSection}<div id="eqList"></div></div>`;
     document.getElementById('tabContent').innerHTML = html;
+    
     function renderEqList() {
       document.getElementById('eqList').innerHTML = items.map(e => `<div class="item-card ${e.priority === 'High' ? 'priority-high' : e.priority === 'Medium' ? 'priority-medium' : 'priority-low'}"><div><strong>${e.name}</strong><br>${e.formula}<br><small>${e.subject} | <span class="badge badge-${e.priority.toLowerCase()}">${e.priority}</span></small></div><div><button class="editEq" data-id="${e.id}"><i class="fas fa-edit"></i></button><button class="delEq" data-id="${e.id}"><i class="fas fa-trash"></i></button></div></div>`).join('');
       document.querySelectorAll('.delEq').forEach(btn => btn.addEventListener('click', async()=>{ allItems.equations = allItems.equations.filter(x=>x.id !== parseInt(btn.dataset.id)); await saveAll(); renderEquations(); }));
@@ -729,6 +846,7 @@
     }
     document.getElementById('addEqBtn').onclick = async()=>{ const name=document.getElementById('eqName').value, formula=document.getElementById('eqFormula').value, subject=document.getElementById('eqSubject').value, priority=document.getElementById('eqPriority').value; if(name&&formula){ allItems.equations.push({id:Date.now(), name, formula, subject, priority}); await saveAll(); renderEquations(); } };
     renderEqList();
+    attachCollapsibleListeners();
   }
   
   async function renderPapers() {
@@ -736,28 +854,30 @@
     const subjectsList = [...new Set([...subjects, ...items.map(i => i.subject)])];
     const uniqueSubjects = ['All Subjects', ...subjectsList];
     
+    const addFormHtml = `
+      <div class="flex-row">
+        <select id="paperSubjectSelect" style="flex: 1;">
+          <option value="">Select Subject</option>
+          ${subjectsList.map(s => `<option value="${s}">${s}</option>`).join('')}
+        </select>
+        <input type="text" id="paperSubjectNew" placeholder="Or enter new subject" style="flex: 1;">
+        <input type="number" id="paperMarks" placeholder="Marks" style="width: 100px;">
+        <input type="number" id="paperTotal" placeholder="Total" style="width: 100px;">
+        <input type="date" id="paperDate" style="width: 130px;">
+        <select id="paperPriority">
+          <option>High</option>
+          <option>Medium</option>
+          <option>Low</option>
+        </select>
+        <button id="addPaperBtn" class="btn-icon"><i class="fas fa-save"></i> Save</button>
+      </div>
+    `;
+    const collapsibleSection = createAddSection('📄 Add New Past Paper', 'fas fa-plus-circle', addFormHtml, 'paperAddContent');
+    
     const html = `
       <div class="glass-card">
         <h2><i class="fas fa-scroll"></i> Past Papers Tracker</h2>
-        <div class="filter-bar">
-          <h3 style="margin-bottom: 1rem;"><i class="fas fa-plus-circle"></i> Add Past Paper</h3>
-          <div class="flex-row">
-            <select id="paperSubjectSelect" style="flex: 1;">
-              <option value="">Select Subject</option>
-              ${subjectsList.map(s => `<option value="${s}">${s}</option>`).join('')}
-            </select>
-            <input type="text" id="paperSubjectNew" placeholder="Or enter new subject" style="flex: 1;">
-            <input type="number" id="paperMarks" placeholder="Marks Obtained" style="width: 120px;">
-            <input type="number" id="paperTotal" placeholder="Total Marks" style="width: 120px;">
-            <input type="date" id="paperDate" style="width: 140px;">
-            <select id="paperPriority">
-              <option>High</option>
-              <option>Medium</option>
-              <option>Low</option>
-            </select>
-            <button id="addPaperBtn" class="btn-icon"><i class="fas fa-save"></i> Save</button>
-          </div>
-        </div>
+        ${collapsibleSection}
         <div class="filter-bar">
           <h3 style="margin-bottom: 1rem;"><i class="fas fa-filter"></i> Filter Papers</h3>
           <div class="flex-row">
@@ -829,6 +949,7 @@
     document.getElementById('filterPriority').addEventListener('change', () => renderPaperList());
     document.getElementById('clearFilters').addEventListener('click', () => { document.getElementById('filterSubject').value = ''; document.getElementById('filterPriority').value = ''; renderPaperList(); });
     renderPaperList();
+    attachCollapsibleListeners();
   }
   
   async function renderEssays() {
@@ -837,25 +958,27 @@
     let currentShuffledItems = [...items];
     let isShuffleMode = false;
     
+    const addFormHtml = `
+      <div class="flex-row">
+        <input type="text" id="essayTitle" placeholder="Essay Topic" style="flex: 2;">
+        <textarea id="essayPoints" rows="2" placeholder="Key points, arguments, structure" style="flex: 3;"></textarea>
+        <select id="essaySubject">
+          ${subjectsList.map(s => `<option>${s}</option>`).join('')}
+        </select>
+        <select id="essayPriority">
+          <option>High</option>
+          <option>Medium</option>
+          <option>Low</option>
+        </select>
+        <button id="addEssayBtn" class="btn-icon"><i class="fas fa-save"></i> Add</button>
+      </div>
+    `;
+    const collapsibleSection = createAddSection('✍️ Add New Essay', 'fas fa-plus-circle', addFormHtml, 'essayAddContent');
+    
     const html = `
       <div class="glass-card">
         <h2><i class="fas fa-feather-alt"></i> Essays Library</h2>
-        <div class="filter-bar">
-          <h3 style="margin-bottom: 1rem;"><i class="fas fa-plus-circle"></i> Add New Essay</h3>
-          <div class="flex-row">
-            <input type="text" id="essayTitle" placeholder="Essay Topic" style="flex: 2;">
-            <textarea id="essayPoints" rows="2" placeholder="Key points, arguments, structure" style="flex: 3;"></textarea>
-            <select id="essaySubject">
-              ${subjectsList.map(s => `<option>${s}</option>`).join('')}
-            </select>
-            <select id="essayPriority">
-              <option>High</option>
-              <option>Medium</option>
-              <option>Low</option>
-            </select>
-            <button id="addEssayBtn" class="btn-icon"><i class="fas fa-save"></i> Add</button>
-          </div>
-        </div>
+        ${collapsibleSection}
         <div style="margin-bottom: 1.5rem;">
           <h3><i class="fas fa-graduation-cap"></i> Study Modes</h3>
           <div class="flex-row">
@@ -987,6 +1110,7 @@
     };
     
     renderEssayList();
+    attachCollapsibleListeners();
   }
   
   async function renderPomodoro() {
@@ -1227,6 +1351,13 @@
     await switchTab('dashboard');
     setTimeout(() => updateRandomInsight(), 100);
     document.getElementById('randomInsightBar')?.addEventListener('click', updateRandomInsight);
+    
+    // Listen to resize to reattach collapsible logic
+    window.addEventListener('resize', () => {
+      if (currentTab === 'revision' || currentTab === 'equations' || currentTab === 'papers' || currentTab === 'essays') {
+        attachCollapsibleListeners();
+      }
+    });
   }
   
   init();
