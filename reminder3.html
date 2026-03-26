@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>StudyFlow · Intelligent Study Tracker</title>
+    <title>StudyFlow · Intelligent Study Tracker (Desktop)</title>
     <!-- Tailwind + Fonts + Smooth Interactivity -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
         * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
         
         /* smooth scroll & hide default focus ring */
-        body { scroll-behavior: smooth; background: #f8fafc; }
+        body { scroll-behavior: smooth; background: #f1f5f9; }
         
         /* animated fade + slide */
         @keyframes fadeSlideUp {
@@ -65,43 +65,6 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
         
-        /* bottom nav active glow */
-        .nav-item.active {
-            color: #4f46e5;
-            position: relative;
-        }
-        .nav-item.active::after {
-            content: '';
-            position: absolute;
-            bottom: 6px;
-            width: 28px;
-            height: 3px;
-            background: #4f46e5;
-            border-radius: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .btn-primary {
-            transition: all 0.2s ease;
-        }
-        .btn-primary:active { transform: scale(0.97); }
-        
-        /* custom scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
-        
-        /* urgent pulse */
-        @keyframes subtlePulse {
-            0% { border-left-color: #ef4444; }
-            100% { border-left-color: #fecaca; }
-        }
-        .urgent-pulse {
-            border-left: 4px solid #ef4444;
-            background: linear-gradient(95deg, #fff 0%, #fef2f2 100%);
-        }
-        
         /* line clamp */
         .line-clamp-2 {
             display: -webkit-box;
@@ -117,9 +80,30 @@
             filter: blur(60px);
             z-index: 0;
         }
+        
+        /* desktop navigation active indicator */
+        .nav-link {
+            transition: all 0.2s;
+        }
+        .nav-link.active {
+            color: #4f46e5;
+            background-color: #eef2ff;
+            border-radius: 2rem;
+        }
+        
+        /* custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        
+        /* urgent pulse */
+        .urgent-pulse {
+            border-left: 4px solid #ef4444;
+            background: linear-gradient(95deg, #fff 0%, #fef2f2 100%);
+        }
     </style>
 </head>
-<body class="bg-slate-50">
+<body class="bg-slate-100">
 
     <!-- LOGIN SCREEN : redesigned modern with floating elements and subtle gradient -->
     <div id="loginScreen" class="fixed inset-0 bg-gradient-to-br from-indigo-900 via-purple-800 to-pink-700 flex items-center justify-center z-[2000] p-4 overflow-hidden">
@@ -151,69 +135,86 @@
         </div>
     </div>
 
-    <!-- MAIN APP CONTAINER (modern design) -->
-    <div id="appBody" class="max-w-3xl mx-auto bg-white min-h-screen shadow-xl relative hidden pb-28">
-        <!-- HEADER with gradient accent -->
-        <div class="bg-gradient-to-r from-indigo-50 to-white border-b border-indigo-100 px-6 pt-8 pb-5">
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                <div>
-                    <h1 class="text-3xl font-black bg-gradient-to-r from-indigo-700 to-purple-700 bg-clip-text text-transparent">📘 StudyFlow</h1>
-                    <p class="text-slate-500 text-sm mt-1" id="userGreeting">loading profile...</p>
-                </div>
-                <div class="flex items-center gap-3">
-                    <select id="subjectFilter" class="px-4 py-2.5 border-0 bg-white/80 rounded-xl shadow-sm text-sm font-medium outline-none ring-1 ring-gray-200 focus:ring-2 focus:ring-indigo-400 cursor-pointer">
-                        <option value="All">📚 All subjects</option>
-                        <option value="Biology">🧬 Biology</option>
-                        <option value="Physics">⚛️ Physics</option>
-                        <option value="Chemistry">🧪 Chemistry</option>
-                    </select>
-                    <div class="hidden sm:block">
-                        <img id="headerAvatar" class="w-9 h-9 rounded-full ring-2 ring-indigo-200 shadow-sm" src="" alt="avatar">
+    <!-- MAIN APP CONTAINER (DESKTOP VERSION - full width with top navigation) -->
+    <div id="appBody" class="bg-white min-h-screen hidden">
+        <!-- Top Navigation Bar (Desktop first) -->
+        <nav class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <!-- Logo and brand -->
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        </div>
+                        <span class="font-bold text-xl bg-gradient-to-r from-indigo-700 to-purple-700 bg-clip-text text-transparent">StudyFlow</span>
+                    </div>
+                    
+                    <!-- Navigation Links (Desktop) -->
+                    <div class="hidden md:flex items-center space-x-1 bg-gray-50 p-1 rounded-full">
+                        <button data-nav="home" class="nav-link active flex items-center gap-2 px-5 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 transition rounded-full">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                            Home
+                        </button>
+                        <button data-nav="add" class="nav-link flex items-center gap-2 px-5 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 transition rounded-full">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4v16m8-8H4" /></svg>
+                            Add Session
+                        </button>
+                        <button data-nav="progress" class="nav-link flex items-center gap-2 px-5 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 transition rounded-full">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                            Progress
+                        </button>
+                        <button data-nav="profile" class="nav-link flex items-center gap-2 px-5 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 transition rounded-full">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                            Profile
+                        </button>
+                    </div>
+                    
+                    <!-- User avatar and greeting (desktop) -->
+                    <div class="flex items-center gap-3">
+                        <p id="userGreetingNav" class="text-sm text-gray-600 hidden md:block">Loading...</p>
+                        <img id="headerAvatarDesktop" class="w-8 h-8 rounded-full ring-2 ring-indigo-200 shadow-sm" src="" alt="avatar">
                     </div>
                 </div>
             </div>
-            <!-- Stats mini dashboard -->
-            <div class="grid grid-cols-2 gap-4 mt-6">
-                <div class="bg-white rounded-2xl p-3 shadow-sm border border-indigo-50">
-                    <p class="text-xs text-gray-500 font-medium">📋 Pending tasks</p>
-                    <p id="pendingCountDisplay" class="text-2xl font-bold text-indigo-700">0</p>
-                </div>
-                <div class="bg-white rounded-2xl p-3 shadow-sm border border-indigo-50">
-                    <p class="text-xs text-gray-500 font-medium">✅ Completed</p>
-                    <p id="completedCountDisplay" class="text-2xl font-bold text-emerald-600">0</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- MAIN REMINDER GRID -->
-        <main class="px-6 py-6">
-            <div id="reminderGrid" class="grid grid-cols-1 md:grid-cols-2 gap-5 auto-rows-fr"></div>
-        </main>
-
-        <!-- BOTTOM NAVIGATION (Premium) -->
-        <nav class="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-3xl bg-white/90 backdrop-blur-lg border-t border-gray-100 flex justify-around items-center py-2 px-4 rounded-t-2xl shadow-2xl z-50">
-            <div class="nav-item active flex flex-col items-center justify-center cursor-pointer transition-all py-1" onclick="switchTab('home')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-                <span class="text-[11px] font-medium mt-0.5">Home</span>
-            </div>
-            <div class="nav-item flex flex-col items-center justify-center cursor-pointer" onclick="openModal('addModal')">
-                <div class="bg-indigo-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-indigo-300 -mt-7 transition-transform active:scale-95">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-                </div>
-                <span class="text-[11px] font-medium mt-0.5">Add</span>
-            </div>
-            <div class="nav-item flex flex-col items-center justify-center cursor-pointer" onclick="openModal('progressModal')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                <span class="text-[11px] font-medium mt-0.5">Progress</span>
-            </div>
-            <div class="nav-item flex flex-col items-center justify-center cursor-pointer" onclick="openModal('profileModal')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                <span class="text-[11px] font-medium mt-0.5">Profile</span>
-            </div>
         </nav>
+
+        <!-- Main Content Area (desktop optimized) -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Dashboard stats row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-indigo-50 rounded-xl"><svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                        <div><p class="text-xs text-gray-500">Pending tasks</p><p id="pendingCountDisplay" class="text-2xl font-bold text-indigo-700">0</p></div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-emerald-50 rounded-xl"><svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                        <div><p class="text-xs text-gray-500">Completed</p><p id="completedCountDisplay" class="text-2xl font-bold text-emerald-600">0</p></div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 col-span-1 sm:col-span-2 lg:col-span-2">
+                    <div class="flex flex-wrap justify-between items-center gap-3">
+                        <div class="flex items-center gap-2"><span class="text-sm font-medium text-gray-600">📚 Filter by subject:</span>
+                            <select id="subjectFilter" class="px-4 py-2 border-0 bg-gray-50 rounded-xl text-sm font-medium outline-none ring-1 ring-gray-200 focus:ring-2 focus:ring-indigo-400 cursor-pointer">
+                                <option value="All">All subjects</option>
+                                <option value="Biology">🧬 Biology</option>
+                                <option value="Physics">⚛️ Physics</option>
+                                <option value="Chemistry">🧪 Chemistry</option>
+                            </select>
+                        </div>
+                        <div id="userGreetingDesktop" class="text-sm text-gray-500"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reminder Grid (3 columns on large screens) -->
+            <div id="reminderGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr"></div>
+        </main>
     </div>
 
-    <!-- ADD MODAL (sleek) -->
+    <!-- MODALS (unchanged, but refined) -->
     <div id="addModal" class="modal-overlay fixed inset-0 hidden justify-center items-center z-[1100]">
         <div class="modal-content bg-white rounded-2xl w-[90%] max-w-md p-6 animate-fade-up">
             <h2 class="text-2xl font-bold text-slate-800">📌 New study session</h2>
@@ -232,7 +233,6 @@
         </div>
     </div>
 
-    <!-- PROGRESS MODAL (dark premium) -->
     <div id="progressModal" class="modal-overlay fixed inset-0 hidden justify-center items-center z-[1100]">
         <div class="modal-content bg-slate-900 rounded-2xl w-[90%] max-w-md p-6 border border-slate-700">
             <div class="flex justify-between items-center mb-4">
@@ -244,7 +244,6 @@
         </div>
     </div>
 
-    <!-- PROFILE MODERN -->
     <div id="profileModal" class="modal-overlay fixed inset-0 hidden justify-center items-center z-[1100]">
         <div class="modal-content bg-white rounded-2xl w-[90%] max-w-lg overflow-hidden flex flex-col md:flex-row animate-fade-up">
             <div class="bg-indigo-50 p-6 flex flex-col items-center text-center md:w-1/3">
@@ -268,7 +267,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, updateDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, updateDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA9DLfAHTUUGxCPn2j_k6godoTEopzaFAU",
@@ -289,14 +288,11 @@
         let currentReminders = [];
         let currentProgress = { Biology: 0, Physics: 0, Chemistry: 0 };
 
-        // UI helpers
         function updatePendingCompletedCounts() {
             const pending = currentReminders.filter(r => !r.completed).length;
             const completed = currentReminders.filter(r => r.completed).length;
-            const pendingEl = document.getElementById('pendingCountDisplay');
-            const completedEl = document.getElementById('completedCountDisplay');
-            if (pendingEl) pendingEl.innerText = pending;
-            if (completedEl) completedEl.innerText = completed;
+            document.getElementById('pendingCountDisplay').innerText = pending;
+            document.getElementById('completedCountDisplay').innerText = completed;
         }
 
         // AUTH
@@ -315,12 +311,14 @@
             if (user) {
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appBody').classList.remove('hidden');
-                document.getElementById('userGreeting').innerHTML = `👋 Hey, ${user.displayName?.split(' ')[0] || 'Scholar'}!`;
+                const firstName = user.displayName?.split(' ')[0] || 'Scholar';
+                document.getElementById('userGreetingNav').innerHTML = `👋 ${firstName}`;
+                document.getElementById('userGreetingDesktop').innerHTML = `👋 Welcome back, ${firstName}`;
                 document.getElementById('profileDisplayName').innerText = user.displayName || 'Student';
                 document.getElementById('profilePic').src = user.photoURL || 'https://ui-avatars.com/api/?background=4f46e5&color=fff&bold=true&name='+encodeURIComponent(user.displayName || 'User');
                 document.getElementById('emailDisplay').innerText = user.email;
-                const headerAvatar = document.getElementById('headerAvatar');
-                if(headerAvatar) headerAvatar.src = user.photoURL || 'https://ui-avatars.com/api/?background=6366f1&color=fff&name='+encodeURIComponent(user.displayName || 'U');
+                const avatarElem = document.getElementById('headerAvatarDesktop');
+                if(avatarElem) avatarElem.src = user.photoURL || 'https://ui-avatars.com/api/?background=6366f1&color=fff&name='+encodeURIComponent(user.displayName || 'U');
                 setupRealtimeListeners(user.uid);
             } else {
                 document.getElementById('loginScreen').classList.remove('hidden');
@@ -379,10 +377,9 @@
             const filter = document.getElementById('subjectFilter').value;
             const today = new Date().toISOString().split('T')[0];
             let filtered = currentReminders.filter(r => !r.completed && (filter === 'All' || r.subject === filter));
-            // sort by nearest date (ascending)
             filtered.sort((a,b) => (a.date || '9999-12-31').localeCompare(b.date || '9999-12-31'));
             if (filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-16 flex flex-col items-center gap-3"><div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center"><svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div><p class="text-gray-500 font-medium">No pending tasks</p><p class="text-sm text-gray-400">Tap + to add a study session</p></div>`;
+                grid.innerHTML = `<div class="col-span-full text-center py-16 flex flex-col items-center gap-3"><div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center"><svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div><p class="text-gray-500 font-medium">No pending tasks</p><p class="text-sm text-gray-400">Click "Add Session" to start studying</p></div>`;
                 return;
             }
             grid.innerHTML = '';
@@ -396,30 +393,23 @@
                 if (isUrgent) dateBadge = '<span class="text-xs font-bold bg-red-100 text-red-700 px-2.5 py-1 rounded-full">⚠️ Due today</span>';
                 else if (isSoon) dateBadge = '<span class="text-xs font-bold bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full">📅 Upcoming</span>';
                 else dateBadge = `<span class="text-xs text-gray-500 bg-gray-50 px-2.5 py-1 rounded-full">📆 ${r.date}</span>`;
-                
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-3">
-                        ${badgeHtml}
-                        ${dateBadge}
-                    </div>
+                    <div class="flex justify-between items-start mb-3">${badgeHtml}${dateBadge}</div>
                     <h3 class="font-bold text-gray-800 text-lg leading-tight">${escapeHtml(r.topic)}</h3>
                     <p class="text-sm text-gray-500 mt-2 line-clamp-2 mb-4">${r.notes ? escapeHtml(r.notes) : '📝 No additional notes'}</p>
                     <button onclick="markReviewed('${r.id}', '${r.subject}')" class="w-full py-2.5 bg-indigo-50 hover:bg-indigo-600 border border-indigo-200 hover:border-indigo-600 rounded-xl text-sm font-semibold text-indigo-700 hover:text-white transition flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                        Mark reviewed
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> Mark reviewed
                     </button>
                 `;
                 grid.appendChild(card);
             });
         }
-        
-        function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){ if(m === '&') return '&amp;'; if(m === '<') return '&lt;'; if(m === '>') return '&gt;'; return m;}); }
 
+        function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
         function getSubjectColor(subj) {
             const map = { Biology: 'bg-green-100 text-green-700', Physics: 'bg-sky-100 text-sky-700', Chemistry: 'bg-purple-100 text-purple-700' };
             return map[subj] || 'bg-gray-100 text-gray-700';
         }
-
         function updateProgressUI() {
             const container = document.getElementById('progressStats');
             if (!container) return;
@@ -432,48 +422,41 @@
                 wrapper.className = 'flex items-center gap-5 bg-slate-800/60 p-4 rounded-2xl border border-slate-700';
                 wrapper.innerHTML = `
                     <div class="progress-ring" style="--ring-color: ${ringColor}; --percent: ${percent}; background: conic-gradient(${ringColor} ${percent * 3.6}deg, #1e293b 0deg); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                        <div class="progress-ring-inner" style="background:#0f172a; width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">${percent}%</div>
+                        <div class="progress-ring-inner">${percent}%</div>
                     </div>
                     <div><h4 class="text-xl font-bold text-white">${subj}</h4><p class="text-xs text-slate-400">Mastery score</p><div class="w-full bg-slate-700 h-1.5 rounded-full mt-2"><div class="bg-${subj === 'Biology' ? 'green-400' : subj === 'Physics' ? 'blue-400' : 'purple-400'} h-1.5 rounded-full" style="width: ${percent}%"></div></div></div>
                 `;
                 container.appendChild(wrapper);
             }
         }
-
         function updateProfileStats() {
             const completedCount = currentReminders.filter(r => r.completed).length;
-            const totalCompletedSpan = document.getElementById('totalCompletedDisplay');
-            if (totalCompletedSpan) totalCompletedSpan.innerText = completedCount;
+            document.getElementById('totalCompletedDisplay').innerText = completedCount;
         }
-
         document.getElementById('subjectFilter')?.addEventListener('change', () => renderReminders());
-        window.switchTab = (tab) => {
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            if(tab === 'home') document.querySelectorAll('.nav-item')[0].classList.add('active');
-        };
-        // close modal on overlay click
-        document.querySelectorAll('.modal-overlay').forEach(overlay => {
-            overlay.addEventListener('click', (e) => {
-                if(e.target === overlay) overlay.style.display = 'none';
+
+        // DESKTOP NAVIGATION HANDLERS
+        const navButtons = document.querySelectorAll('[data-nav]');
+        navButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const nav = btn.getAttribute('data-nav');
+                navButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                if (nav === 'home') {
+                    // already on home page, no extra action
+                } else if (nav === 'add') {
+                    openModal('addModal');
+                } else if (nav === 'progress') {
+                    openModal('progressModal');
+                } else if (nav === 'profile') {
+                    openModal('profileModal');
+                }
             });
         });
+
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.style.display = 'none'; });
+        });
     </script>
-    <!-- ========== INTEGRATION DESCRIPTION ========== -->
-    <!--
-    🔌 FIREBASE INTEGRATION ARCHITECTURE:
-    - AUTHENTICATION: Google Sign-In via Firebase Auth (popup). onAuthStateChanged guards entire app.
-    - FIRESTORE DATA MODEL:
-        * Collection path: artifacts/reminder-udara/users/{userId}/reminders
-            Each doc stores: topic, subject, date, notes, completed, createdAt.
-        * Progress subcollection: artifacts/reminder-udara/users/{userId}/stats/progress
-            Document tracks mastery percentages for Biology, Physics, Chemistry.
-    - REAL-TIME SYNC: onSnapshot() listeners update UI instantly when data changes (add/update).
-    - PROGRESS LOGIC: Each "Mark reviewed" increments subject mastery by +5% (capped at 100%).
-    - UI REACTIVITY: Reminders filtered, sorted by nearest date, completed excluded from main grid.
-    - All Firebase services initialized with modular SDK v11, no legacy dependencies.
-    - Security implicitly handled via Firebase project rules (configured externally).
-    - The app uses a shared 'artifacts' container to isolate user data per appId (reminder-udara).
-    - Modals, theme, and dynamic rendering built with Tailwind CSS + vanilla JS, entirely client-side.
-    -->
 </body>
 </html>
