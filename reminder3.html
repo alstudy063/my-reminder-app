@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>StudyFlow · Intelligent Study Tracker (Desktop)</title>
+    <title>StudyFlow · Intelligent Study Tracker</title>
     <!-- Tailwind + Fonts + Smooth Interactivity -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
@@ -101,6 +101,75 @@
             border-left: 4px solid #ef4444;
             background: linear-gradient(95deg, #fff 0%, #fef2f2 100%);
         }
+        
+        /* ===== RESPONSIVE NAVIGATION ===== */
+        /* Desktop top nav - visible on md and up */
+        .desktop-nav {
+            display: block;
+        }
+        /* Mobile bottom nav - hidden on md and up */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #e5e7eb;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            padding: 8px 16px 12px;
+        }
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #9ca3af;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+        .mobile-nav-item.active {
+            color: #4f46e5;
+        }
+        .mobile-add-btn {
+            background: #4f46e5;
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: -28px;
+            box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+            transition: transform 0.2s;
+        }
+        .mobile-add-btn:active {
+            transform: scale(0.95);
+        }
+        
+        @media (max-width: 767px) {
+            .desktop-nav {
+                display: none;
+            }
+            .mobile-bottom-nav {
+                display: flex;
+                justify-content: space-around;
+                align-items: flex-end;
+            }
+            /* Add padding to main content to avoid overlap */
+            .main-content-padding {
+                padding-bottom: 80px;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .main-content-padding {
+                padding-bottom: 0;
+            }
+        }
     </style>
 </head>
 <body class="bg-slate-100">
@@ -135,10 +204,10 @@
         </div>
     </div>
 
-    <!-- MAIN APP CONTAINER (DESKTOP VERSION - full width with top navigation) -->
+    <!-- MAIN APP CONTAINER (DESKTOP VERSION with responsive adjustments) -->
     <div id="appBody" class="bg-white min-h-screen hidden">
-        <!-- Top Navigation Bar (Desktop first) -->
-        <nav class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <!-- Desktop Top Navigation Bar (visible on md+) -->
+        <nav class="desktop-nav bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-16">
                     <!-- Logo and brand -->
@@ -179,7 +248,7 @@
         </nav>
 
         <!-- Main Content Area (desktop optimized) -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 main-content-padding">
             <!-- Dashboard stats row -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
                 <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
@@ -212,9 +281,31 @@
             <!-- Reminder Grid (3 columns on large screens) -->
             <div id="reminderGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr"></div>
         </main>
+
+        <!-- Mobile Bottom Navigation Bar (visible only on mobile) -->
+        <div class="mobile-bottom-nav">
+            <div class="mobile-nav-item" data-mobile-nav="home">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                <span class="text-xs font-medium">Home</span>
+            </div>
+            <div class="mobile-nav-item" data-mobile-nav="add">
+                <div class="mobile-add-btn">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                </div>
+                <span class="text-xs font-medium mt-1">Add</span>
+            </div>
+            <div class="mobile-nav-item" data-mobile-nav="progress">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                <span class="text-xs font-medium">Progress</span>
+            </div>
+            <div class="mobile-nav-item" data-mobile-nav="profile">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                <span class="text-xs font-medium">Profile</span>
+            </div>
+        </div>
     </div>
 
-    <!-- MODALS (unchanged, but refined) -->
+    <!-- MODALS (unchanged) -->
     <div id="addModal" class="modal-overlay fixed inset-0 hidden justify-center items-center z-[1100]">
         <div class="modal-content bg-white rounded-2xl w-[90%] max-w-md p-6 animate-fade-up">
             <h2 class="text-2xl font-bold text-slate-800">📌 New study session</h2>
@@ -443,7 +534,7 @@
                 navButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 if (nav === 'home') {
-                    // already on home page, no extra action
+                    // already on home page
                 } else if (nav === 'add') {
                     openModal('addModal');
                 } else if (nav === 'progress') {
@@ -453,6 +544,29 @@
                 }
             });
         });
+
+        // MOBILE BOTTOM NAVIGATION HANDLERS
+        const mobileNavItems = document.querySelectorAll('[data-mobile-nav]');
+        mobileNavItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const nav = item.getAttribute('data-mobile-nav');
+                mobileNavItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                if (nav === 'home') {
+                    // scroll to top if needed
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else if (nav === 'add') {
+                    openModal('addModal');
+                } else if (nav === 'progress') {
+                    openModal('progressModal');
+                } else if (nav === 'profile') {
+                    openModal('profileModal');
+                }
+            });
+        });
+        // Set default active for mobile (home)
+        const defaultMobileHome = document.querySelector('[data-mobile-nav="home"]');
+        if (defaultMobileHome) defaultMobileHome.classList.add('active');
 
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.style.display = 'none'; });
