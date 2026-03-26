@@ -629,6 +629,10 @@
 <div id="bottomSheetOverlay" class="bottom-sheet-overlay"><div class="bottom-sheet" id="bottomSheet"><div class="bottom-sheet-header">More</div><div class="bottom-sheet-grid" id="sheetItems"></div></div></div>
 
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
   // 1. Firebase Modules Import කිරීම
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { 
@@ -654,6 +658,7 @@
     appId: "1:426684063256:web:52c17625a9450ea9662d6d",
   };
 
+  // Firebase Initialize කිරීම
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getDatabase(app);
