@@ -1616,14 +1616,16 @@
         import { getFirestore, collection, addDoc, getDoc, setDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Your web app's Firebase configuration (provided by user)
-        const userFirebaseConfig = {
-            apiKey: "AIzaSyApLfVQ6hv0IAAN5ZkFlOQ-y5KXK-x1Q_M",
-            authDomain: "reminderapp-d84e9.firebaseapp.com",
-            projectId: "reminderapp-d84e9",
-            storageBucket: "reminderapp-d84e9.firebaseapp.com",
-            messagingSenderId: "312145339940",
-            appId: "1:312145339940:web:ade59de4d6de6cec221ab1"
-        };
+        const firebaseConfig = {
+  apiKey: "AIzaSyA9DLfAHTUUGxCPn2j_k6godoTEopzaFAU",
+  authDomain: "studymaster-919ba.firebaseapp.com",
+  databaseURL: "https://studymaster-919ba-default-rtdb.firebaseio.com",
+  projectId: "studymaster-919ba",
+  storageBucket: "studymaster-919ba.firebasestorage.app",
+  messagingSenderId: "426684063256",
+  appId: "1:426684063256:web:52c17625a9450ea9662d6d",
+  measurementId: "G-CWQB2330GF"
+};
 
         // Global variables provided by the Canvas environment (MUST BE USED)
         // If running outside Canvas, these will be undefined, so provide fallbacks.
