@@ -629,25 +629,10 @@
 <div id="bottomSheetOverlay" class="bottom-sheet-overlay"><div class="bottom-sheet" id="bottomSheet"><div class="bottom-sheet-header">More</div><div class="bottom-sheet-grid" id="sheetItems"></div></div></div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
   import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-  // 1. Firebase Modules Import කිරීම
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { 
-    getAuth, 
-    setPersistence, 
-    browserLocalPersistence, 
-    GoogleAuthProvider, 
-    signInWithRedirect, 
-    getRedirectResult, 
-    onAuthStateChanged, 
-    signOut 
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-  // 2. Firebase Configuration
   const firebaseConfig = {
     apiKey: "AIzaSyA9DLfAHTUUGxCPn2j_k6godoTEopzaFAU",
     authDomain: "studymaster-919ba.firebaseapp.com",
@@ -657,71 +642,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
     messagingSenderId: "426684063256",
     appId: "1:426684063256:web:52c17625a9450ea9662d6d",
   };
-
-  // Firebase Initialize කිරීම
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getDatabase(app);
   const provider = new GoogleAuthProvider();
-
-
-  window.handleGoogleLogin = async () => {
-    try {
-     
-      await setPersistence(auth, browserLocalPersistence);
-      await signInWithRedirect(auth, provider);
-    } catch (error) {
-      console.error("Login Error:", error);
-      alert(" + error.message);
-    }
-  };
-
-  // 4. Logout Function
-  window.handleLogout = () => {
-    signOut(auth).then(() => {
-      localStorage.clear();
-      location.reload();
-    }).catch((error) => {
-      console.error("Logout Error:", error);
-    });
-  };
-
-  async function checkAuthRedirect() {
-    try {
-      const result = await getRedirectResult(auth);
-      if (result) {
-        console.log("Logged in successfully after redirect:", result.user.displayName);
-      }
-    } catch (error) {
-      console.error("Redirect Error:", error);
-    }
-  }
-
-
-  async function init() {
- 
-    await checkAuthRedirect();
-
-    //  (Login/Logout)
-    onAuthStateChanged(auth, async (user) => {
-      const authContainer = document.getElementById('authContainer');
-      const mainContent = document.getElementById('mainContent');
-
-      if (user) {
-        console.log("User is logged in:", user.displayName);
-        if (authContainer) authContainer.style.display = 'none';
-        if (mainContent) mainContent.style.display = 'block';
-        
-        setupAppAfterLogin(user); 
-      } else {
-        console.log("No user is logged in.");
-        if (authContainer) authContainer.style.display = 'block';
-        if (mainContent) mainContent.style.display = 'none';
-      }
-    });
-  }
-
-
 
   // Global state
   let currentUser = null;
