@@ -2,162 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Biology Definitions • Smart Study with Cloud Sync</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Flow</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    <script type="importmap">
-        {
-            "imports": {
-                "firebase/app": "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js",
-                "firebase/auth": "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js",
-                "firebase/database": "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js"
-            }
-        }
-    </script>
-    <style>
-        * { font-family: 'Inter', sans-serif; }
-        body { min-height: 100vh; padding-bottom: 90px; transition: background-color 0.25s, color 0.2s; }
-        body.theme-light { background: #f8fafc; color: #0f172a; }
-        body.theme-dark { background: #0f172a; color: #eef2ff; }
-        .theme-dark .card-bg, .theme-dark .modal-content, .theme-dark .stat-card, .theme-dark .lesson-card, .theme-dark .suggestion-card, .theme-dark .bottom-nav { background-color: #1e293b; border-color: #334155; }
-        .theme-dark .bg-white { background-color: #1e293b !important; }
-        .theme-dark .bg-gray-50, .theme-dark .bg-gray-100 { background-color: #0f172a !important; }
-        .theme-dark .border-gray-200, .theme-dark .border-gray-300 { border-color: #334155 !important; }
-        .theme-dark .text-gray-600, .theme-dark .text-gray-700, .theme-dark .text-gray-500 { color: #cbd5e1 !important; }
-        .theme-dark .text-gray-800 { color: #f1f5f9 !important; }
-        .theme-dark .bg-blue-100, .theme-dark .bg-purple-100, .theme-dark .bg-green-100, .theme-dark .bg-red-100 { background-color: #1e293b !important; }
-        .theme-dark .bg-blue-50, .theme-dark .bg-purple-50, .theme-dark .bg-green-50 { background-color: #0f172a !important; }
-        .bottom-nav { backdrop-filter: blur(16px); border-radius: 2rem; width: calc(100% - 2rem); max-width: 500px; left: 50%; transform: translateX(-50%); bottom: 1.25rem; z-index: 50; transition: background 0.2s, border 0.2s; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; padding: 0.5rem 0.25rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 500; transition: all 0.2s; color: #64748b; }
-        .theme-dark .nav-item { color: #94a3b8; }
-        .nav-item i { font-size: 1.5rem; margin-bottom: 2px; }
-        .nav-item.active { color: #3b82f6; background: rgba(59,130,246,0.12); transform: translateY(-2px); }
-        .theme-dark .nav-item.active { color: #818cf8; background: rgba(129,140,248,0.15); }
-        .lesson-card, .suggestion-card, .stat-card { transition: all 0.2s ease; }
-        .lesson-card:hover, .suggestion-card:hover { transform: translateY(-3px); box-shadow: 0 12px 20px -12px rgba(0,0,0,0.15); }
-        .suggestion-card { cursor: pointer; }
-        .definition-text { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.4s cubic-bezier(0.2,0.9,0.4,1.1), opacity 0.3s ease; }
-        .definition-text.active { max-height: 300px; opacity: 1; margin-top: 0.5rem; }
-        .modal { background-color: rgba(0,0,0,0.7); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; }
-        .modal:not(.hidden) { opacity: 1; pointer-events: auto; }
-        .modal-content { transform: scale(0.96); transition: transform 0.2s ease-out; border-radius: 1.5rem; max-width: 92%; width: 500px; max-height: 85vh; overflow-y: auto; }
-        .modal:not(.hidden) .modal-content { transform: scale(1); }
-        .toast { padding: 0.75rem 1.25rem; border-radius: 2rem; font-weight: 500; backdrop-filter: blur(12px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); transform: translateX(120%); transition: transform 0.25s, opacity 0.2s; }
-        .toast.show { transform: translateX(0); }
-        .daily-badge { background: #8b5cf6; color: white; border-radius: 999px; padding: 0.2rem 0.75rem; font-size: 0.8rem; font-weight: 600; }
-        .lessons-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
-        .header-icon-btn { transition: all 0.2s; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 999px; }
-        .header-icon-btn:hover { background: rgba(0,0,0,0.05); }
-        .theme-dark .header-icon-btn:hover { background: rgba(255,255,255,0.08); }
-        .user-avatar { width: 36px; height: 36px; border-radius: 999px; object-fit: cover; border: 2px solid #3b82f6; }
-        .sync-spinner { margin-left: 0.5rem; display: inline-flex; align-items: center; }
-        .last-sync { font-size: 0.7rem; color: #6b7280; margin-top: 0.25rem; }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
-        .theme-dark ::-webkit-scrollbar-track { background: #1e293b; }
-        .theme-dark ::-webkit-scrollbar-thumb { background: #475569; }
-    </style>
-</head>
-<body class="theme-light">
-
-    <div class="max-w-5xl mx-auto px-4 pt-5 pb-2 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <i class="fas fa-dna text-blue-600 text-2xl"></i>
-            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">A/L Biology<span class="text-blue-500">·</span>Definitions</h1>
-        </div>
-        <div class="flex gap-2 items-center">
-            <div id="user-profile" class="flex items-center gap-2 cursor-pointer" onclick="window.toggleAuthMenu()">
-                <img id="user-avatar" src="https://via.placeholder.com/36" alt="avatar" class="user-avatar hidden">
-                <i id="user-icon" class="fas fa-user-circle text-2xl text-gray-500"></i>
-                <span id="user-name" class="text-sm font-medium hidden md:inline-block"></span>
-            </div>
-            <div id="sync-spinner" class="sync-spinner hidden">
-                <i class="fas fa-spinner fa-pulse text-blue-500"></i>
-            </div>
-            <button id="global-history-btn" class="header-icon-btn text-gray-600 hover:text-blue-600" title="History"><i class="fas fa-history text-xl"></i></button>
-            <div id="theme-switch-header" class="header-icon-btn cursor-pointer"><i class="fas fa-sun text-yellow-500 text-lg"></i></div>
-        </div>
-    </div>
-
-    <div id="auth-menu" class="hidden absolute right-4 top-16 bg-white dark:bg-slate-800 rounded-xl shadow-lg border p-2 z-50 w-48">
-        <div id="auth-status" class="text-sm p-2"></div>
-        <button id="google-signin-btn" class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg flex items-center gap-2"><i class="fab fa-google"></i> Sign in with Google</button>
-        <button id="google-signout-btn" class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg hidden"><i class="fas fa-sign-out-alt"></i> Sign out</button>
-    </div>
-
-    <div class="max-w-5xl mx-auto px-4 pb-8">
-        <div id="main-content-section" class="space-y-6">
-            <div id="daily-suggestions-section-trigger" class="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-5 border border-purple-200 dark:border-slate-700 cursor-pointer hover:shadow-lg transition-all group" onclick="window.showSection('suggestions-section')">
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center"><i class="fas fa-lightbulb text-purple-600 dark:text-purple-300 text-xl"></i></div>
-                        <div><h2 class="text-lg font-bold text-purple-800 dark:text-purple-200">Daily Smart Suggestions</h2><p class="text-sm text-gray-500 dark:text-gray-400">Tap any card to reveal definition</p></div>
-                    </div>
-                    <div class="daily-badge bg-purple-600 dark:bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-sm"><span id="daily-suggestions-count-display">0</span> left</div>
-                </div>
-            </div>
-            <div class="flex flex-wrap items-center justify-between gap-3 bg-white/50 dark:bg-slate-800/40 p-3 rounded-xl backdrop-blur-sm">
-                <div class="flex items-center gap-2"><i class="fas fa-filter text-blue-500"></i><span class="text-sm font-medium">Filter by lesson</span></div>
-                <select id="filter-lesson" class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none transition"><option value="">📚 All Lessons</option></select>
-            </div>
-            <div><div class="flex items-center justify-between mb-3"><h2 class="text-xl font-semibold flex items-center gap-2"><i class="fas fa-layer-group text-blue-500"></i> Your Lessons</h2><span id="lessons-count-badge" class="text-xs bg-gray-200 dark:bg-slate-700 px-2 py-1 rounded-full">0</span></div><div id="definitions-display" class="lessons-grid"></div></div>
-        </div>
-        <div id="suggestions-section" class="hidden space-y-4"><div class="flex items-center gap-3 mb-2"><button onclick="window.showSection('main-content-section')" class="text-blue-500 hover:underline text-sm flex items-center gap-1"><i class="fas fa-arrow-left"></i> Back</button><h3 class="text-2xl font-bold flex items-center gap-2"><i class="fas fa-lightbulb text-purple-500"></i> Today's Study List</h3><span class="text-xs text-gray-500">(Tap card to reveal/hide definition)</span></div><div id="daily-suggestions-container" class="flex flex-col gap-3"></div></div>
-        <div id="settings-section" class="hidden space-y-6">
-            <div class="flex items-center gap-3 mb-2"><button onclick="window.showSection('main-content-section')" class="text-blue-500 hover:underline text-sm"><i class="fas fa-arrow-left"></i> Back</button><h3 class="text-2xl font-bold">Stats & Settings</h3></div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div class="stat-card bg-white dark:bg-slate-800 p-4 rounded-2xl border text-center shadow-sm"><i class="fas fa-book-open text-blue-500 text-2xl mb-1"></i><p class="text-xs uppercase tracking-wide text-gray-500">Total</p><p id="total-definitions-count" class="text-2xl font-bold">0</p></div>
-                <div class="stat-card bg-white dark:bg-slate-800 p-4 rounded-2xl border text-center"><i class="fas fa-calendar-day text-purple-500 text-2xl mb-1"></i><p class="text-xs uppercase">Suggested today</p><p id="suggested-definitions-count" class="text-2xl font-bold">0</p></div>
-                <div class="stat-card bg-white dark:bg-slate-800 p-4 rounded-2xl border text-center"><i class="fas fa-check-circle text-green-500 text-2xl mb-1"></i><p class="text-xs uppercase">Passed total</p><p id="total-passed-count" class="text-2xl font-bold">0</p></div>
-                <div class="stat-card bg-white dark:bg-slate-800 p-4 rounded-2xl border text-center"><i class="fas fa-times-circle text-red-500 text-2xl mb-1"></i><p class="text-xs uppercase">Failed total</p><p id="total-failed-count" class="text-2xl font-bold">0</p></div>
-            </div>
-            <div class="bg-white dark:bg-slate-800 rounded-2xl border p-5 space-y-3">
-                <div class="flex items-center justify-between">
-                    <span class="font-semibold"><i class="fas fa-cloud-upload-alt mr-2"></i> Cloud Sync</span>
-                    <span id="sync-status" class="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 px-3 py-1 rounded-full">⚠️ Signed out (local only)</span>
-                </div>
-                <div id="user-info-panel" class="text-sm text-gray-600 dark:text-gray-300"></div>
-                <div id="last-sync-time" class="last-sync text-xs">Last synced: --</div>
-                <button id="force-sync-btn" class="w-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 py-2 rounded-xl text-sm mt-2 hidden"><i class="fas fa-sync-alt mr-1"></i> Force Sync Now</button>
-            </div>
-            <div class="bg-white dark:bg-slate-800 rounded-2xl border p-5 space-y-5">
-                <h4 class="font-semibold"><i class="fas fa-database mr-2"></i> Data Management</h4>
-                <div class="flex flex-wrap gap-2">
-                    <button id="import-data" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-sm shadow"><i class="fas fa-file-import mr-1"></i> Import JSON</button>
-                    <button id="export-data" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm shadow"><i class="fas fa-file-export mr-1"></i> Export Backup</button>
-                    <button id="reset-progress-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm shadow"><i class="fas fa-chart-line mr-1"></i> Reset Progress</button>
-                    <button id="clear-all-data-btn" class="bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded-xl text-sm shadow"><i class="fas fa-trash-alt mr-1"></i> Clear All Data</button>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div><p class="text-xs text-gray-500 mb-1">📋 Copy backup code</p><textarea id="backup-data-textarea" rows="2" class="w-full text-xs bg-gray-50 dark:bg-slate-900 border rounded-xl p-2" readonly placeholder="Click 'Copy Backup Data'"></textarea><button id="copy-backup-btn" class="mt-1 w-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 py-1.5 rounded-xl text-sm"><i class="fas fa-copy mr-1"></i> Copy to Clipboard</button></div>
-                    <div><p class="text-xs text-gray-500 mb-1">📥 Paste & restore</p><textarea id="restore-data-textarea" rows="2" class="w-full text-xs border rounded-xl p-2 dark:bg-slate-900" placeholder='Paste backup JSON here...'></textarea><button id="load-backup-btn" class="mt-1 w-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 py-1.5 rounded-xl text-sm"><i class="fas fa-upload mr-1"></i> Merge Data</button></div>
-                </div>
-            </div>
-        </div>
-        <div id="history-section" class="hidden"><div class="flex justify-between items-center mb-4"><h3 class="text-2xl font-bold flex items-center gap-2"><i class="fas fa-history"></i> Study History</h3><button id="back-from-history" class="px-3 py-1 rounded-full bg-gray-200 dark:bg-slate-700 text-sm"><i class="fas fa-arrow-left"></i> Back</button></div><div id="history-container" class="space-y-3"></div></div>
-    </div>
-
-    <div id="bottom-nav" class="bottom-nav fixed flex justify-around p-1.5 bg-white/80 dark:bg-slate-900/80 border border-gray-200 dark:border-slate-700 backdrop-blur-lg">
-        <button id="nav-home" class="nav-item active"><i class="fas fa-home"></i><span>Home</span></button>
-        <button id="nav-suggestions" class="nav-item"><i class="fas fa-lightbulb"></i><span>Today</span></button>
-        <button id="nav-add" class="nav-item"><i class="fas fa-plus-circle"></i><span>Add</span></button>
-        <button id="nav-settings" class="nav-item"><i class="fas fa-chart-simple"></i><span>Stats</span></button>
-    </div>
-
-    <div id="addContentModal" class="modal fixed inset-0 flex items-center justify-center hidden"><div class="modal-content bg-white dark:bg-slate-800 p-5 rounded-2xl w-full max-w-md"><div class="flex justify-between border-b pb-2 mb-3"><h3 class="text-xl font-bold"><i class="fas fa-plus-circle text-blue-500"></i> Add New</h3><button class="close-modal-btn text-3xl">&times;</button></div><div class="space-y-4"><div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl"><h4 class="font-semibold">New Lesson</h4><form id="add-lesson-form" class="flex gap-2 mt-2"><input type="text" id="new-lesson-name" placeholder="e.g., Cell Biology" class="flex-1 p-2 rounded-lg border dark:bg-slate-700" required><button type="submit" class="bg-blue-600 text-white px-4 rounded-xl text-sm">Add</button></form></div><div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-xl"><h4 class="font-semibold">New Definition</h4><form id="add-definition-form" class="space-y-2 mt-2"><select id="add-definition-lesson" class="w-full p-2 rounded-lg border dark:bg-slate-700" required></select><input type="text" id="new-definition-topic" placeholder="Topic / Term" class="w-full p-2 rounded-lg border dark:bg-slate-700" required><textarea id="new-definition-text" rows="2" placeholder="Definition content..." class="w-full p-2 rounded-lg border dark:bg-slate-700" required></textarea><button type="submit" class="bg-green-600 text-white w-full py-2 rounded-xl">Save Definition</button></form></div></div></div></div>
-    <div id="lessonDefinitionsModal" class="modal fixed inset-0 flex items-center justify-center hidden"><div class="modal-content bg-white dark:bg-slate-800 p-5 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto"><div class="flex justify-between sticky top-0 bg-white dark:bg-slate-800 pb-2"><h3 id="lesson-definitions-modal-title" class="text-xl font-bold"></h3><button id="close-lesson-definitions-modal" class="text-2xl">&times;</button></div><div id="lesson-definitions-container" class="grid gap-2 mt-2"></div></div></div>
-    <div id="editDefinitionModal" class="modal fixed inset-0 flex items-center justify-center hidden"><div class="modal-content bg-white dark:bg-slate-800 p-5 rounded-2xl w-full max-w-md"><div class="flex justify-between mb-3"><h3 class="font-bold"><i class="fas fa-edit text-yellow-500"></i> Edit Definition</h3><button id="close-edit-modal-btn" class="text-2xl">&times;</button></div><form id="edit-definition-form" class="space-y-3"><input type="hidden" id="edit-definition-id"><select id="edit-definition-lesson" class="w-full p-2 rounded-lg border dark:bg-slate-700" required></select><input type="text" id="edit-definition-topic" class="w-full p-2 rounded-lg border dark:bg-slate-700" required><textarea id="edit-definition-text" rows="3" class="w-full p-2 rounded-lg border dark:bg-slate-700" required></textarea><button type="submit" class="bg-blue-600 text-white w-full py-2 rounded-xl">Update</button></form></div></div>
-    <div id="infoModal" class="modal fixed inset-0 flex items-center justify-center hidden"><div class="modal-content bg-white dark:bg-slate-800 p-6 rounded-2xl text-center max-w-sm"><h3 id="modal-title" class="text-lg font-bold mb-2"></h3><p id="modal-message" class="mb-4"></p><button id="close-info-modal" class="bg-blue-600 text-white px-5 py-2 rounded-full">OK</button></div></div>
-    <div id="confirmModal" class="modal fixed inset-0 flex items-center justify-center hidden"><div class="modal-content bg-white dark:bg-slate-800 p-5 rounded-2xl text-center"><h3 class="text-lg font-bold">Confirm</h3><p id="confirm-message" class="my-3"></p><div class="flex gap-3 justify-center"><button id="cancel-confirm-modal" class="bg-gray-300 px-4 py-2 rounded-full">Cancel</button><button id="confirm-action" class="bg-red-600 text-white px-4 py-2 rounded-full">Yes, Delete</button></div></div></div>
-    <div id="toast-container" class="fixed bottom-24 right-4 z-[9999] flex flex-col gap-2"></div>
-
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Firebase SDK -->
     <script type="module">
-        import { initializeApp } from "firebase/app";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "firebase/auth";
-        import { getDatabase, ref, set, get, onValue } from "firebase/database";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA9DLfAHTUUGxCPn2j_k6godoTEopzaFAU",
@@ -169,650 +23,339 @@
             appId: "1:426684063256:web:52c17625a9450ea9662d6d",
             measurementId: "G-CWQB2330GF"
         };
+
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
-        const db = getDatabase(app);
 
-        // Global state
-        let definitions = [];
-        let lessons = [];
-        let suggestionsHistory = [];
-        let currentUser = null;
-        let realtimeUnsubscribe = null;
-        let syncSpinnerCounter = 0;
-        let lastSyncTime = null;
-
-        // Helper functions
-        function showSyncSpinner() {
-            const spinner = document.getElementById('sync-spinner');
-            if (spinner) {
-                syncSpinnerCounter++;
-                spinner.classList.remove('hidden');
-            }
-        }
-        function hideSyncSpinner() {
-            syncSpinnerCounter--;
-            if (syncSpinnerCounter <= 0) {
-                syncSpinnerCounter = 0;
-                const spinner = document.getElementById('sync-spinner');
-                if (spinner) spinner.classList.add('hidden');
-            }
-        }
-        function updateLastSyncTime() {
-            const now = new Date();
-            lastSyncTime = now;
-            document.getElementById('last-sync-time').innerHTML = `Last synced: ${now.toLocaleTimeString()}`;
-        }
-        function escapeHtml(str) { return String(str).replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
-        function showToast(msg, type='info'){ const c=document.getElementById('toast-container'); const t=document.createElement('div'); t.className=`toast ${type==='success'?'bg-green-600':type==='error'?'bg-red-600':'bg-blue-600'} text-white`; t.innerText=msg; c.appendChild(t); setTimeout(()=>t.classList.add('show'),20); setTimeout(()=>{t.classList.remove('show'); setTimeout(()=>t.remove(),300);},2800);}
-        function triggerHaptic(){ if(navigator.vibrate) navigator.vibrate(20); }
-        function openModal(id){ const m=document.getElementById(id); if(m){ m.classList.remove('hidden'); m.classList.add('is-opening'); } }
-        function closeModal(id){ const m=document.getElementById(id); if(m){ m.classList.add('hidden'); m.classList.remove('is-opening'); } }
-        function closeAllModals(){ document.querySelectorAll('.modal').forEach(m=>closeModal(m.id)); }
-        function showModal(title,msg){ document.getElementById('modal-title').innerText=title; document.getElementById('modal-message').innerText=msg; openModal('infoModal'); }
-        function showConfirmModal(msg,cb){ document.getElementById('confirm-message').innerText=msg; openModal('confirmModal'); window.confirmCallback=cb; }
-
-        // Core data persistence
-        function getUserDataPath(userId) {
-            return `users/${userId}/definition_master_app`;
-        }
-
-        // Save current state to localStorage and Firebase (if signed in)
-        function saveAllToLocalAndFirebase() {
-            // Save to localStorage (keys used by the app)
-            localStorage.setItem('biologyLessons', JSON.stringify(lessons));
-            localStorage.setItem('biologyDefinitions', JSON.stringify(definitions));
-            localStorage.setItem('suggestionsHistory', JSON.stringify(suggestionsHistory));
-
-            if (currentUser) {
-                const path = getUserDataPath(currentUser.uid);
-                const dataRef = ref(db, path);
-                showSyncSpinner();
-                set(dataRef, {
-                    lessons,
-                    definitions,
-                    suggestionsHistory,
-                    lastUpdated: new Date().toISOString()
-                }).then(() => {
-                    updateLastSyncTime();
-                    document.getElementById('sync-status').innerHTML = "☁️ Synced to cloud";
-                }).catch(err => {
-                    console.error("Firebase save failed:", err);
-                    showToast("Sync failed: " + err.message, "error");
-                    document.getElementById('sync-status').innerHTML = "⚠️ Sync error";
-                }).finally(() => {
-                    hideSyncSpinner();
-                });
-            }
-        }
-
-        // Load data from Firebase and update localStorage + UI
-        async function loadFromFirebase(userId) {
-            const path = getUserDataPath(userId);
-            const dataRef = ref(db, path);
-            try {
-                const snapshot = await get(dataRef);
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    lessons = data.lessons || [];
-                    definitions = data.definitions || [];
-                    suggestionsHistory = data.suggestionsHistory || [];
-                    // Ensure counters exist
-                    definitions.forEach(d => {
-                        if (typeof d.count === 'undefined') d.count = 0;
-                        if (typeof d.passCount === 'undefined') d.passCount = 0;
-                        if (typeof d.failCount === 'undefined') d.failCount = 0;
-                    });
-                    // Save to localStorage
-                    localStorage.setItem('biologyLessons', JSON.stringify(lessons));
-                    localStorage.setItem('biologyDefinitions', JSON.stringify(definitions));
-                    localStorage.setItem('suggestionsHistory', JSON.stringify(suggestionsHistory));
-                    // Refresh UI
-                    refreshUI();
-                    initializeDailySession();
-                    updateLastSyncTime();
-                    showToast("Data loaded from cloud", "success");
-                } else {
-                    // First time user: push local data (if any) to Firebase
-                    const storedLessons = localStorage.getItem('biologyLessons');
-                    const storedDefs = localStorage.getItem('biologyDefinitions');
-                    const storedHistory = localStorage.getItem('suggestionsHistory');
-                    if (storedLessons) lessons = JSON.parse(storedLessons);
-                    if (storedDefs) definitions = JSON.parse(storedDefs);
-                    if (storedHistory) suggestionsHistory = JSON.parse(storedHistory);
-                    definitions.forEach(d => {
-                        if (typeof d.count === 'undefined') d.count = 0;
-                        if (typeof d.passCount === 'undefined') d.passCount = 0;
-                        if (typeof d.failCount === 'undefined') d.failCount = 0;
-                    });
-                    refreshUI();
-                    initializeDailySession();
-                    saveAllToLocalAndFirebase(); // pushes initial data
-                }
-            } catch (err) {
-                console.error("Firebase load failed:", err);
-                showToast("Failed to load from cloud: " + err.message, "error");
-            }
-        }
-
-        // Real-time listener for updates from other devices
-        function startRealtimeListener(userId) {
-            if (realtimeUnsubscribe) realtimeUnsubscribe();
-            const path = getUserDataPath(userId);
-            const dataRef = ref(db, path);
-            realtimeUnsubscribe = onValue(dataRef, (snapshot) => {
-                if (snapshot.exists() && currentUser) {
-                    const data = snapshot.val();
-                    const newLessons = data.lessons || [];
-                    const newDefs = data.definitions || [];
-                    const newHistory = data.suggestionsHistory || [];
-                    // Avoid unnecessary updates if nothing changed
-                    if (JSON.stringify(lessons) !== JSON.stringify(newLessons) ||
-                        JSON.stringify(definitions) !== JSON.stringify(newDefs) ||
-                        JSON.stringify(suggestionsHistory) !== JSON.stringify(newHistory)) {
-                        lessons = newLessons;
-                        definitions = newDefs;
-                        suggestionsHistory = newHistory;
-                        definitions.forEach(d => {
-                            if (typeof d.count === 'undefined') d.count = 0;
-                            if (typeof d.passCount === 'undefined') d.passCount = 0;
-                            if (typeof d.failCount === 'undefined') d.failCount = 0;
-                        });
-                        // Update localStorage
-                        localStorage.setItem('biologyLessons', JSON.stringify(lessons));
-                        localStorage.setItem('biologyDefinitions', JSON.stringify(definitions));
-                        localStorage.setItem('suggestionsHistory', JSON.stringify(suggestionsHistory));
-                        refreshUI();
-                        initializeDailySession();
-                        updateLastSyncTime();
-                        showToast("Cloud update received", "info");
-                    }
-                }
-            }, (err) => {
-                console.error("Realtime listener error:", err);
-                showToast("Realtime sync error: " + err.message, "error");
-            });
-        }
-
-        // Stop realtime listener
-        function stopRealtimeListener() {
-            if (realtimeUnsubscribe) {
-                realtimeUnsubscribe();
-                realtimeUnsubscribe = null;
-            }
-        }
-
-        // --- UI rendering functions (unchanged from previous working version) ---
-        function refreshUI() {
-            document.getElementById('total-definitions-count').textContent = definitions.length;
-            const today = new Date().toISOString().slice(0,10);
-            const dailyEntry = suggestionsHistory.find(e=>e.date===today);
-            const incomplete = dailyEntry ? dailyEntry.definitions.filter(d=>d.sessionStatus!=='passed' && d.sessionStatus!=='failed').length : 0;
-            document.getElementById('suggested-definitions-count').textContent = incomplete;
-            document.getElementById('total-passed-count').textContent = definitions.reduce((s,d)=>s+(d.passCount||0),0);
-            document.getElementById('total-failed-count').textContent = definitions.reduce((s,d)=>s+(d.failCount||0),0);
-            document.getElementById('daily-suggestions-count-display').textContent = incomplete;
-            document.getElementById('lessons-count-badge').textContent = lessons.length;
-
-            const selects = ['add-definition-lesson','filter-lesson','edit-definition-lesson'];
-            selects.forEach(id=>{ const sel=document.getElementById(id); if(sel){ const prev=sel.value; sel.innerHTML=id==='filter-lesson'?'<option value="">All Lessons</option>':'<option value="">Select a Lesson</option>'; lessons.forEach(l=>{ const opt=document.createElement('option'); opt.value=l.id; opt.textContent=l.name; sel.appendChild(opt); }); if(prev && lessons.some(l=>l.id===prev)) sel.value=prev; } });
-
-            const filterId = document.getElementById('filter-lesson').value;
-            const container = document.getElementById('definitions-display');
-            container.innerHTML = '';
-            let lessonsToShow = filterId ? lessons.filter(l => definitions.some(d=>d.lessonId===l.id && l.id===filterId)) : [...lessons];
-            if(lessonsToShow.length===0) { container.innerHTML='<div class="col-span-full text-center py-8 text-gray-400">📭 No lessons yet. Tap + to add.</div>'; }
-            else lessonsToShow.forEach(lesson => container.appendChild(createLessonCard(lesson)));
-
-            if (!document.getElementById('suggestions-section').classList.contains('hidden')) showSuggestionsContent();
-            if (!document.getElementById('history-section').classList.contains('hidden')) renderHistory();
-        }
-
-        function createLessonCard(lesson) {
-            const card = document.createElement('div');
-            card.className = 'lesson-card bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-4 cursor-pointer transition hover:shadow-md';
-            const defCount = definitions.filter(d=>d.lessonId===lesson.id).length;
-            card.innerHTML = `<div class="flex justify-between items-start"><h3 class="font-bold text-lg truncate">${escapeHtml(lesson.name)}</h3><span class="text-xs bg-blue-100 dark:bg-blue-900/40 px-2 py-1 rounded-full">${defCount} terms</span></div><div class="mt-3 flex justify-between items-center"><button class="view-lesson-defs text-blue-500 text-sm font-medium flex items-center gap-1"><i class="fas fa-eye"></i> View</button><button class="delete-lesson-btn bg-red-100 dark:bg-red-900/30 text-red-600 px-3 py-1 rounded-full text-xs" data-id="${lesson.id}" data-name="${escapeHtml(lesson.name)}"><i class="fas fa-trash-alt"></i> Delete</button></div>`;
-            card.setAttribute('data-id', lesson.id);
-            card.addEventListener('click', (e) => { if(!e.target.closest('.delete-lesson-btn')) window.showLessonDefinitionsModal(lesson.id); });
-            return card;
-        }
-        window.showLessonDefinitionsModal = (lessonId) => {
-            const lesson = lessons.find(l=>l.id===lessonId);
-            if(!lesson) return;
-            const defs = definitions.filter(d=>d.lessonId===lessonId);
-            const container = document.getElementById('lesson-definitions-container');
-            container.innerHTML = '';
-            if(defs.length===0) container.innerHTML='<p class="text-center text-gray-500">No definitions in this lesson.</p>';
-            else defs.forEach(def=>container.appendChild(createDefinitionCard(def)));
-            document.getElementById('lesson-definitions-modal-title').textContent = lesson.name;
-            openModal('lessonDefinitionsModal');
-        };
-        function createDefinitionCard(def) {
-            const div = document.createElement('div');
-            div.className = 'border rounded-xl p-3 bg-gray-50 dark:bg-slate-700/30';
-            div.innerHTML = `<div class="flex justify-between items-start"><h4 class="font-semibold text-md">${escapeHtml(def.topic)}</h4><span class="text-xs font-mono bg-blue-100 dark:bg-blue-800 px-2 py-0.5 rounded-full">Repeated: ${def.count}</span></div><p class="definition-text text-sm text-gray-600 dark:text-gray-300 mt-1" id="def-text-${def.id}">${escapeHtml(def.definition)}</p><div class="flex justify-between items-center mt-2"><button class="toggle-def-btn bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-full text-xs" data-id="${def.id}"><i class="fas fa-eye mr-1"></i> Show</button><div><button class="edit-def-btn bg-yellow-500 text-white px-2 py-1 rounded-full text-xs mr-1" data-id="${def.id}"><i class="fas fa-edit"></i></button><button class="delete-def-btn bg-red-500 text-white px-2 py-1 rounded-full text-xs" data-id="${def.id}" data-topic="${escapeHtml(def.topic)}"><i class="fas fa-trash"></i></button></div></div>`;
-            return div;
-        }
-
-        function generateNewSuggestions() {
-            if(!definitions.length) return [];
-            let weighted = [];
-            definitions.forEach(d=>{ let w = (d.failCount>d.passCount) ? 4 : (d.passCount>0&&d.failCount>0 ? 2 : 1); for(let i=0;i<w;i++) weighted.push(d); });
-            if(!weighted.length) weighted = [...definitions];
-            const shuffled = weighted.sort(()=>0.5-Math.random());
-            return Array.from(new Set(shuffled.slice(0,30)));
-        }
-        function initializeDailySession() {
-            const today = new Date().toISOString().slice(0,10);
-            if(!suggestionsHistory.some(e=>e.date===today)) {
-                const newSuggest = generateNewSuggestions().map(d => ({ ...d, sessionStatus: 'incomplete' }));
-                if (newSuggest.length) {
-                    suggestionsHistory.unshift({ date: today, definitions: newSuggest });
-                    if (suggestionsHistory.length > 30) suggestionsHistory.pop();
-                    saveAllToLocalAndFirebase();
-                }
-            }
-        }
-        function showSuggestionsContent() {
-            const container = document.getElementById('daily-suggestions-container');
-            container.innerHTML = '';
-            const today = new Date().toISOString().slice(0,10);
-            const entry = suggestionsHistory.find(e=>e.date===today);
-            const incomplete = entry?.definitions.filter(d=>d.sessionStatus!=='passed' && d.sessionStatus!=='failed') || [];
-            if(!incomplete.length){ container.innerHTML='<div class="p-6 text-center bg-white dark:bg-slate-800 rounded-2xl">🎉 All caught up! Great job.</div>'; return; }
-            incomplete.forEach(def=>{
-                const card = document.createElement('div');
-                card.className = 'suggestion-card bg-white dark:bg-slate-800 rounded-xl p-4 border shadow-sm transition hover:shadow-md';
-                card.setAttribute('data-id', def.id);
-                card.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <h4 class="font-bold text-md">${escapeHtml(def.topic)}</h4>
-                        <span class="text-xs bg-gray-200 dark:bg-slate-700 px-2 rounded-full">#${def.count}</span>
-                    </div>
-                    <p class="definition-text text-sm text-gray-600 dark:text-gray-300 mt-1" id="sug-text-${def.id}">${escapeHtml(def.definition)}</p>
-                    <div class="flex justify-between items-center mt-3">
-                        <button class="toggle-def-btn bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded-full text-xs shadow-sm transition" data-id="${def.id}">
-                            <i class="fas fa-eye mr-1"></i> Show Definition
-                        </button>
-                        <div id="pass-fail-buttons-${def.id}" class="flex gap-2">
-                            <button class="pass-def-btn bg-green-500 hover:bg-green-600 text-white p-2 rounded-full text-xs shadow-sm transition" data-id="${def.id}" title="Pass"><i class="fas fa-check"></i></button>
-                            <button class="fail-def-btn bg-red-500 hover:bg-red-600 text-white p-2 rounded-full text-xs shadow-sm transition" data-id="${def.id}" title="Fail"><i class="fas fa-times"></i></button>
-                        </div>
-                    </div>
-                `;
-                card.addEventListener('click', (e) => {
-                    if (e.target.closest('.pass-def-btn') || e.target.closest('.fail-def-btn') || e.target.closest('.toggle-def-btn')) return;
-                    const defText = document.getElementById(`sug-text-${def.id}`);
-                    if (defText) {
-                        defText.classList.toggle('active');
-                        const toggleBtn = card.querySelector('.toggle-def-btn');
-                        if (toggleBtn) {
-                            toggleBtn.innerHTML = defText.classList.contains('active') ? '<i class="fas fa-eye-slash mr-1"></i> Hide Definition' : '<i class="fas fa-eye mr-1"></i> Show Definition';
-                        }
-                    }
-                });
-                container.appendChild(card);
-            });
-        }
-        function renderHistory() {
-            const container = document.getElementById('history-container');
-            container.innerHTML = '';
-            if(!suggestionsHistory.length){ container.innerHTML='<div class="text-center py-6">No history yet.</div>'; return; }
-            suggestionsHistory.forEach(entry=>{
-                const dateStr = new Date(entry.date+'T00:00').toLocaleDateString();
-                const wrapper = document.createElement('div');
-                wrapper.className = 'bg-white dark:bg-slate-800 rounded-xl border p-3';
-                wrapper.innerHTML = `<div class="collapsible-header flex justify-between cursor-pointer font-semibold p-2"><span>📅 ${dateStr}</span><i class="fas fa-chevron-down"></i></div><div class="collapsible-content hidden mt-2 space-y-2"></div>`;
-                const contentDiv = wrapper.querySelector('.collapsible-content');
-                entry.definitions.forEach(def=>{
-                    const badge = def.sessionStatus==='passed'?'<span class="text-green-600 text-xs bg-green-100 px-2 py-0.5 rounded-full">✔ Passed</span>':(def.sessionStatus==='failed'?'<span class="text-red-600 text-xs bg-red-100 px-2 py-0.5 rounded-full">✖ Failed</span>':'');
-                    const item = document.createElement('div');
-                    item.className = 'border-b pb-1 text-sm';
-                    item.innerHTML = `<div class="flex justify-between"><span class="font-medium">${escapeHtml(def.topic)}</span>${badge}</div><p class="text-xs text-gray-500">${escapeHtml(def.definition)}</p>`;
-                    contentDiv.appendChild(item);
-                });
-                wrapper.querySelector('.collapsible-header').addEventListener('click',()=>{ contentDiv.classList.toggle('hidden'); });
-                container.appendChild(wrapper);
-            });
-        }
-
-        // --- Data modification actions (all call saveAllToLocalAndFirebase after changes) ---
-        function addLesson(name) {
-            lessons.push({ id: Date.now().toString(), name, createdAt: new Date().toISOString() });
-            saveAllToLocalAndFirebase();
-            refreshUI();
-        }
-        function addDefinition(lessonId, topic, definitionText) {
-            definitions.push({
-                id: Date.now().toString(),
-                lessonId,
-                topic,
-                definition: definitionText,
-                count: 0,
-                passCount: 0,
-                failCount: 0
-            });
-            saveAllToLocalAndFirebase();
-            refreshUI();
-            initializeDailySession();
-        }
-        function updateDefinition(id, topic, definitionText, lessonId) {
-            const idx = definitions.findIndex(d => d.id === id);
-            if (idx !== -1) {
-                definitions[idx] = { ...definitions[idx], topic, definition: definitionText, lessonId };
-                saveAllToLocalAndFirebase();
-                refreshUI();
-            }
-        }
-        function deleteDefinition(id, topic) {
-            definitions = definitions.filter(d => d.id !== id);
-            saveAllToLocalAndFirebase();
-            refreshUI();
-            showToast(`Definition "${topic}" deleted`, 'error');
-        }
-        function deleteLesson(id, name) {
-            lessons = lessons.filter(l => l.id !== id);
-            definitions = definitions.filter(d => d.lessonId !== id);
-            saveAllToLocalAndFirebase();
-            refreshUI();
-            initializeDailySession();
-            closeAllModals();
-            showToast(`Lesson "${name}" deleted`, 'error');
-        }
-        function markDefStatus(id, status) {
-            const def = definitions.find(d => d.id === id);
-            if (!def) return;
-            if (status === 'passed') { def.passCount++; def.count++; }
-            else { def.failCount++; def.count++; }
-            const today = new Date().toISOString().slice(0,10);
-            const entry = suggestionsHistory.find(e => e.date === today);
-            if (entry) {
-                const target = entry.definitions.find(d => d.id === id);
-                if (target) target.sessionStatus = status;
-            }
-            saveAllToLocalAndFirebase();
-            refreshUI();
-            showSuggestionsContent();
-            showToast(`${def.topic} marked as ${status}`, status === 'passed' ? 'success' : 'error');
-        }
-        function resetAllProgress() {
-            definitions.forEach(def => { def.count = 0; def.passCount = 0; def.failCount = 0; });
-            const today = new Date().toISOString().slice(0,10);
-            const dailyEntry = suggestionsHistory.find(e => e.date === today);
-            if (dailyEntry) {
-                dailyEntry.definitions.forEach(def => { def.sessionStatus = 'incomplete'; });
-            } else {
-                const newSuggest = generateNewSuggestions().map(d => ({ ...d, sessionStatus: 'incomplete' }));
-                if (newSuggest.length) suggestionsHistory.unshift({ date: today, definitions: newSuggest });
-                if (suggestionsHistory.length > 30) suggestionsHistory.pop();
-            }
-            saveAllToLocalAndFirebase();
-            refreshUI();
-            showToast("All progress has been reset!", "success");
-        }
-
-        function clearAllData() {
-            lessons = [];
-            definitions = [];
-            suggestionsHistory = [];
-            saveAllToLocalAndFirebase();
-            refreshUI();
-            initializeDailySession();
-            showToast("All data cleared", "error");
-        }
-
-        // --- Auth and UI event listeners ---
-        onAuthStateChanged(auth, async (user) => {
+        // Check if user is already signed in
+        onAuthStateChanged(auth, (user) => {
             if (user) {
-                currentUser = user;
-                document.getElementById('user-avatar').src = user.photoURL || 'https://via.placeholder.com/36';
-                document.getElementById('user-avatar').classList.remove('hidden');
-                document.getElementById('user-icon').classList.add('hidden');
-                document.getElementById('user-name').textContent = user.displayName?.split(' ')[0] || '';
-                document.getElementById('user-name').classList.remove('hidden');
-                document.getElementById('sync-status').innerHTML = "☁️ Synced with " + user.email;
-                document.getElementById('google-signin-btn').classList.add('hidden');
-                document.getElementById('google-signout-btn').classList.remove('hidden');
-                document.getElementById('force-sync-btn').classList.remove('hidden');
-                await loadFromFirebase(user.uid);
-                startRealtimeListener(user.uid);
-            } else {
-                currentUser = null;
-                stopRealtimeListener();
-                const storedLessons = localStorage.getItem('biologyLessons');
-                const storedDefs = localStorage.getItem('biologyDefinitions');
-                const storedHistory = localStorage.getItem('suggestionsHistory');
-                lessons = storedLessons ? JSON.parse(storedLessons) : [];
-                definitions = storedDefs ? JSON.parse(storedDefs) : [];
-                suggestionsHistory = storedHistory ? JSON.parse(storedHistory) : [];
-                definitions.forEach(d => {
-                    if (typeof d.count === 'undefined') d.count = 0;
-                    if (typeof d.passCount === 'undefined') d.passCount = 0;
-                    if (typeof d.failCount === 'undefined') d.failCount = 0;
-                });
-                refreshUI();
-                initializeDailySession();
-
-                document.getElementById('user-avatar').classList.add('hidden');
-                document.getElementById('user-icon').classList.remove('hidden');
-                document.getElementById('user-name').classList.add('hidden');
-                document.getElementById('sync-status').innerHTML = "⚠️ Signed out (local only)";
-                document.getElementById('google-signin-btn').classList.remove('hidden');
-                document.getElementById('google-signout-btn').classList.add('hidden');
-                document.getElementById('force-sync-btn').classList.add('hidden');
-                document.getElementById('last-sync-time').innerHTML = "Last synced: --";
+                console.log("User already signed in:", user.email);
+                // Redirect immediately to manager page
+                window.location.href = "https://alstudy063.github.io/reminder3/manager.html";
             }
         });
 
-        // Manual force sync
-        document.getElementById('force-sync-btn').onclick = () => {
-            if (currentUser) {
-                showToast("Forcing sync...", "info");
-                saveAllToLocalAndFirebase();
-                showToast("Sync completed", "success");
-            } else {
-                showToast("Not signed in", "error");
-            }
-        };
+        // Attach event listeners after DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Email/Password sign-in
+            const form = document.querySelector('#loginForm');
+            const emailInput = document.querySelector('#loginEmail');
+            const passwordInput = document.querySelector('#loginPassword');
 
-        // Clear All Data button
-        document.getElementById('clear-all-data-btn').onclick = () => {
-            showConfirmModal("⚠️ This will delete ALL lessons, definitions, and history. This cannot be undone. Are you sure?", () => {
-                clearAllData();
-            });
-        };
-
-        // Form submissions
-        document.getElementById('add-lesson-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('new-lesson-name').value.trim();
-            if (!name) return;
-            addLesson(name);
-            document.getElementById('new-lesson-name').value = '';
-            closeModal('addContentModal');
-            showToast(`Lesson "${name}" added`, 'success');
-        });
-        document.getElementById('add-definition-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const lid = document.getElementById('add-definition-lesson').value;
-            const topic = document.getElementById('new-definition-topic').value.trim();
-            const defText = document.getElementById('new-definition-text').value.trim();
-            if (!lid || !topic || !defText) return showModal('Error', 'Fill all fields');
-            addDefinition(lid, topic, defText);
-            document.getElementById('add-definition-form').reset();
-            closeModal('addContentModal');
-            showToast(`Definition "${topic}" added`, 'success');
-        });
-        document.getElementById('edit-definition-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const id = document.getElementById('edit-definition-id').value;
-            const topic = document.getElementById('edit-definition-topic').value.trim();
-            const def = document.getElementById('edit-definition-text').value.trim();
-            const lid = document.getElementById('edit-definition-lesson').value;
-            updateDefinition(id, topic, def, lid);
-            closeModal('editDefinitionModal');
-            showToast('Definition updated', 'success');
-        });
-
-        // Event delegation for dynamic buttons (show/hide, edit, delete, pass/fail)
-        document.body.addEventListener('click', (e) => {
-            const toggleBtn = e.target.closest('.toggle-def-btn');
-            if (toggleBtn) {
+            form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const card = toggleBtn.closest('.suggestion-card');
-                if (card) {
-                    const defId = toggleBtn.dataset.id;
-                    const defText = document.getElementById(`sug-text-${defId}`);
-                    if (defText) {
-                        defText.classList.toggle('active');
-                        toggleBtn.innerHTML = defText.classList.contains('active') ? '<i class="fas fa-eye-slash mr-1"></i> Hide Definition' : '<i class="fas fa-eye mr-1"></i> Show Definition';
+                const email = emailInput.value.trim();
+                const password = passwordInput.value.trim();
+
+                if (!email || !password) {
+                    alert('Please enter both email and password.');
+                    return;
+                }
+
+                try {
+                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                    console.log('Signed in with email:', userCredential.user);
+                    alert(`Welcome ${userCredential.user.email}!`);
+                    // Close modal and redirect to manager page
+                    closeModal();
+                    setTimeout(() => {
+                        window.location.href = "https://alstudy063.github.io/reminder3/manager.html";
+                    }, 300);
+                } catch (error) {
+                    console.error('Email sign-in error:', error);
+                    alert(error.message);
+                }
+            });
+
+            // Google sign-in button
+            const googleBtn = document.querySelector('#googleSignInBtn');
+            googleBtn.addEventListener('click', async () => {
+                try {
+                    const result = await signInWithPopup(auth, provider);
+                    console.log('Google sign-in success:', result.user);
+                    alert(`Welcome ${result.user.displayName || result.user.email}!`);
+                    // Close modal and redirect to manager page
+                    closeModal();
+                    setTimeout(() => {
+                        window.location.href = "https://alstudy063.github.io/reminder3/manager.html";
+                    }, 300);
+                } catch (error) {
+                    console.error('Google sign-in error:', error);
+                    if (error.code === 'auth/popup-closed-by-user') {
+                        console.log('Popup closed by user');
+                    } else {
+                        alert(error.message);
                     }
                 }
-                return;
-            }
-            const pass = e.target.closest('.pass-def-btn');
-            if (pass) { triggerHaptic(); markDefStatus(pass.dataset.id, 'passed'); return; }
-            const fail = e.target.closest('.fail-def-btn');
-            if (fail) { triggerHaptic(); markDefStatus(fail.dataset.id, 'failed'); return; }
-            const edit = e.target.closest('.edit-def-btn');
-            if (edit) {
-                const def = definitions.find(d => d.id === edit.dataset.id);
-                if (def) {
-                    document.getElementById('edit-definition-id').value = def.id;
-                    document.getElementById('edit-definition-topic').value = def.topic;
-                    document.getElementById('edit-definition-text').value = def.definition;
-                    document.getElementById('edit-definition-lesson').value = def.lessonId;
-                    openModal('editDefinitionModal');
-                }
-                return;
-            }
-            const delDef = e.target.closest('.delete-def-btn');
-            if (delDef) { showConfirmModal(`Delete "${delDef.dataset.topic}"?`, () => deleteDefinition(delDef.dataset.id, delDef.dataset.topic)); return; }
-            const delLesson = e.target.closest('.delete-lesson-btn');
-            if (delLesson) { showConfirmModal(`Delete "${delLesson.dataset.name}" and all definitions?`, () => deleteLesson(delLesson.dataset.id, delLesson.dataset.name)); return; }
+            });
         });
+    </script>
+    <style>
+        /* Custom Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        .anim-float-1 {
+            animation: float 6s ease-in-out infinite;
+        }
+        .anim-float-2 {
+            animation: float 5s ease-in-out infinite reverse;
+        }
+        .anim-bounce-slow {
+            animation: bounce 4s ease-in-out infinite;
+        }
+        
+        /* Modal & Main Content Transitions */
+        .page-content-wrapper {
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+        }
+        .page-content-hidden {
+            opacity: 0;
+            transform: scale(0.98);
+            pointer-events: none;
+        }
 
-        // Import/Export
-        document.getElementById('import-data').onclick = () => {
-            const inp = document.createElement('input');
-            inp.type = 'file';
-            inp.accept = 'application/json';
-            inp.onchange = ev => {
-                const file = ev.target.files[0];
-                if (!file) return;
-                const fr = new FileReader();
-                fr.onload = e => {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        if (data.lessons && data.definitions) {
-                            lessons.push(...data.lessons.filter(l => !lessons.some(ex => ex.id === l.id)));
-                            definitions.push(...data.definitions.filter(d => !definitions.some(ex => ex.id === d.id)));
-                            if (data.suggestionsHistory) {
-                                suggestionsHistory.push(...data.suggestionsHistory.filter(h => !suggestionsHistory.some(ex => ex.date === h.date)));
-                            }
-                            saveAllToLocalAndFirebase();
-                            refreshUI();
-                            initializeDailySession();
-                            showToast('Import merged', 'success');
-                        } else showModal('Error', 'Invalid structure');
-                    } catch (err) { showModal('Invalid JSON'); }
-                };
-                fr.readAsText(file);
-            };
-            inp.click();
-        };
-        document.getElementById('export-data').onclick = () => {
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(new Blob([JSON.stringify({ lessons, definitions, suggestionsHistory }, null, 2)], { type: 'application/json' }));
-            a.download = 'biology_backup.json';
-            a.click();
-            showToast('Export ready', 'success');
-        };
-        document.getElementById('copy-backup-btn').onclick = async () => {
-            const str = JSON.stringify({ lessons, definitions, suggestionsHistory }, null, 2);
-            await navigator.clipboard.writeText(str);
-            showToast('Backup copied', 'success');
-            document.getElementById('backup-data-textarea').value = str;
-        };
-        document.getElementById('load-backup-btn').onclick = () => {
-            try {
-                const data = JSON.parse(document.getElementById('restore-data-textarea').value);
-                if (data.lessons && data.definitions) {
-                    lessons.push(...data.lessons.filter(l => !lessons.some(ex => ex.id === l.id)));
-                    definitions.push(...data.definitions.filter(d => !definitions.some(ex => ex.id === d.id)));
-                    if (data.suggestionsHistory) {
-                        suggestionsHistory.push(...data.suggestionsHistory.filter(h => !suggestionsHistory.some(ex => ex.date === h.date)));
-                    }
-                    saveAllToLocalAndFirebase();
-                    refreshUI();
-                    initializeDailySession();
-                    showToast('Data merged', 'success');
-                } else showModal('Error', 'Invalid structure');
-            } catch (e) { showModal('Invalid JSON'); }
-        };
-        document.getElementById('reset-progress-btn').onclick = () => { showConfirmModal("⚠️ This will reset all progress: total passed, failed, and repeated times for all definitions. Today's suggestions will be reset as incomplete. This cannot be undone. Proceed?", () => resetAllProgress()); };
-        document.getElementById('filter-lesson').addEventListener('change', () => refreshUI());
+        .modal-backdrop {
+            transition: opacity 0.4s ease;
+        }
+        .modal-content {
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+        }
+        .hidden-modal {
+            pointer-events: none;
+            opacity: 0;
+        }
+        .hidden-modal .modal-content {
+            transform: scale(0.9) translateY(20px);
+        }
 
-        // Navigation
-        document.getElementById('global-history-btn').onclick = () => window.showSection('history-section');
-        document.getElementById('back-from-history').onclick = () => window.showSection('main-content-section');
-        document.getElementById('nav-home').onclick = () => { triggerHaptic(); window.showSection('main-content-section'); };
-        document.getElementById('nav-suggestions').onclick = () => { triggerHaptic(); window.showSection('suggestions-section'); };
-        document.getElementById('nav-add').onclick = () => { triggerHaptic(); openModal('addContentModal'); };
-        document.getElementById('nav-settings').onclick = () => { triggerHaptic(); window.showSection('settings-section'); };
-        document.getElementById('close-lesson-definitions-modal').onclick = () => closeModal('lessonDefinitionsModal');
-        document.getElementById('close-edit-modal-btn').onclick = () => closeModal('editDefinitionModal');
-        document.querySelectorAll('.close-modal-btn').forEach(btn => btn.onclick = () => closeModal(btn.closest('.modal').id));
-        document.getElementById('close-info-modal').onclick = () => closeModal('infoModal');
-        document.getElementById('cancel-confirm-modal').onclick = () => { closeModal('confirmModal'); window.confirmCallback = null; };
-        document.getElementById('confirm-action').onclick = () => { if (window.confirmCallback) window.confirmCallback(); closeModal('confirmModal'); window.confirmCallback = null; };
+        /* Glassmorphism for Login Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-[#FAFAFA]">
+    <!-- Wrapper for all main landing page content to hide/show animately -->
+    <div id="pageWrapper" class="page-content-wrapper min-h-screen font-sans overflow-hidden relative selection:bg-yellow-200">
+      
+        <!-- Background Decorative Lines (Subtle) -->
+        <svg class="absolute top-0 left-0 w-full h-full pointer-events-none opacity-40" viewBox="0 0 1440 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M-100 400C200 400 300 600 700 600C1100 600 1300 300 1600 300" stroke="#E2E8F0" stroke-width="1"></path>
+            <path d="M-100 200C300 200 400 500 800 500C1200 500 1300 100 1600 100" stroke="#E2E8F0" stroke-width="1"></path>
+        </svg>
 
-        window.showSection = (sectionId) => {
-            closeAllModals();
-            const sections = ['main-content-section','suggestions-section','settings-section','history-section'];
-            sections.forEach(id => document.getElementById(id).classList.toggle('hidden', id !== sectionId));
-            document.getElementById('bottom-nav').classList.toggle('hidden', sectionId === 'history-section');
-            if (sectionId === 'suggestions-section') showSuggestionsContent();
-            if (sectionId === 'settings-section') refreshUI();
-            if (sectionId === 'history-section') renderHistory();
-            if (sectionId === 'main-content-section') refreshUI();
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-            const map = { 'main-content-section':'nav-home', 'suggestions-section':'nav-suggestions', 'settings-section':'nav-settings' };
-            if(map[sectionId]) document.getElementById(map[sectionId])?.classList.add('active');
-        };
-        window.toggleAuthMenu = () => { document.getElementById('auth-menu').classList.toggle('hidden'); };
-        window.addEventListener('click', (event) => { if (event.target.classList && event.target.classList.contains('modal')) closeModal(event.target.id); });
+        <!-- Decorative Dots -->
+        <div class="absolute top-32 right-1/4 w-3 h-3 bg-pink-400 rounded-full"></div>
+        <div class="absolute top-40 right-1/3 w-2 h-2 bg-yellow-400 rounded-full"></div>
+        <div class="absolute top-20 right-10 w-2 h-2 bg-green-400 rounded-full"></div>
+        <div class="absolute top-64 right-1/2 w-2 h-2 bg-purple-500 rounded-full"></div>
 
-        // Theme
-        const setTheme = (theme) => {
-            const body = document.body;
-            const isDark = theme === 'dark';
-            body.classList.toggle('theme-dark', isDark);
-            body.classList.toggle('theme-light', !isDark);
-            localStorage.setItem('app-theme', theme);
-            const sunIcon = document.querySelector('#theme-switch-header i');
-            if (sunIcon) sunIcon.className = isDark ? 'fas fa-moon text-indigo-200 text-lg' : 'fas fa-sun text-yellow-500 text-lg';
-        };
-        const savedTheme = localStorage.getItem('app-theme') || 'light';
-        setTheme(savedTheme);
-        document.getElementById('theme-switch-header').onclick = () => { const newTheme = document.body.classList.contains('theme-dark') ? 'light' : 'dark'; setTheme(newTheme); };
+        <!-- Navigation -->
+        <nav class="relative z-20 flex items-center justify-between px-6 py-6 max-w-7xl mx-auto lg:px-12">
+            <div class="flex items-center gap-1 cursor-pointer">
+                <span class="text-xl font-extrabold tracking-tight text-gray-900">Master Flow</span>
+                <span class="w-2 h-2 rounded-full bg-yellow-400 mt-1"></span>
+            </div>
 
-        // Initial load (before auth)
-        const storedLessons = localStorage.getItem('biologyLessons');
-        const storedDefs = localStorage.getItem('biologyDefinitions');
-        const storedHistory = localStorage.getItem('suggestionsHistory');
-        if (storedLessons) lessons = JSON.parse(storedLessons);
-        if (storedDefs) definitions = JSON.parse(storedDefs);
-        if (storedHistory) suggestionsHistory = JSON.parse(storedHistory);
-        definitions.forEach(d => {
-            if (typeof d.count === 'undefined') d.count = 0;
-            if (typeof d.passCount === 'undefined') d.passCount = 0;
-            if (typeof d.failCount === 'undefined') d.failCount = 0;
+            <!-- Desktop Links -->
+            <div class="hidden md:flex items-center gap-10 text-sm font-medium text-gray-500">
+                <a href="#" class="hover:text-gray-900 transition-colors">Features</a>
+                <a href="#" class="hover:text-gray-900 transition-colors">Pricing</a>
+                <a href="#" class="hover:text-gray-900 transition-colors">Promotions</a>
+            </div>
+
+            <button onclick="openModal()" class="bg-[#412E27] text-white px-7 py-2.5 rounded-full text-sm font-medium hover:bg-[#2d1e19] transition-all shadow-lg shadow-[#412E27]/20">
+                Sign Up
+            </button>
+        </nav>
+
+        <!-- Hero Section -->
+        <main class="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 pt-12 lg:pt-24 flex flex-col lg:flex-row items-center justify-between">
+            
+            <!-- Left Content -->
+            <div class="w-full lg:w-[55%] flex flex-col items-start mt-8 lg:mt-0 text-center lg:text-left">
+                <h1 class="text-5xl sm:text-6xl lg:text-[5rem] leading-[1.1] font-extrabold text-[#111827] tracking-tight w-full">
+                    Manage your<br>
+                    <span class="relative inline-block">
+                        Todos with
+                        <svg class="absolute -bottom-2 left-0 w-full h-4 sm:h-6 -z-10 text-[#FFD447]" viewBox="0 0 300 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                            <path d="M2.00021 15.0001C35.0002 9.00014 135.5 -1.49986 298.5 10.0001C298.5 10.0001 292.5 19.5001 280.5 20.0001C194 23.5716 35.0002 24.0001 6.50021 21.0001C-1.87978 20.1177 -0.500305 15.5001 2.00021 15.0001Z"></path>
+                        </svg>
+                    </span>
+                    <br>
+                    ease.
+                </h1>
+                
+                <p class="mt-8 text-gray-500 text-lg lg:text-xl max-w-md mx-auto lg:mx-0">
+                    Learn about how to manage your daily tasks efficiently.
+                </p>
+
+                <div class="mt-10 lg:mt-14 w-full flex justify-center lg:justify-start">
+                    <button onclick="openModal()" class="bg-[#EAB308] text-white px-8 py-3.5 rounded-full text-base font-medium shadow-[0_8px_25px_-5px_rgba(234,179,8,0.5)] hover:bg-[#CA9A04] hover:-translate-y-0.5 transition-all">
+                        Try to free
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Content (Image & Cards) -->
+            <div class="hidden lg:block w-full lg:w-[45%] relative mt-20 lg:mt-0 h-[600px]">
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-[#FFE8D6] rounded-full -z-20"></div>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[500px] rounded-[2.5rem] overflow-hidden shadow-2xl z-10 border-4 border-white transform hover:scale-[1.02] transition-transform duration-500">
+                    <img src="https://alstudy063.github.io/reminder3/Boy_on_cloud_202603271309.jpeg" alt="Boy on cloud" class="w-full h-full object-cover">
+                </div>
+
+                <div class="absolute top-1/2 -left-12 -translate-y-1/4 bg-white p-4 rounded-2xl shadow-xl shadow-gray-200/50 z-20 flex items-center gap-4 w-[260px] anim-float-1">
+                    <div class="w-14 h-14 rounded-full bg-gradient-to-br from-purple-400 to-indigo-600 flex items-center justify-center shrink-0 shadow-inner">
+                        <div class="w-10 h-10 rounded-full border-4 border-white/20"></div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-bold text-gray-900 flex justify-between items-center">
+                            Taskez App
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                        </h3>
+                        <p class="text-[11px] text-gray-400 mt-0.5">UI/UX Design</p>
+                        <span class="inline-block mt-2 px-2.5 py-1 bg-emerald-500 text-white text-[10px] font-bold rounded-md">Completed</span>
+                    </div>
+                    <div class="absolute -top-3 left-4 w-8 h-8 rounded-full border-2 border-white bg-blue-100 overflow-hidden">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4" alt="avatar">
+                    </div>
+                </div>
+
+                <div class="absolute top-32 -right-8 bg-white p-5 rounded-2xl shadow-xl shadow-gray-200/50 z-20 w-[190px] anim-float-2">
+                    <div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center mb-3">
+                        <div class="w-5 h-5 bg-yellow-400 rounded-md rotate-12"></div>
+                        <div class="w-5 h-5 bg-indigo-900 rounded-md -ml-3 -rotate-12"></div>
+                    </div>
+                    <h3 class="text-sm font-bold text-gray-900 flex items-center gap-1">OpenMind <span class="text-xs">🚀</span></h3>
+                    <p class="text-[11px] text-gray-400 mt-0.5 mb-3">Development</p>
+                    <div class="flex items-center gap-3">
+                        <div class="h-1.5 flex-1 bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-orange-400 w-1/4 rounded-full"></div>
+                        </div>
+                        <span class="text-[10px] font-bold text-gray-900">5/20</span>
+                    </div>
+                </div>
+
+                <div class="absolute bottom-20 right-4 w-14 h-14 bg-indigo-500 rounded-full shadow-lg shadow-indigo-500/30 flex items-center justify-center z-20 anim-bounce-slow">
+                    <i data-lucide="bell" class="w-6 h-6 text-white"></i>
+                    <div class="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 border-2 border-white rounded-full flex items-center justify-center text-[10px] text-white font-bold">2</div>
+                </div>
+
+                <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 w-14 h-14 bg-white rounded-full p-1 shadow-lg z-20">
+                    <div class="w-full h-full rounded-full bg-pink-100 overflow-hidden">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka&backgroundColor=ffdfbf" alt="avatar">
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden-modal modal-backdrop">
+        <div class="absolute inset-0 bg-white/30 backdrop-blur-md" onclick="closeModal()"></div>
+        
+        <!-- Background Clouds (Image) -->
+        <div class="absolute inset-0 pointer-events-none opacity-40">
+            <img src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?auto=format&fit=crop&q=80&w=2000" alt="Cloud Background" class="w-full h-full object-cover">
+        </div>
+
+        <!-- Modal Content Container -->
+        <div class="relative w-full max-w-[400px] px-6 modal-content">
+            <div class="glass-card rounded-[2.5rem] p-6 shadow-2xl border border-white/50 text-center relative overflow-hidden">
+                
+                <button onclick="closeModal()" class="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100/50 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5 text-gray-400"></i>
+                </button>
+
+                <div class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm border border-gray-100">
+                    <i data-lucide="log-in" class="w-6 h-6 text-gray-700"></i>
+                </div>
+
+                <h2 class="text-xl font-bold text-gray-900 mb-1">Sign in with email</h2>
+                <p class="text-gray-500 text-[11px] leading-snug mb-5 px-4">
+                    Make a new doc to bring your words, data, and teams together. For free
+                </p>
+
+                <form id="loginForm" onsubmit="event.preventDefault()" class="space-y-2.5">
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <i data-lucide="mail" class="w-4 h-4"></i>
+                        </span>
+                        <input id="loginEmail" type="email" placeholder="Email" class="w-full bg-gray-100/50 border-transparent focus:border-gray-200 focus:bg-white focus:ring-0 rounded-xl py-2.5 pl-10 pr-4 text-[11px] transition-all outline-none" required>
+                    </div>
+
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <i data-lucide="lock" class="w-4 h-4"></i>
+                        </span>
+                        <input id="loginPassword" type="password" placeholder="Password" class="w-full bg-gray-100/50 border-transparent focus:border-gray-200 focus:bg-white focus:ring-0 rounded-xl py-2.5 pl-10 pr-10 text-[11px] transition-all outline-none" required>
+                        <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <i data-lucide="eye-off" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <div class="text-right px-1">
+                        <a href="#" class="text-[10px] font-semibold text-gray-900 hover:underline">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="w-full bg-[#1A1A1A] text-white py-3 rounded-xl font-bold text-xs hover:bg-black transition-all shadow-lg shadow-black/10">
+                        Get Started
+                    </button>
+                </form>
+
+                <div class="flex items-center gap-3 my-4">
+                    <div class="h-px flex-1 bg-gray-200/50"></div>
+                    <span class="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Or sign in with</span>
+                    <div class="h-px flex-1 bg-gray-200/50"></div>
+                </div>
+
+                <div class="flex justify-center pb-1">
+                    <button id="googleSignInBtn" class="w-10 h-10 rounded-xl border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all bg-white shadow-sm">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Initialize Lucide Icons & Modal Functions -->
+    <script>
+        lucide.createIcons();
+
+        const modal = document.getElementById('loginModal');
+        const pageWrapper = document.getElementById('pageWrapper');
+        
+        function openModal() {
+            pageWrapper.classList.add('page-content-hidden');
+            setTimeout(() => {
+                modal.classList.remove('hidden-modal');
+            }, 50);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden-modal');
+            setTimeout(() => {
+                pageWrapper.classList.remove('page-content-hidden');
+            }, 200);
+            document.body.style.overflow = 'auto';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
         });
-        refreshUI();
-        initializeDailySession();
     </script>
 </body>
 </html>
